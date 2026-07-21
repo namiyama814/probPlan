@@ -1,15 +1,31 @@
-const app = document.getElementById("app");
+const projectSection = document.getElementById("project-section");
+const taskSection = document.getElementById("task-section");
+const resultSection = document.getElementById("result-section");
 
-app.innerHTML = `
-<div class="max-w-6xl mx-auto px-6 py-8">
+projectSection.innerHTML = `
+<div class="bg-white rounded-xl shadow p-6">
+    <h2 class="text-xl font-semibold">
+        プロジェクト
+    </h2>
 
-    <h1 class="text-4xl font-bold text-slate-800">
-        ProbPlan
-    </h1>
-
-    <p class="mt-2 text-slate-600">
-        ProbPlanは、計画を立てるためのツールです。
+    <p class="mt-2 text-slate-500">
+        プロジェクトを作成してください
     </p>
+</div>
+`;
 
+taskSection.innerHTML = `
+<div class="bg-white rounded-xl shadow p-6">
+    <h2 class="text-xl font-semibold">
+        タスク一覧
+    </h2>
+</div>
+`;
+
+resultSection.innerHTML = `
+<div class="bg-white rounded-xl shadow p-6">
+    <h2 class="text-xl font-semibold">
+        シミュレーション結果
+    </h2>
 </div>
 `;
