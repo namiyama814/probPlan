@@ -3,29 +3,18 @@ const taskSection = document.getElementById("task-section");
 const resultSection = document.getElementById("result-section");
 
 projectSection.innerHTML = `
-<div class="bg-white rounded-xl shadow p-6">
-    <h2 class="text-xl font-semibold">
-        プロジェクト
-    </h2>
-
-    <p class="mt-2 text-slate-500">
-        プロジェクトを作成してください
-    </p>
-</div>
+<h2 class="text-lg font-bold">プロジェクト</h2>
+<p class="mt-2 text-sm text-[#252525]/60">
+    プロジェクトを作成してください
+</p>
 `;
 
 taskSection.innerHTML = `
-<div class="bg-white rounded-xl shadow p-6">
-    <h2 class="text-xl font-semibold">
-        タスク一覧
-    </h2>
-</div>
+<h2 class="text-lg font-bold">タスク一覧</h2>
 `;
 
 resultSection.innerHTML = `
-<div class="bg-white rounded-xl shadow p-6">
-    <h2 class="text-xl font-semibold">
-        シミュレーション結果
-    </h2>
-</div>
+<h2 class="text-lg font-bold">
+    シミュレーション結果
+</h2>
 `;
