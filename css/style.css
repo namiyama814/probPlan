@@ -1,4 +1,4 @@
-/*
- * ProbPlan
- * ここに追加のCSSスタイルを記述
- */
+:root{
+    --color-text:#252525;
+    --color-bg:#FAFAFA;
+}
