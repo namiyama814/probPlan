@@ -1,5 +1,6 @@
 import { ProjectManager } from "./models/ProjectManager.js";
 import { StorageService } from "./services/storageService.js";
+import { createProject } from "./controllers/projectController.js";
 import { renderProjectSection } from "./ui/projectView.js";
 
 const projectSection = document.getElementById("project-section");
@@ -11,25 +12,6 @@ let manager = StorageService.load();
 if (!manager) {
     manager = new ProjectManager();
 }
-
-renderProjectSection(
-    projectSection,
-    manager,
-    (projectName) => {
-
-        const project = Project.create(projectName);
-        manager.addProject(project);
-
-        StorageService.save(manager);
-
-        renderProjectSection(
-            projectSection,
-            manager,
-            arguments.callee,
-        );
-
-    }
-);
 
 function render() {
 
@@ -48,12 +30,14 @@ function render() {
             シミュレーション結果
         </h2>
     `;
-
 }
 
 function onCreateProject(projectName) {
+
     createProject(manager, projectName);
+
     render();
+
 }
 
 render();
