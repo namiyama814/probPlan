@@ -1,16 +1,18 @@
 import { ProjectManager } from "./models/ProjectManager.js";
 import { StorageService } from "./services/storageService.js";
+import { renderProjectSection } from "./ui/projectView.js";
 
 const projectSection = document.getElementById("project-section");
 const taskSection = document.getElementById("task-section");
 const resultSection = document.getElementById("result-section");
 
-projectSection.innerHTML = `
-<h2 class="text-lg font-bold">プロジェクト</h2>
-<p class="mt-2 text-sm text-[#252525]/60">
-    プロジェクトを作成してください
-</p>
-`;
+let manager = StorageService.load();
+
+if (!manager) {
+    manager = new ProjectManager();
+}
+
+renderProjectSection(projectSection, manager);
 
 taskSection.innerHTML = `
 <h2 class="text-lg font-bold">タスク一覧</h2>
@@ -21,11 +23,3 @@ resultSection.innerHTML = `
     シミュレーション結果
 </h2>
 `;
-
-let manager = StorageService.load();
-
-if (!manager) {
-    manager = new ProjectManager();
-}
-
-console.log(manager);
