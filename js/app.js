@@ -12,7 +12,13 @@ if (!manager) {
     manager = new ProjectManager();
 }
 
-renderProjectSection(projectSection, manager);
+renderProjectSection(
+    projectSection,
+    manager,
+    (projectName) => {
+        console.log(projectName);
+    }
+);
 
 taskSection.innerHTML = `
 <h2 class="text-lg font-bold">タスク一覧</h2>
