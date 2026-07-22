@@ -8,7 +8,6 @@ export class Task {
     }) {
         this.id = id;
         this.name = name;
-
         this.optimistic = optimistic;
         this.mostLikely = mostLikely;
         this.pessimistic = pessimistic;
@@ -19,5 +18,9 @@ export class Task {
             id: crypto.randomUUID(),
             ...data,
         });
+    }
+
+    static fromJSON(data) {
+        return new Task(data);
     }
 }

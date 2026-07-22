@@ -1,8 +1,11 @@
+import { Task } from "./Task.js";
+
 export class Project {
+
     constructor({
         id,
         name,
-        tasks = [],
+        tasks = []
     }) {
         this.id = id;
         this.name = name;
@@ -13,7 +16,15 @@ export class Project {
         return new Project({
             id: crypto.randomUUID(),
             name,
-            tasks: [],
+            tasks: []
+        });
+    }
+
+    static fromJSON(data) {
+        return new Project({
+            id: data.id,
+            name: data.name,
+            tasks: data.tasks.map(task => Task.fromJSON(task))
         });
     }
 
@@ -28,4 +39,5 @@ export class Project {
     getTask(taskId) {
         return this.tasks.find(task => task.id === taskId);
     }
+
 }

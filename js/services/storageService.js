@@ -1,24 +1,30 @@
+import { ProjectManager } from "../models/ProjectManager.js";
+
 const STORAGE_KEY = "probplan";
 
 export const StorageService = {
 
-    save(project) {
-        localStorage.setItem(
-            STORAGE_KEY,
-            JSON.stringify(project)
-        );
-    },
+  save(manager) {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(manager)
+    );
+  },
 
-    load() {
-        const json = localStorage.getItem(STORAGE_KEY);
+  load() {
 
-        if (!json) return null;
+    const json = localStorage.getItem(STORAGE_KEY);
 
-        return JSON.parse(json);
-    },
+    if (!json) return null;
 
-    clear() {
-        localStorage.removeItem(STORAGE_KEY);
-    }
+    return ProjectManager.fromJSON(
+      JSON.parse(json)
+    );
+
+  },
+
+  clear() {
+    localStorage.removeItem(STORAGE_KEY);
+  }
 
 };
