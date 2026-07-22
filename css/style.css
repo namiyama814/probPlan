@@ -1,4 +1,7 @@
 :root{
     --color-text:#252525;
     --color-bg:#FAFAFA;
+
+    --radius: 0.75rem;
+    --transition: 150ms;
 }

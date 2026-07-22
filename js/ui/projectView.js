@@ -1,22 +1,34 @@
 import { showCreateProjectModal } from "./projectModal.js";
 
 export function renderProjectSection(
-    projectSection,
-    manager,
-    onCreateProject
+  projectSection,
+  manager,
+  onCreateProject
 ) {
 
-    projectSection.innerHTML = `
+  projectSection.innerHTML = `
         <div class="flex items-center justify-between">
             <h2 class="text-lg font-bold">プロジェクト</h2>
 
             <button
-                id="add-project-button"
-                class="hidden rounded-md border border-[--color-text]/10 p-2 hover:bg-[--color-text]/5"
-                aria-label="プロジェクトを追加"
+              id="add-project-button"
+              class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-text)]/5"
+              aria-label="プロジェクトを追加"
             >
-                +
-            </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-5 w-5"
+            >
+            <path d="M12 5v14" />
+            <path d="M5 12h14" />
+            </svg>
+          </button>
         </div>
 
         <div
@@ -25,17 +37,19 @@ export function renderProjectSection(
         ></div>
     `;
 
-    const content = document.getElementById("project-content");
-    const addButton = document.getElementById("add-project-button");
+  const content = document.getElementById("project-content");
+  const addButton = document.getElementById("add-project-button");
 
-    if (manager.projects.length === 0) {
+  if (manager.projects.length === 0) {
 
-        addButton.classList.add("hidden");
+    addButton.classList.remove("flex");
+    addButton.classList.add("hidden");
 
-        content.innerHTML = `
+
+    content.innerHTML = `
             <button
                 id="empty-create-project"
-                class="w-full h-56 border-2 border-dashed border-[var(--color-text)]/10 rounded-md flex flex-col items-center justify-center hover:bg-[var(--color-text)]/5 transition"
+                class="w-full h-56 rounded-xl flex flex-col items-center justify-center transition-colors hover:bg-[var(--color-text)]/5"
             >
                 <span class="text-5xl leading-none">+</span>
 
@@ -45,20 +59,29 @@ export function renderProjectSection(
             </button>
         `;
 
-        const createButton = document.getElementById("empty-create-project");
+    const createButton = document.getElementById("empty-create-project");
 
-        createButton.addEventListener("click", () => {
-            showCreateProjectModal(onCreateProject);
-        });
+    createButton.addEventListener("click", () => {
+      showCreateProjectModal(onCreateProject);
+    });
 
-        return;
-    }
+    return;
+  }
 
-    addButton.classList.remove("hidden");
+  addButton.classList.remove("hidden");
+  addButton.classList.add("flex");
 
-    content.innerHTML = `
-        <div class="space-y-2">
-            プロジェクト一覧
-        </div>
-    `;
+  content.innerHTML = manager.projects.map(project => `
+      <button
+          class="w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
+      >
+          <h3 class="font-semibold">
+              ${project.name}
+          </h3>
+
+          <p class="mt-1 text-sm text-[--color-text]/60">
+              タスク数：${project.tasks.length}
+          </p>
+      </button>
+  `).join("");
 }
