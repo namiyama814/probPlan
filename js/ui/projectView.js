@@ -40,6 +40,10 @@ export function renderProjectSection(
   const content = document.getElementById("project-content");
   const addButton = document.getElementById("add-project-button");
 
+  addButton.addEventListener("click", () => {
+    showCreateProjectModal(onCreateProject);
+  });
+
   if (manager.projects.length === 0) {
 
     addButton.classList.remove("flex");
