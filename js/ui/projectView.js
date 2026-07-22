@@ -35,11 +35,11 @@ export function renderProjectSection(
         content.innerHTML = `
             <button
                 id="empty-create-project"
-                class="w-full h-56 border-2 border-dashed border-[--color-text]/10 rounded-md flex flex-col items-center justify-center hover:bg-[--color-text]/5 transition"
+                class="w-full h-56 border-2 border-dashed border-[var(--color-text)]/10 rounded-md flex flex-col items-center justify-center hover:bg-[var(--color-text)]/5 transition"
             >
                 <span class="text-5xl leading-none">+</span>
 
-                <span class="mt-3 text-sm text-[--color-text]/60">
+                <span class="mt-3 text-sm text-[var(--color-text)]/60">
                     プロジェクトを作成
                 </span>
             </button>

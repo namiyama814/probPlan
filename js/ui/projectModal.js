@@ -1,8 +1,7 @@
 import { openModal, closeModal } from "./modal.js";
 
 export function showCreateProjectModal(onCreateProject) {
-
-    openModal(`
+  openModal(`
         <h2 class="text-xl font-bold">
             新しいプロジェクト
         </h2>
@@ -18,34 +17,31 @@ export function showCreateProjectModal(onCreateProject) {
             <input
                 id="project-name"
                 type="text"
-                class="mt-2 w-full rounded-md border border-[--color-text]/10 px-3 py-2 outline-none focus:border-[--color-text]"
+                class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2 outline-none focus:border-[var(--color-text)]"
                 placeholder="スマイル動画開発"
             >
         </div>
 
         <button
             id="create-project-submit"
-            class="mt-6 w-full rounded-md bg-[--color-text] py-2 text-[--color-background]"
+            class="mt-6 w-full rounded-md bg-[var(--color-text)] py-2 text-[var(--color-bg)]"
         >
             作成
         </button>
     `);
 
-    const submitButton = document.getElementById("create-project-submit");
-    const input = document.getElementById("project-name");
+  const submitButton = document.getElementById("create-project-submit");
+  const input = document.getElementById("project-name");
 
-    submitButton.addEventListener("click", () => {
+  submitButton.addEventListener("click", () => {
+    const projectName = input.value.trim();
 
-        const projectName = input.value.trim();
+    if (!projectName) {
+      return;
+    }
 
-        if (!projectName) {
-            return;
-        }
+    onCreateProject(projectName);
 
-        onCreateProject(projectName);
-
-        closeModal();
-
-    });
-
+    closeModal();
+  });
 }
