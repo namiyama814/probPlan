@@ -16,16 +16,44 @@ renderProjectSection(
     projectSection,
     manager,
     (projectName) => {
-        console.log(projectName);
+
+        const project = Project.create(projectName);
+        manager.addProject(project);
+
+        StorageService.save(manager);
+
+        renderProjectSection(
+            projectSection,
+            manager,
+            arguments.callee,
+        );
+
     }
 );
 
-taskSection.innerHTML = `
-<h2 class="text-lg font-bold">タスク一覧</h2>
-`;
+function render() {
 
-resultSection.innerHTML = `
-<h2 class="text-lg font-bold">
-    シミュレーション結果
-</h2>
-`;
+    renderProjectSection(
+        projectSection,
+        manager,
+        onCreateProject
+    );
+
+    taskSection.innerHTML = `
+        <h2 class="text-lg font-bold">タスク一覧</h2>
+    `;
+
+    resultSection.innerHTML = `
+        <h2 class="text-lg font-bold">
+            シミュレーション結果
+        </h2>
+    `;
+
+}
+
+function onCreateProject(projectName) {
+    createProject(manager, projectName);
+    render();
+}
+
+render();
