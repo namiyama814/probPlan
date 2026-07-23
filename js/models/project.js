@@ -3,20 +3,20 @@ import { Task } from "./Task.js";
 export class Project {
 
     constructor({
-        id,
-        name,
-        tasks = []
+      id,
+      name,
+      tasks = []
     }) {
-        this.id = id;
-        this.name = name;
-        this.tasks = tasks;
+      this.id = id;
+      this.name = name;
+      this.tasks = tasks;
     }
 
     static create(name) {
         return new Project({
-            id: crypto.randomUUID(),
-            name,
-            tasks: []
+          id: crypto.randomUUID(),
+          name,
+          tasks: []
         });
     }
 

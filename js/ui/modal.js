@@ -1,24 +1,20 @@
 let overlay = null;
 
 export function openModal(content) {
-
     closeModal();
-
     overlay = document.createElement("div");
 
     overlay.className = `
-        fixed inset-0
-        bg-black/40
-        flex items-center justify-center
-        p-4
-        z-50
+      fixed inset-0
+      bg-black/40
+      flex items-center justify-center
+      p-4
+      z-50
     `;
 
     overlay.innerHTML = `
-        <div
-            class="w-full max-w-md rounded-md bg-white border border-[#252525]/10 p-6"
-        >
-            ${content}
+        <div class="w-full max-w-md rounded-md bg-white border border-[#252525]/10 p-6">
+          ${content}
         </div>
     `;
 
@@ -26,10 +22,8 @@ export function openModal(content) {
 }
 
 export function closeModal() {
+  if (!overlay) return;
 
-    if (!overlay) return;
-
-    overlay.remove();
-    overlay = null;
-
+  overlay.remove();
+  overlay = null;
 }
