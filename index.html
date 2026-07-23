@@ -2,51 +2,34 @@
 <html lang="ja">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-
-    <link rel="stylesheet" href="./css/style.css">
-
-    <title>ProbPlan</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="./css/style.css">
+  <title>ProbPlan</title>
 </head>
 
 <body class="bg-[var(--color-bg)] text-[var(--color-text)] antialiased min-h-screen">
 
-    <main class="max-w-3xl mx-auto px-6 py-16">
+  <main class="max-w-3xl mx-auto px-6 py-16">
 
-        <header class="mb-10 border-b border-[var(--color-text)]/10 pb-8">
-            <h1 class="text-3xl font-bold tracking-tight text-[var(--color-text)]">
-                ProbPlan
-            </h1>
-            <p class="text-[var(--color-text)]/60 text-sm mt-2 leading-relaxed">
-                プロジェクトの未来を確率で見える化
-            </p>
-        </header>
+    <div class="overflow-x-auto snap-x snap-mandatory">
+      <div class="flex gap-6 md:grid md:grid-cols-2 md:min-w-0">
 
-        <div class="overflow-x-auto snap-x snap-mandatory">
-            <div class="flex gap-6 md:grid md:grid-cols-2 md:min-w-0">
-
-                <section id="project-section"
-                    class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-white rounded-md border border-[var(--color-text)]/10 p-6">
-                </section>
-
-                <section id="task-section"
-                    class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-white rounded-md border border-[var(--color-text)]/10 p-6">
-                </section>
-
-            </div>
-        </div>
-
-        <section id="result-section" class="mt-6 bg-white rounded-md border border-[var(--color-text)]/10 p-6">
+        <section id="project-section"
+          class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-white rounded-md border border-[var(--color-text)]/10 p-6">
         </section>
 
+        <section id="task-section"
+          class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-white rounded-md border border-[var(--color-text)]/10 p-6">
+        </section>
 
-    </main>
+      </div>
+    </div>
 
-    <script type="module" src="./js/app.js"></script>
+  </main>
+
+  <script type="module" src="./js/app.js"></script>
 
 </body>
-
 </html>

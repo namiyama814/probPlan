@@ -27,12 +27,6 @@ function render() {
     taskSection.innerHTML = `
       <h2 class="text-lg font-bold">タスク一覧</h2>
     `;
-
-    resultSection.innerHTML = `
-      <h2 class="text-lg font-bold">
-        シミュレーション結果
-      </h2>
-    `;
 };
 
 function onCreateProject(projectName) {
