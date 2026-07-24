@@ -1,4 +1,7 @@
 import { StorageService } from "./services/storageService.js";
+import { renderProjectHeader } from "./ui/projectDetailView.js";
+import { renderTaskSection } from "./ui/taskView.js";
+import { createTask } from "./controllers/taskController.js";
 
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
@@ -9,16 +12,29 @@ const project = manager.projects.find(
     project => project.id === projectId
 );
 
-console.log(project);
-
 const projectHeader = document.getElementById("project-header");
+const taskSection = document.getElementById("task-section");
 
-projectHeader.innerHTML = `
-    <h1 class="text-3xl font-bold">
-        ${project.name}
-    </h1>
+function render() {
+  renderProjectHeader(
+    projectHeader,
+    project
+  );
 
-    <p class="mt-2 text-sm text-[var(--color-text)]/60">
-        タスク数：${project.tasks.length}
-    </p>
-`;
+  renderTaskSection(
+    taskSection,
+    project,
+    onCreateTask
+  );
+}
+
+render();
+
+function onCreateTask(taskName) {
+  createTask(
+    manager,
+    project,
+    taskName
+  );
+  render();
+}
