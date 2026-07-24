@@ -27,7 +27,6 @@ function render() {
 
 function onCreateProject(projectName) {
   const project = createProject(manager, projectName);
-  selectedProjectId = project.id;
   render();
 };
 
