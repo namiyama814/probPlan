@@ -3,7 +3,6 @@ import { ProjectManager } from "../models/ProjectManager.js";
 const STORAGE_KEY = "probplan";
 
 export const StorageService = {
-
   save(manager) {
     localStorage.setItem(
       STORAGE_KEY,
@@ -12,7 +11,6 @@ export const StorageService = {
   },
 
   load() {
-
     const json = localStorage.getItem(STORAGE_KEY);
 
     if (!json) return null;
@@ -20,11 +18,9 @@ export const StorageService = {
     return ProjectManager.fromJSON(
       JSON.parse(json)
     );
-
   },
 
   clear() {
     localStorage.removeItem(STORAGE_KEY);
   }
-
 };

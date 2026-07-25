@@ -17,8 +17,8 @@ export class Task {
         this.status = status;
     } static create(data) {
         return new Task({
-            id: crypto.randomUUID(),
-            ...data,
+          id: crypto.randomUUID(),
+          ...data,
         });
     }
     static fromJSON(data) {
