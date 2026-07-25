@@ -76,14 +76,24 @@ export function renderProjectSection(
   addButton.classList.add("flex");
 
   content.innerHTML = manager.projects.map(project => `
-      <button class="w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5">
-        <h3 class="font-semibold">
-          ${project.name}
-        </h3>
-
-        <p class="mt-1 text-sm text-[--color-text]/60">
-          タスク数：${project.tasks.length}
-        </p>
-      </button>
+    <button
+      class="project-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
+      data-project-id="${project.id}"
+    >
+      <h3 class="font-semibold">
+        ${project.name}
+      </h3>
+  
+      <p class="mt-1 text-sm text-[var(--color-text)]/60">
+        タスク数：${project.tasks.length}
+      </p>
+    </button>
   `).join("");
+
+  content.querySelectorAll(".project-card").forEach(button => {
+    button.addEventListener("click", () => {
+      const projectId = button.dataset.projectId;
+      window.location.href = `detail.html?id=${projectId}`;
+    });
+  });
 }
