@@ -144,6 +144,11 @@ export function showEditTaskModal(task, onUpdateTask) {
       >
     </div>
 
+    <p
+      id="task-error"
+      class="mt-4 text-sm text-red-500 min-h-5"
+    ></p>
+
     <button
       id="save-task"
       class="mt-6 w-full rounded-md bg-[var(--color-text)] py-2 text-[var(--color-bg)]"
@@ -152,21 +157,77 @@ export function showEditTaskModal(task, onUpdateTask) {
     </button>
   `);
 
-    document
-      .getElementById("close-task-modal")
-      .addEventListener("click", closeModal);
+  document
+    .getElementById("close-task-modal")
+    .addEventListener("click", closeModal);
 
-    document
+  document
       .getElementById("save-task")
       .addEventListener("click", () => {
+        const name = document.getElementById("task-name").value.trim();
+  
+        const optimisticInput = document.getElementById("optimistic");
+        const mostLikelyInput = document.getElementById("most-likely");
+        const pessimisticInput = document.getElementById("pessimistic");
 
-      onUpdateTask(task, {
-        name: document.getElementById("task-name").value.trim(),
-        optimistic: document.getElementById("optimistic").value,
-        mostLikely: document.getElementById("most-likely").value,
-        pessimistic: document.getElementById("pessimistic").value,
-      });
+        const error = document.getElementById("task-error");
 
-      closeModal();
+        error.textContent = "";
+
+        if (name === "") {
+          error.textContent = "タスク名を入力してください";
+          return;
+        }
+
+        const optimistic =
+          optimisticInput.value === ""
+            ? null
+            : Number(optimisticInput.value);
+        
+        const mostLikely =
+          mostLikelyInput.value === ""
+            ? null
+            : Number(mostLikelyInput.value);
+        
+        const pessimistic =
+          pessimisticInput.value === ""
+            ? null
+            : Number(pessimisticInput.value);
+
+        if (
+          optimistic === null ||
+          mostLikely === null ||
+          pessimistic === null
+        ) {
+          error.textContent = "見積日数を全て入力してください";
+          return;
+        }
+
+        if (
+          optimistic < 0 ||
+          mostLikely < 0 ||
+          pessimistic < 0
+        ) {
+          error.textContent = "日数は0以上で入力してください";
+          return;
+        }
+
+        if (
+          optimistic > mostLikely ||
+          mostLikely > pessimistic
+        ) {
+          error.textContent =
+            "最短日数 ≤ 最頻日数 ≤ 最長日数の順で入力してください";
+          return;
+        }
+
+        onUpdateTask(task, {
+            name,
+            optimistic,
+            mostLikely,
+            pessimistic,
+        });
+        
+        closeModal();
       });
 }
