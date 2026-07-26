@@ -1,7 +1,10 @@
 import { StorageService } from "./services/storageService.js";
 import { renderProjectHeader } from "./ui/projectDetailView.js";
 import { renderTaskSection } from "./ui/taskView.js";
-import { createTask } from "./controllers/taskController.js";
+import {
+  createTask,
+  updateTask,
+} from "./controllers/taskController.js";
 
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
@@ -24,7 +27,8 @@ function render() {
   renderTaskSection(
     taskSection,
     project,
-    onCreateTask
+    onCreateTask,
+    onUpdateTask
   );
 }
 
@@ -35,6 +39,15 @@ function onCreateTask(taskName) {
     manager,
     project,
     taskName
+  );
+  render();
+}
+
+function onUpdateTask(task, data) {
+  updateTask(
+    manager,
+    task,
+    data
   );
   render();
 }

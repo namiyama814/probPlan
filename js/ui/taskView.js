@@ -1,9 +1,13 @@
-import { showCreateTaskModal } from "./taskModal.js";
+import {
+  showCreateTaskModal,
+  showEditTaskModal
+} from "./taskModal.js";
 
 export function renderTaskSection(
-  taskSection,
-  project,
-  onCreateTask
+    taskSection,
+    project,
+    onCreateTask,
+    onUpdateTask
 ) {
   taskSection.innerHTML = `
     <div class="flex items-center justify-between">
@@ -37,13 +41,24 @@ export function renderTaskSection(
       class="mt-6 space-y-2"
     >
       ${project.tasks.map(task => `
-        <button class="w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5">
+        <button
+          class="task-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
+          data-task-id="${task.id}"
+        >
           <h3 class="font-medium">${task.name}</h3>
           <p class="mt-1 text-sm text-[var(--color-text)]/60">見積未設定</p>
         </button>
       `).join("")}
     </div>
   `;
+
+  document.querySelectorAll(".task-card").forEach(button => {
+    button.addEventListener("click", () => {
+      const taskId = button.dataset.taskId;
+      const task = project.getTask(taskId);
+      showEditTaskModal(task, onUpdateTask);
+    });
+  });
 
   const addButton = document.getElementById("add-task-button");
 

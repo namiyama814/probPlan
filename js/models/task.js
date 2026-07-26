@@ -15,13 +15,23 @@ export class Task {
     this.pessimistic = pessimistic;
 
     this.status = status;
-  } static create(data) {
+  }
+
+  static create(data) {
     return new Task({
       id: crypto.randomUUID(),
       ...data,
     });
   }
+
   static fromJSON(data) {
     return new Task(data);
+  }
+
+  update(data) {
+    this.name = data.name;
+    this.optimistic = data.optimistic;
+    this.mostLikely = data.mostLikely;
+    this.pessimistic = data.pessimistic;
   }
 }
