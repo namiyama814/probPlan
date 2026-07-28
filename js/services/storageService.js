@@ -15,7 +15,7 @@ export const StorageService = {
 
     if (!json) return null;
 
-    return projectManager.fromJSON(
+    return ProjectManager.fromJSON(
       JSON.parse(json)
     );
   },
