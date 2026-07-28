@@ -1,4 +1,4 @@
-import { ProjectManager } from "./models/ProjectManager.js";
+import { ProjectManager } from "./models/projectManager.js";
 import { StorageService } from "./services/storageService.js";
 import { createProject } from "./controllers/projectController.js";
 import { renderProjectSection } from "./ui/projectView.js";
