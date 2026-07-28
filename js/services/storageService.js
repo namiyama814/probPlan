@@ -1,4 +1,4 @@
-import { projectManager } from "../models/projectManager.js";
+import { ProjectManager } from "../models/projectManager.js";
 
 const STORAGE_KEY = "probplan";
 
