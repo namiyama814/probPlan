@@ -1,4 +1,4 @@
-import { ProjectManager } from "../models/projectManager.js";
+import { ProjectManager } from "./models/projectManager.js";
 import { StorageService } from "./services/storageService.js";
 import { createProject } from "./controllers/projectController.js";
 import { renderProjectSection } from "./ui/projectView.js";
@@ -10,7 +10,7 @@ const resultSection = document.getElementById("result-section");
 let manager = StorageService.load();
 
 if (!manager) {
-  manager = new projectManager();
+  manager = new ProjectManager();
 };
 
 function render() {
