@@ -1,4 +1,4 @@
-import { ProjectManager } from "../models/ProjectManager.js";
+import { projectManager } from "../models/projectManager.js";
 
 const STORAGE_KEY = "probplan";
 
@@ -15,7 +15,7 @@ export const StorageService = {
 
     if (!json) return null;
 
-    return ProjectManager.fromJSON(
+    return projectManager.fromJSON(
       JSON.parse(json)
     );
   },
