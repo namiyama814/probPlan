@@ -41,13 +41,50 @@ export function renderTaskSection(
       class="mt-6 space-y-2"
     >
       ${project.tasks.map(task => `
-        <button
-          class="task-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
-          data-task-id="${task.id}"
+        <div
+          class="flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
         >
-          <h3 class="font-medium">${task.name}</h3>
-          <p class="mt-1 text-sm text-[var(--color-text)]/60">見積未設定</p>
-        </button>
+      
+          <button
+            class="task-card flex-1 text-left"
+            data-task-id="${task.id}"
+          >
+            <h3 class="font-medium">
+              ${task.name}
+            </h3>
+      
+            <p class="mt-1 text-sm text-[var(--color-text)]/60">
+              ${
+                task.optimistic === null
+                  ? "見積未設定"
+                  : `${task.optimistic} / ${task.mostLikely} / ${task.pessimistic} 日`
+              }
+            </p>
+          </button>
+      
+          <button
+            class="simulation-button ml-4 flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-text)]/10"
+            data-task-id="${task.id}"
+            title="シミュレーション"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              class="h-5 w-5"
+            >
+              <path d="M3 3v18h18"/>
+              <path d="M7 16v-4"/>
+              <path d="M12 16V8"/>
+              <path d="M17 16V5"/>
+            </svg>
+          </button>
+      
+        </div>
       `).join("")}
     </div>
   `;
