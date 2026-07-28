@@ -51,3 +51,6 @@ function onUpdateTask(task, data) {
   );
   render();
 }
+
+import { runSimulation } from "./simulation/monteCarlo.js";
+console.log(runSimulation(project));
