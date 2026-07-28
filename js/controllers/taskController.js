@@ -1,4 +1,4 @@
-import { Task } from "../models/Task.js";
+import { Task } from "../models/task.js";
 import { StorageService } from "../services/storageService.js";
 
 export function createTask(manager, project, taskName) {
