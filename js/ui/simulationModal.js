@@ -1,5 +1,4 @@
 import { openModal, closeModal } from "./modal.js";
-import { runSimulation } from "../simulation/monteCarlo.js";
 
 export function showSimulationModal(project) {
 
