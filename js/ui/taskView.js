@@ -1,8 +1,8 @@
+import { showSimulationModal } from "./simulationModal.js";
 import {
   showCreateTaskModal,
   showEditTaskModal
 } from "./taskModal.js";
-import { showSimulationModal } from "./simulationModal.js";
 
 export function renderTaskSection(
     taskSection,
@@ -100,7 +100,8 @@ export function renderTaskSection(
 
   document.querySelectorAll(".simulation-button").forEach(button => {
     button.addEventListener("click", () => {
-      const task = project.getTask(button.dataset.taskId);
+      const task =
+        project.getTask(button.dataset.taskId);
       showSimulationModal(task);
     });
   });

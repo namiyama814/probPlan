@@ -1,12 +1,12 @@
 export function drawHistogram(canvas, samples) {
   const ctx = canvas.getContext("2d");
 
-  const width = canvas.width;
-  const height = canvas.height;
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
 
   ctx.clearRect(0, 0, width, height);
 
-  const bins = 20;
+  const bins = window.innerWidth < 640 ? 12 : 20;
 
   const min = Math.min(...samples);
   const max = Math.max(...samples);
@@ -64,6 +64,4 @@ export function drawHistogram(canvas, samples) {
       height - 15
     );
   }
-
-  
 }
