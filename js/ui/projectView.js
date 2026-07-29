@@ -75,20 +75,34 @@ export function renderProjectSection(
   addButton.classList.remove("hidden");
   addButton.classList.add("flex");
 
-  content.innerHTML = manager.projects.map(project => `
-    <button
-      class="project-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
-      data-project-id="${project.id}"
-    >
-      <h3 class="font-semibold">
-        ${project.name}
-      </h3>
-  
-      <p class="mt-1 text-sm text-[var(--color-text)]/60">
-        タスク数：${project.tasks.length}
-      </p>
-    </button>
-  `).join("");
+  content.innerHTML = manager.projects.map(project => {
+    const progress = project.getProgress();
+
+    return `
+      <button
+        class="project-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
+        data-project-id="${project.id}"
+      >
+        <h3 class="font-semibold">
+          ${project.name}
+        </h3>
+
+        <div class="mt-1 flex items-center justify-between text-sm">
+          <span class="text-[var(--color-text)]/60">
+            タスク数：${project.tasks.length}
+          </span>
+          <span class="font-medium">${progress}%</span>
+        </div>
+
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--color-text)]/10">
+          <div
+            class="h-full rounded-full bg-[var(--color-text)] transition-[width] duration-300"
+            style="width: ${progress}%"
+          ></div>
+        </div>
+      </button>
+    `;
+  }).join("");
 
   content.querySelectorAll(".project-card").forEach(button => {
     button.addEventListener("click", () => {

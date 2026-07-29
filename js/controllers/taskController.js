@@ -19,6 +19,13 @@ export function updateTask(manager, task, data) {
   return task;
 }
 
+export function setTaskCompleted(manager, task, isCompleted) {
+  task.setCompleted(isCompleted);
+  StorageService.save(manager);
+
+  return task;
+}
+
 export function deleteTask(manager, project, taskId) {
   project.removeTask(taskId);
   StorageService.save(manager);

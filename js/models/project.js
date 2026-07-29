@@ -38,4 +38,15 @@ export class Project {
   getTask(taskId) {
     return this.tasks.find(task => task.id === taskId);
   }
+
+  getProgress() {
+    if (this.tasks.length === 0) return 0;
+
+    const totalProgress = this.tasks.reduce(
+      (total, task) => total + task.getProgress(),
+      0
+    );
+
+    return Math.round(totalProgress / this.tasks.length);
+  }
 }

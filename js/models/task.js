@@ -34,4 +34,12 @@ export class Task {
     this.mostLikely = data.mostLikely;
     this.pessimistic = data.pessimistic;
   }
+
+  setCompleted(isCompleted) {
+    this.status = isCompleted ? "completed" : "todo";
+  }
+
+  getProgress() {
+    return this.status === "completed" ? 100 : 0;
+  }
 }

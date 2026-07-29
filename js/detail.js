@@ -4,6 +4,7 @@ import { renderTaskSection } from "./ui/taskView.js";
 import {
   createTask,
   deleteTask,
+  setTaskCompleted,
   updateTask,
 } from "./controllers/taskController.js";
 import { initializeTheme } from "./ui/theme.js";
@@ -33,7 +34,8 @@ function render() {
     project,
     onCreateTask,
     onUpdateTask,
-    onDeleteTask
+    onDeleteTask,
+    onSetTaskCompleted
   );
 }
 
@@ -62,6 +64,15 @@ function onDeleteTask(task) {
     manager,
     project,
     task.id
+  );
+  render();
+}
+
+function onSetTaskCompleted(task, isCompleted) {
+  setTaskCompleted(
+    manager,
+    task,
+    isCompleted
   );
   render();
 }
