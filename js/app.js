@@ -2,6 +2,7 @@ import { ProjectManager } from "./models/projectManager.js";
 import { StorageService } from "./services/storageService.js";
 import { createProject } from "./controllers/projectController.js";
 import { renderProjectSection } from "./ui/projectView.js";
+import { initializeTheme } from "./ui/theme.js";
 
 const projectSection = document.getElementById("project-section");
 const taskSection = document.getElementById("task-section");
@@ -12,6 +13,8 @@ let manager = StorageService.load();
 if (!manager) {
   manager = new ProjectManager();
 };
+
+initializeTheme();
 
 function render() {
   renderProjectSection(

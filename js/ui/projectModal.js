@@ -10,7 +10,7 @@ export function showCreateProjectModal(onCreateProject) {
       <button
         id="close-project-modal"
         type="button"
-        class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black"
+        class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
         aria-label="閉じる"
       >
         <svg

@@ -3,8 +3,10 @@ import { renderProjectHeader } from "./ui/projectDetailView.js";
 import { renderTaskSection } from "./ui/taskView.js";
 import {
   createTask,
+  deleteTask,
   updateTask,
 } from "./controllers/taskController.js";
+import { initializeTheme } from "./ui/theme.js";
 
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
@@ -18,6 +20,8 @@ const project = manager.projects.find(
 const projectHeader = document.getElementById("project-header");
 const taskSection = document.getElementById("task-section");
 
+initializeTheme();
+
 function render() {
   renderProjectHeader(
     projectHeader,
@@ -28,7 +32,8 @@ function render() {
     taskSection,
     project,
     onCreateTask,
-    onUpdateTask
+    onUpdateTask,
+    onDeleteTask
   );
 }
 
@@ -48,6 +53,15 @@ function onUpdateTask(task, data) {
     manager,
     task,
     data
+  );
+  render();
+}
+
+function onDeleteTask(task) {
+  deleteTask(
+    manager,
+    project,
+    task.id
   );
   render();
 }

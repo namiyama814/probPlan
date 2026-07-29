@@ -3,6 +3,9 @@ export function drawHistogram(canvas, samples) {
 
   const width = canvas.clientWidth;
   const height = canvas.clientHeight;
+  const textColor = getComputedStyle(document.documentElement)
+    .getPropertyValue("--color-text")
+    .trim();
 
   ctx.clearRect(0, 0, width, height);
 
@@ -30,10 +33,16 @@ export function drawHistogram(canvas, samples) {
 
   ctx.lineTo(margin, height - margin);
   ctx.lineTo(width - margin, height - margin);
+  ctx.strokeStyle = textColor;
+  ctx.globalAlpha = 0.35;
   ctx.stroke();
+  ctx.globalAlpha = 1;
 
   const maxCount = Math.max(...counts);
   const barWidth = graphWidth / bins;
+
+  ctx.fillStyle = textColor;
+  ctx.globalAlpha = 0.8;
 
   counts.forEach((count, index) => {
     const barHeight =
@@ -47,6 +56,7 @@ export function drawHistogram(canvas, samples) {
     );
   });
 
+  ctx.globalAlpha = 0.6;
   ctx.textAlign = "center";
   
   ctx.font = "12px sans-serif";
@@ -64,4 +74,6 @@ export function drawHistogram(canvas, samples) {
       height - 15
     );
   }
+
+  ctx.globalAlpha = 1;
 }

@@ -4,6 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    try {
+      const theme = localStorage.getItem("probplan-theme");
+      if (theme === "light" || theme === "dark") {
+        document.documentElement.dataset.theme = theme;
+      }
+    } catch {}
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="./css/style.css">
   <title>ProbPlan</title>
@@ -11,10 +19,16 @@
 
 <body class="bg-[var(--color-bg)] text-[var(--color-text)]">
 
-<main class="max-w-5xl mx-auto px-6 py-16">
-  <header id="project-header" class="pb-8"></header>
-  <section id="task-section" class="mt-8"></section>
-</main>
+  <button
+    id="theme-toggle"
+    type="button"
+    class="fixed right-5 top-5 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-text)]/10 bg-[var(--color-surface)] shadow-sm transition-colors hover:bg-[var(--color-text)]/5"
+  ></button>
+
+  <main class="max-w-5xl mx-auto px-6 py-16">
+    <header id="project-header" class="pb-8"></header>
+    <section id="task-section" class="mt-8"></section>
+  </main>
 
   <script type="module" src="./js/detail.js"></script>
 

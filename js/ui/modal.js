@@ -18,7 +18,7 @@ export function openModal(content, options = {}) {
   `;
 
   overlay.innerHTML = `
-    <div class="w-full ${maxWidth} rounded-md bg-white border border-[#252525]/10 p-6">
+    <div class="w-full ${maxWidth} rounded-md bg-[var(--color-surface)] border border-[var(--color-text)]/10 p-6 shadow-xl">
       ${content}
     </div>
   `;

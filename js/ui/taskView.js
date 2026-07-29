@@ -8,7 +8,8 @@ export function renderTaskSection(
     taskSection,
     project,
     onCreateTask,
-    onUpdateTask
+    onUpdateTask,
+    onDeleteTask
 ) {
   taskSection.innerHTML = `
     <div class="flex items-center justify-between">
@@ -41,7 +42,15 @@ export function renderTaskSection(
       id="task-list"
       class="mt-6 space-y-2"
     >
-      ${project.tasks.map(task => `
+      ${project.tasks.length === 0
+        ? `
+          <div class="flex min-h-40 items-center justify-center rounded-xl">
+            <p class="text-sm text-[var(--color-text)]/60">
+              タスクはまだありません
+            </p>
+          </div>
+        `
+        : project.tasks.map(task => `
         <div
           class="flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
         >
@@ -62,7 +71,7 @@ export function renderTaskSection(
               }
             </p>
           </button>
-      
+
           <button
             class="simulation-button ml-4 flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-text)]/10"
             data-task-id="${task.id}"
@@ -84,7 +93,7 @@ export function renderTaskSection(
               <path d="M17 16V5"/>
             </svg>
           </button>
-      
+
         </div>
       `).join("")}
     </div>
@@ -94,7 +103,7 @@ export function renderTaskSection(
     button.addEventListener("click", () => {
       const taskId = button.dataset.taskId;
       const task = project.getTask(taskId);
-      showEditTaskModal(task, onUpdateTask);
+      showEditTaskModal(task, onUpdateTask, onDeleteTask);
     });
   });
 

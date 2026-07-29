@@ -4,6 +4,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>
+    try {
+      const theme = localStorage.getItem("probplan-theme");
+      if (theme === "light" || theme === "dark") {
+        document.documentElement.dataset.theme = theme;
+      }
+    } catch {}
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="./css/style.css">
   <title>ProbPlan</title>
@@ -11,17 +19,23 @@
 
 <body class="bg-[var(--color-bg)] text-[var(--color-text)] antialiased min-h-screen flex items-center justify-center">
 
+  <button
+    id="theme-toggle"
+    type="button"
+    class="fixed right-5 top-5 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-text)]/10 bg-[var(--color-surface)] shadow-sm transition-colors hover:bg-[var(--color-text)]/5"
+  ></button>
+
   <main class="max-w-3xl w-full px-6">
 
     <div class="overflow-x-auto snap-x snap-mandatory">
       <div class="flex gap-6 md:grid md:grid-cols-2 md:min-w-0">
 
         <section id="project-section"
-          class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-white rounded-md border border-[var(--color-text)]/10 p-6">
+          class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-[var(--color-surface)] rounded-md border border-[var(--color-text)]/10 p-6">
         </section>
 
         <section id="task-section"
-          class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-white rounded-md border border-[var(--color-text)]/10 p-6">
+          class="w-[85vw] shrink-0 snap-start md:w-auto min-h-80 bg-[var(--color-surface)] rounded-md border border-[var(--color-text)]/10 p-6">
         </section>
 
       </div>

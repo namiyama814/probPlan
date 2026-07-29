@@ -12,7 +12,7 @@ openModal(`
     <button
       id="close-task-modal"
       type="button"
-      class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black"
+      class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
       aria-label="閉じる"
     >
       <svg
@@ -72,14 +72,14 @@ submitButton.addEventListener("click", () => {
   });
 }
 
-export function showEditTaskModal(task, onUpdateTask) {
+export function showEditTaskModal(task, onUpdateTask, onDeleteTask) {
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">タスクを編集</h2>
       <button
         id="close-task-modal"
         type="button"
-        class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-gray-500 transition-colors hover:bg-gray-100 hover:text-black"
+        class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
         aria-label="閉じる"
       >
         <svg
@@ -155,6 +155,14 @@ export function showEditTaskModal(task, onUpdateTask) {
     >
       保存
     </button>
+
+    <button
+      id="delete-task"
+      type="button"
+      class="mt-3 w-full rounded-md py-2 text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger-soft)]"
+    >
+      タスクを削除
+    </button>
   `);
 
   document
@@ -228,6 +236,82 @@ export function showEditTaskModal(task, onUpdateTask) {
           pessimistic,
       });
         
+      closeModal();
+    });
+
+  document
+    .getElementById("delete-task")
+    .addEventListener("click", () => {
+      showDeleteTaskModal(task, onUpdateTask, onDeleteTask);
+    });
+}
+
+function showDeleteTaskModal(task, onUpdateTask, onDeleteTask) {
+  openModal(`
+    <div class="relative">
+      <h2 class="text-xl font-bold">タスクを削除</h2>
+      <button
+        id="close-delete-task-modal"
+        type="button"
+        class="absolute right-0 top-0 flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
+        aria-label="閉じる"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <p class="mt-6 text-sm leading-6 text-[var(--color-text)]/70">
+      「<span id="delete-task-name"></span>」を削除します。
+      この操作は元に戻せません。
+    </p>
+
+    <div class="mt-6 flex gap-3">
+      <button
+        id="cancel-delete-task"
+        type="button"
+        class="flex-1 rounded-md border border-[var(--color-text)]/10 py-2 transition-colors hover:bg-[var(--color-text)]/5"
+      >
+        キャンセル
+      </button>
+      <button
+        id="confirm-delete-task"
+        type="button"
+        class="flex-1 rounded-md bg-[var(--color-danger)] py-2 text-[var(--color-danger-contrast)]"
+      >
+        削除
+      </button>
+    </div>
+  `);
+
+  document.getElementById("delete-task-name").textContent = task.name;
+
+  document
+    .getElementById("close-delete-task-modal")
+    .addEventListener("click", closeModal);
+
+  document
+    .getElementById("cancel-delete-task")
+    .addEventListener("click", () => {
+      showEditTaskModal(task, onUpdateTask, onDeleteTask);
+    });
+
+  document
+    .getElementById("confirm-delete-task")
+    .addEventListener("click", () => {
+      onDeleteTask(task);
       closeModal();
     });
 }

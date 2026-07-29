@@ -31,29 +31,29 @@ export function showSimulationModal(task) {
 
     <div class="mt-8 grid grid-cols-2 gap-4">
 
-      <div class="rounded-lg border p-4">
-        <p class="text-sm text-gray-500">平均</p>
+      <div class="rounded-lg border border-[var(--color-text)]/10 p-4">
+        <p class="text-sm text-[var(--color-muted)]">平均</p>
         <p class="text-2xl font-bold">
           ${result.average.toFixed(1)}日
         </p>
       </div>
 
-      <div class="rounded-lg border p-4">
-        <p class="text-sm text-gray-500">50%</p>
+      <div class="rounded-lg border border-[var(--color-text)]/10 p-4">
+        <p class="text-sm text-[var(--color-muted)]">50%</p>
         <p class="text-2xl font-bold">
           ${Math.round(result.p50)}日
         </p>
       </div>
 
-      <div class="rounded-lg border p-4">
-        <p class="text-sm text-gray-500">80%</p>
+      <div class="rounded-lg border border-[var(--color-text)]/10 p-4">
+        <p class="text-sm text-[var(--color-muted)]">80%</p>
         <p class="text-2xl font-bold">
           ${Math.round(result.p80)}日
         </p>
       </div>
 
-      <div class="rounded-lg border p-4">
-        <p class="text-sm text-gray-500">90%</p>
+      <div class="rounded-lg border border-[var(--color-text)]/10 p-4">
+        <p class="text-sm text-[var(--color-muted)]">90%</p>
         <p class="text-2xl font-bold">
           ${Math.round(result.p90)}日
         </p>
