@@ -15,9 +15,25 @@ export function showSimulationModal(task) {
 
       <button
         id="close-modal"
-        class="rounded-lg px-3 py-2 hover:bg-[var(--color-text)]/10"
+        type="button"
+        class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
+        aria-label="閉じる"
       >
-        ✕
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-5 w-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+          stroke-width="2"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M6 18L18 6M6 6l12 12"
+          />
+        </svg>
       </button>
 
     </div>
