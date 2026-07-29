@@ -2,9 +2,36 @@ import { openModal, closeModal } from "./modal.js";
 import { runTaskSimulation } from "../simulation/taskSimulation.js";
 import { drawHistogram } from "../simulation/histogram.js";
 
+async function copyToClipboard(text) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return;
+    } catch {
+      // フォールバックのコピー処理を試みる。
+    }
+  }
+
+  const textarea = document.createElement("textarea");
+  textarea.value = text;
+  textarea.setAttribute("readonly", "");
+  textarea.className = "fixed opacity-0";
+
+  document.body.appendChild(textarea);
+  textarea.select();
+
+  const copied = document.execCommand("copy");
+  textarea.remove();
+
+  if (!copied) {
+    throw new Error("クリップボードへのコピーに失敗しました。");
+  }
+}
+
 export function showSimulationModal(task) {
 
   const result = runTaskSimulation(task);
+  const shareText = `${task.name}は50%の確率で${Math.round(result.p50)}日、80%の確率で${Math.round(result.p80)}日、90%の確率で${Math.round(result.p90)}日で終了します`;
 
   openModal(`
     <div class="flex items-center justify-between">
@@ -13,28 +40,54 @@ export function showSimulationModal(task) {
         シミュレーション結果
       </h2>
 
-      <button
-        id="close-modal"
-        type="button"
-        class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
-        aria-label="閉じる"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="h-5 w-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          stroke-width="2"
-          aria-hidden="true"
+      <div class="flex items-center gap-2">
+        <button
+          id="copy-simulation-result"
+          type="button"
+          class="flex h-8 items-center gap-1.5 rounded-full px-3 text-sm text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
+          aria-label="シミュレーション結果をコピー"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
-      </button>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M12 16V4M8 8l4-4 4 4M5 14v5h14v-5"
+            />
+          </svg>
+          <span>共有</span>
+        </button>
+
+        <button
+          id="close-modal"
+          type="button"
+          class="flex h-8 w-8 items-center justify-center rounded-full text-[var(--color-muted)] transition-colors hover:bg-[var(--color-text)]/10 hover:text-[var(--color-text)]"
+          aria-label="閉じる"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            stroke-width="2"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
 
     </div>
 
@@ -101,4 +154,22 @@ export function showSimulationModal(task) {
   document
     .getElementById("close-modal")
     .addEventListener("click", closeModal);
+
+  const copyButton = document.getElementById("copy-simulation-result");
+  const copyLabel = copyButton.querySelector("span");
+
+  copyButton.addEventListener("click", async () => {
+    try {
+      await copyToClipboard(shareText);
+      copyLabel.textContent = "コピーしました";
+    } catch {
+      copyLabel.textContent = "コピーに失敗しました";
+    }
+
+    window.setTimeout(() => {
+      if (document.body.contains(copyButton)) {
+        copyLabel.textContent = "共有";
+      }
+    }, 2000);
+  });
 }
