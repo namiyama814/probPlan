@@ -1,5 +1,8 @@
 import { StorageService } from "./services/storageService.js";
-import { renderProjectHeader } from "./ui/projectDetailView.js";
+import {
+  renderProjectError,
+  renderProjectHeader,
+} from "./ui/projectDetailView.js";
 import { renderTaskSection } from "./ui/taskView.js";
 import {
   createTask,
@@ -13,10 +16,9 @@ const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
 
 const manager = StorageService.load();
-
-const project = manager.projects.find(
-    project => project.id === projectId
-);
+const project = projectId
+  ? manager?.getProject(projectId)
+  : null;
 
 const projectHeader = document.getElementById("project-header");
 const taskSection = document.getElementById("task-section");
@@ -39,7 +41,31 @@ function render() {
   );
 }
 
-render();
+if (!projectId) {
+  document.title = "プロジェクトが指定されていません | ProbPlan";
+  renderProjectError(
+    projectHeader,
+    taskSection,
+    {
+      title: "プロジェクトが指定されていません",
+      description:
+        "ホーム画面から表示するプロジェクトを選択してください。",
+    }
+  );
+} else if (!project) {
+  document.title = "プロジェクトが見つかりません | ProbPlan";
+  renderProjectError(
+    projectHeader,
+    taskSection,
+    {
+      title: "プロジェクトが見つかりません",
+      description:
+        "削除されたか、URLが正しくない可能性があります。",
+    }
+  );
+} else {
+  render();
+}
 
 function onCreateTask(taskName) {
   createTask(

@@ -9,3 +9,8 @@ export function createProject(manager, projectName) {
 
   return project;
 }
+
+export function deleteProject(manager, projectId) {
+  manager.removeProject(projectId);
+  StorageService.save(manager);
+}

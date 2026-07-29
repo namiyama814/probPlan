@@ -1,7 +1,8 @@
 import { showSimulationModal } from "./simulationModal.js";
 import {
   showCreateTaskModal,
-  showEditTaskModal
+  showDeleteTaskModal,
+  showEditTaskModal,
 } from "./taskModal.js";
 
 let activeTaskMenu = null;
@@ -190,6 +191,34 @@ export function renderTaskSection(
                       : "完了にする"
                   }
                 </button>
+
+                <div class="my-1 border-t border-[var(--color-text)]/10"></div>
+
+                <button
+                  class="task-delete-button flex w-full items-center gap-3 rounded-sm px-3 py-2 text-left text-sm text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger-soft)]"
+                  data-task-id="${task.id}"
+                  type="button"
+                  role="menuitem"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    class="h-4 w-4"
+                    aria-hidden="true"
+                  >
+                    <path d="M3 6h18"/>
+                    <path d="M8 6V4h8v2"/>
+                    <path d="M19 6l-1 14H6L5 6"/>
+                    <path d="M10 11v5"/>
+                    <path d="M14 11v5"/>
+                  </svg>
+                  タスクを削除
+                </button>
               </div>
             </div>
           </div>
@@ -203,7 +232,7 @@ export function renderTaskSection(
     button.addEventListener("click", () => {
       const taskId = button.dataset.taskId;
       const task = project.getTask(taskId);
-      showEditTaskModal(task, onUpdateTask, onDeleteTask);
+      showEditTaskModal(task, onUpdateTask);
     });
   });
 
@@ -244,6 +273,15 @@ export function renderTaskSection(
       const isCompleted = button.dataset.completed === "true";
 
       onSetTaskCompleted(task, !isCompleted);
+    });
+  });
+
+  taskSection.querySelectorAll(".task-delete-button").forEach(button => {
+    button.addEventListener("click", () => {
+      const task = project.getTask(button.dataset.taskId);
+
+      closeActiveTaskMenu();
+      showDeleteTaskModal(task, onDeleteTask);
     });
   });
 

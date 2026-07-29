@@ -1,10 +1,17 @@
 import { showCreateProjectModal } from "./projectModal.js";
+import { showProjectListModal } from "./projectListModal.js";
+import {
+  bindProjectContextMenu,
+  closeProjectContextMenu,
+} from "./projectContextMenu.js";
 
 export function renderProjectSection(
   projectSection,
   manager,
-  onCreateProject
+  onCreateProject,
+  onDeleteProject
 ) {
+  closeProjectContextMenu();
 
   projectSection.innerHTML = `
     <div class="flex items-center justify-between">
@@ -75,7 +82,10 @@ export function renderProjectSection(
   addButton.classList.remove("hidden");
   addButton.classList.add("flex");
 
-  content.innerHTML = manager.projects.map(project => {
+  const visibleProjects = manager.projects.slice(0, 3);
+  const overflowProjects = manager.projects.slice(3);
+
+  content.innerHTML = visibleProjects.map(project => {
     const progress = project.getProgress();
 
     return `
@@ -102,12 +112,41 @@ export function renderProjectSection(
         </div>
       </button>
     `;
-  }).join("");
+  }).join("") + (
+    overflowProjects.length > 0
+      ? `
+        <button
+          id="show-more-projects"
+          type="button"
+          class="mt-2 flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm text-[var(--color-text)]/60 transition-colors hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)]"
+        >
+          <span>その他のプロジェクトを表示</span>
+        </button>
+      `
+      : ""
+  );
 
   content.querySelectorAll(".project-card").forEach(button => {
+    const project = manager.getProject(button.dataset.projectId);
+
     button.addEventListener("click", () => {
       const projectId = button.dataset.projectId;
       window.location.href = `detail.html?id=${projectId}`;
     });
+
+    bindProjectContextMenu(
+      button,
+      project,
+      onDeleteProject
+    );
   });
+
+  content
+    .querySelector("#show-more-projects")
+    ?.addEventListener("click", () => {
+      showProjectListModal(
+        overflowProjects,
+        onDeleteProject
+      );
+    });
 }

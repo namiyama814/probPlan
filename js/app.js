@@ -1,7 +1,11 @@
 import { ProjectManager } from "./models/projectManager.js";
 import { StorageService } from "./services/storageService.js";
-import { createProject } from "./controllers/projectController.js";
+import {
+  createProject,
+  deleteProject,
+} from "./controllers/projectController.js";
 import { renderProjectSection } from "./ui/projectView.js";
+import { renderRecentTaskSection } from "./ui/recentTaskView.js";
 import { initializeTheme } from "./ui/theme.js";
 
 const projectSection = document.getElementById("project-section");
@@ -20,17 +24,24 @@ function render() {
   renderProjectSection(
     projectSection,
     manager,
-    onCreateProject
+    onCreateProject,
+    onDeleteProject
   );
 
-  taskSection.innerHTML = `
-      <h2 class="text-lg font-bold">タスク一覧</h2>
-    `;
+  renderRecentTaskSection(
+    taskSection,
+    manager
+  );
 };
 
 function onCreateProject(projectName) {
   const project = createProject(manager, projectName);
   render();
 };
+
+function onDeleteProject(project) {
+  deleteProject(manager, project.id);
+  render();
+}
 
 render();

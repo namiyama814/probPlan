@@ -6,6 +6,7 @@ export class Task {
     mostLikely = null,
     pessimistic = null,
     status = "todo",
+    createdAt = null,
   }) {
     this.id = id;
     this.name = name;
@@ -15,11 +16,13 @@ export class Task {
     this.pessimistic = pessimistic;
 
     this.status = status;
+    this.createdAt = createdAt;
   }
 
   static create(data) {
     return new Task({
       id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
       ...data,
     });
   }

@@ -23,6 +23,12 @@ export function openModal(content, options = {}) {
     </div>
   `;
 
+  overlay.addEventListener("click", event => {
+    if (event.target === event.currentTarget) {
+      closeModal();
+    }
+  });
+
   document.body.appendChild(overlay);
 }
 
