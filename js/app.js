@@ -7,10 +7,14 @@ import {
 import { renderProjectSection } from "./ui/projectView.js";
 import { renderRecentTaskSection } from "./ui/recentTaskView.js";
 import { initializeTheme } from "./ui/theme.js";
+import {
+  createExportFile,
+  getExportFileName,
+  parseImportData,
+} from "./services/dataTransferService.js";
 
 const projectSection = document.getElementById("project-section");
 const taskSection = document.getElementById("task-section");
-const resultSection = document.getElementById("result-section");
 
 let manager = StorageService.load();
 
@@ -25,7 +29,9 @@ function render() {
     projectSection,
     manager,
     onCreateProject,
-    onDeleteProject
+    onDeleteProject,
+    exportData,
+    importData
   );
 
   renderRecentTaskSection(
@@ -42,6 +48,81 @@ function onCreateProject(projectName) {
 function onDeleteProject(project) {
   deleteProject(manager, project.id);
   render();
+}
+
+function showDataTransferStatus(message, isError = false) {
+  const dataTransferStatus = document.getElementById(
+    "data-transfer-status"
+  );
+
+  if (!dataTransferStatus) return;
+
+  dataTransferStatus.textContent = message;
+  dataTransferStatus.classList.remove("hidden");
+  dataTransferStatus.classList.toggle(
+    "text-[var(--color-danger)]",
+    isError
+  );
+  dataTransferStatus.classList.toggle(
+    "text-[var(--color-muted)]",
+    !isError
+  );
+}
+
+function clearDataTransferStatus() {
+  const dataTransferStatus = document.getElementById(
+    "data-transfer-status"
+  );
+
+  if (!dataTransferStatus) return;
+
+  dataTransferStatus.textContent = "";
+  dataTransferStatus.classList.add("hidden");
+}
+
+function exportData() {
+  clearDataTransferStatus();
+
+  const url = URL.createObjectURL(createExportFile(manager));
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = getExportFileName();
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(url), 0);
+}
+
+async function importData(event) {
+  const [file] = event.target.files;
+
+  if (!file) return;
+
+  if (!file.name.toLowerCase().endsWith(".pplp")) {
+    showDataTransferStatus(
+      ".pplpファイルを選択してください。",
+      true
+    );
+    event.target.value = "";
+    return;
+  }
+
+  try {
+    const importedManager = parseImportData(await file.text());
+
+    manager = importedManager;
+    StorageService.save(manager);
+    render();
+  } catch {
+    showDataTransferStatus(
+      "ファイルを読み込めませんでした。内容を確認してください。",
+      true
+    );
+  } finally {
+    event.target.value = "";
+  }
 }
 
 render();
