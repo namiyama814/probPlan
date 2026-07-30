@@ -10,6 +10,7 @@ import {
   setTaskCompleted,
   updateTask,
 } from "./controllers/taskController.js";
+import { updateProjectDeadline } from "./controllers/projectController.js";
 import { initializeTheme } from "./ui/theme.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -22,13 +23,17 @@ const project = projectId
 
 const projectHeader = document.getElementById("project-header");
 const taskSection = document.getElementById("task-section");
+let isDeadlineSettingsOpen = false;
 
 initializeTheme();
 
 function render() {
   renderProjectHeader(
     projectHeader,
-    project
+    project,
+    onUpdateProjectDeadline,
+    isDeadlineSettingsOpen,
+    onToggleDeadlineSettings
   );
 
   renderTaskSection(
@@ -101,4 +106,13 @@ function onSetTaskCompleted(task, isCompleted) {
     isCompleted
   );
   render();
+}
+
+function onUpdateProjectDeadline(deadline) {
+  updateProjectDeadline(manager, project, deadline);
+  render();
+}
+
+function onToggleDeadlineSettings(isOpen) {
+  isDeadlineSettingsOpen = isOpen;
 }

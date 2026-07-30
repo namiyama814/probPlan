@@ -44,6 +44,22 @@ export function showCreateProjectModal(onCreateProject) {
         placeholder="スマイル動画開発"
       >
     </div>
+
+    <div class="mt-4">
+      <label
+        for="project-deadline"
+        class="block text-sm font-medium"
+      >
+        締切日（任意）
+      </label>
+
+      <input
+        id="project-deadline"
+        type="date"
+        class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2 outline-none focus:border-[var(--color-text)]"
+      >
+    </div>
+
     <button
       id="create-project-submit"
       class="mt-6 w-full rounded-md bg-[var(--color-text)] py-2 text-[var(--color-bg)]"
@@ -55,6 +71,7 @@ export function showCreateProjectModal(onCreateProject) {
   const closeButton = document.getElementById("close-project-modal");
   const submitButton = document.getElementById("create-project-submit");
   const input = document.getElementById("project-name");
+  const deadlineInput = document.getElementById("project-deadline");
 
   closeButton.addEventListener("click", () => {
     closeModal();
@@ -67,7 +84,7 @@ export function showCreateProjectModal(onCreateProject) {
       return;
     }
 
-    onCreateProject(projectName);
+    onCreateProject(projectName, deadlineInput.value || null);
     closeModal();
   });
 };

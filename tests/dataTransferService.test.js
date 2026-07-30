@@ -44,6 +44,7 @@ function createDataFixture() {
       {
         id: "project-1",
         name: "Webサイト制作",
+        deadline: "2026-08-15",
         tasks: [
           {
             id: "task-1",
@@ -77,6 +78,11 @@ test("エクスポート用ファイルにプロジェクトとタスクを保�
   assertEqual(file.type, "application/json", "MIMEタイプが正しくありません。");
   assertEqual(exportedData.projects.length, 1, "プロジェクト数が一致しません。");
   assertEqual(
+    exportedData.projects[0].deadline,
+    "2026-08-15",
+    "締切日が保存されていません。"
+  );
+  assertEqual(
     exportedData.projects[0].tasks[1].name,
     "実装",
     "タスク名が保存されていません。"
@@ -107,6 +113,11 @@ test("有効な.pplpデータをモデルとして復元できる", () => {
   assert(
     manager.projects[0].tasks[0] instanceof Task,
     "Taskとして復元されていません。"
+  );
+  assertEqual(
+    manager.projects[0].deadline,
+    "2026-08-15",
+    "締切日が復元されていません。"
   );
   assertEqual(
     manager.projects[0].getProgress(),

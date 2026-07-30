@@ -1,4 +1,6 @@
 export function randomTriangular(min, mode, max) {
+  if (min === max) return min;
+
   const u = Math.random();
   const c = (mode - min) / (max - min);
 

@@ -1,36 +1,192 @@
-export function renderProjectHeader(projectHeader, project) {
+import { getProjectDeadlineForecast } from "../simulation/projectSimulation.js";
+
+function renderDeadlineForecast(project) {
+  const forecast = getProjectDeadlineForecast(project);
+
+  if (forecast.status === "available") {
+    return `
+      <div class="mt-4">
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-[var(--color-text)]/60">期限達成率</span>
+          <span class="font-medium">${forecast.probability}%</span>
+        </div>
+
+        <div
+          class="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-text)]/10"
+          role="progressbar"
+          aria-label="期限達成率"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="${forecast.probability}"
+        >
+          <div
+            class="h-full rounded-full bg-[var(--color-text)] transition-[width] duration-300"
+            style="width: ${forecast.probability}%"
+          ></div>
+        </div>
+
+        <p class="mt-2 text-xs text-[var(--color-text)]/60">
+          締切まであと${forecast.daysRemaining}日
+        </p>
+      </div>
+    `;
+  }
+
+  if (forecast.status === "missing-estimates") {
+    return `
+      <p class="mt-4 text-xs leading-5 text-[var(--color-text)]/60">
+        未完了タスク${forecast.missingEstimateCount}件の見積もりを入力すると、期限達成率を算出できます。
+      </p>
+    `;
+  }
+
+  if (forecast.status === "overdue") {
+    return `
+      <div class="mt-4 flex items-center justify-between text-sm">
+        <span class="text-[var(--color-text)]/60">期限達成率</span>
+        <span class="font-medium">0%</span>
+      </div>
+
+      <p class="mt-2 text-xs text-[var(--color-danger)]">
+        締切日を過ぎています。
+      </p>
+    `;
+  }
+
+  if (forecast.status === "completed") {
+    return `
+      <p class="mt-4 text-xs text-[var(--color-text)]/60">
+        すべてのタスクが完了しています。
+      </p>
+    `;
+  }
+
+  return `
+    <p class="mt-4 text-xs leading-5 text-[var(--color-text)]/60">
+      締切日を設定すると、期限達成率を確認できます。
+    </p>
+  `;
+}
+
+export function renderProjectHeader(
+  projectHeader,
+  project,
+  onUpdateProjectDeadline,
+  isDeadlineSettingsOpen = false,
+  onToggleDeadlineSettings = () => {}
+) {
   const progress = project.getProgress();
 
   projectHeader.innerHTML = `
-    <h1 class="text-3xl font-bold">
-      ${project.name}
-    </h1>
+    <div class="max-w-2xl">
+      <h1 class="text-3xl font-bold">
+        ${project.name}
+      </h1>
 
-    <p class="mt-2 text-sm text-[var(--color-text)]/60">
-      タスク数：${project.tasks.length}
-    </p>
+      <p class="mt-2 text-sm text-[var(--color-text)]/60">
+        タスク数：${project.tasks.length}
+      </p>
 
-    <div class="mt-5 max-w-md">
-      <div class="flex items-center justify-between text-sm">
-        <span class="text-[var(--color-text)]/60">プロジェクト進捗</span>
-        <span class="font-medium">${progress}%</span>
-      </div>
+      <div class="mt-6 max-w-xl">
+        <div class="flex items-center justify-between text-sm">
+          <span class="text-[var(--color-text)]/60">プロジェクト進捗</span>
+          <span class="font-medium">${progress}%</span>
+        </div>
 
-      <div
-        class="mt-2 h-2 overflow-hidden rounded-full bg-[var(--color-text)]/10"
-        role="progressbar"
-        aria-label="プロジェクト進捗"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        aria-valuenow="${progress}"
-      >
         <div
-          class="h-full rounded-full bg-[var(--color-text)] transition-[width] duration-300"
-          style="width: ${progress}%"
-        ></div>
+          class="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--color-text)]/10"
+          role="progressbar"
+          aria-label="プロジェクト進捗"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="${progress}"
+        >
+          <div
+            class="h-full rounded-full bg-[var(--color-text)] transition-[width] duration-300"
+            style="width: ${progress}%"
+          ></div>
+        </div>
+
+        <button
+          id="toggle-deadline-settings"
+          type="button"
+          class="mt-4 flex items-center gap-1.5 text-sm text-[var(--color-text)]/60 transition-colors hover:text-[var(--color-text)]"
+          aria-expanded="${isDeadlineSettingsOpen}"
+          aria-controls="deadline-settings"
+        >
+          詳細設定
+          <svg
+            id="deadline-settings-icon"
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4 transition-transform ${
+              isDeadlineSettingsOpen ? "rotate-180" : ""
+            }"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
+        </button>
+
+        <section
+          id="deadline-settings"
+          class="deadline-settings ${
+            isDeadlineSettingsOpen ? "is-open" : ""
+          }"
+          aria-hidden="${!isDeadlineSettingsOpen}"
+          ${isDeadlineSettingsOpen ? "" : "inert"}
+        >
+          <div class="deadline-settings-content">
+            <div class="mt-4 border-t border-[var(--color-text)]/10 pt-4">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-sm text-[var(--color-text)]/60">締切日</span>
+                <input
+                  id="project-deadline"
+                  type="date"
+                  value="${project.deadline ?? ""}"
+                  class="h-8 rounded-md border border-[var(--color-text)]/10 px-2 text-xs"
+                  aria-label="締切日"
+                >
+              </div>
+
+              ${renderDeadlineForecast(project)}
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   `;
+
+  const deadlineSettingsButton = projectHeader.querySelector(
+    "#toggle-deadline-settings"
+  );
+  const deadlineSettings = projectHeader.querySelector(
+    "#deadline-settings"
+  );
+  const deadlineSettingsIcon = projectHeader.querySelector(
+    "#deadline-settings-icon"
+  );
+
+  deadlineSettingsButton.addEventListener("click", () => {
+    const isOpen = deadlineSettings.classList.toggle("is-open");
+
+    deadlineSettingsButton.setAttribute("aria-expanded", String(isOpen));
+    deadlineSettingsIcon.classList.toggle("rotate-180", isOpen);
+    deadlineSettings.setAttribute("aria-hidden", String(!isOpen));
+    deadlineSettings.inert = !isOpen;
+    onToggleDeadlineSettings(isOpen);
+  });
+
+  projectHeader
+    .querySelector("#project-deadline")
+    .addEventListener("change", event => {
+      onUpdateProjectDeadline(event.target.value || null);
+    });
 }
 
 export function renderProjectError(

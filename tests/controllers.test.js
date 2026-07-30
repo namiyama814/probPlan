@@ -1,6 +1,7 @@
 import {
   createProject,
   deleteProject,
+  updateProjectDeadline,
 } from "../js/controllers/projectController.js";
 import {
   createTask,
@@ -21,7 +22,11 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
 
   try {
     const manager = new ProjectManager();
-    const project = createProject(manager, "コントローラーテスト");
+    const project = createProject(
+      manager,
+      "コントローラーテスト",
+      "2026-08-15"
+    );
     const task = createTask(manager, project, "テストタスク");
 
     updateTask(manager, task, {
@@ -31,6 +36,7 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
       pessimistic: 5,
     });
     setTaskCompleted(manager, task, true);
+    updateProjectDeadline(manager, project, "2026-08-20");
 
     const savedManager = StorageService.load();
     assertEqual(savedManager.projects.length, 1, "プロジェクトが保存されていません。");
@@ -43,6 +49,11 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
       savedManager.projects[0].tasks[0].status,
       "completed",
       "タスク完了が保存されていません。"
+    );
+    assertEqual(
+      savedManager.projects[0].deadline,
+      "2026-08-20",
+      "締切日が保存されていません。"
     );
 
     deleteTask(manager, project, task.id);

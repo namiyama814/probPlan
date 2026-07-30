@@ -40,8 +40,8 @@ function render() {
   );
 };
 
-function onCreateProject(projectName) {
-  const project = createProject(manager, projectName);
+function onCreateProject(projectName, deadline) {
+  const project = createProject(manager, projectName, deadline);
   render();
 };
 

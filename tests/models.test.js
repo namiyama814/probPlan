@@ -55,7 +55,10 @@ test("プロジェクト進捗を完了タスクの割合から計算できる",
   project.addTask(createTask({ id: "task-2", name: "B", status: "completed" }));
   project.addTask(createTask({ id: "task-3", name: "C" }));
 
+  project.setDeadline("2026-08-15");
+
   assertEqual(project.getProgress(), 67, "プロジェクト進捗が正しくありません。");
+  assertEqual(project.deadline, "2026-08-15", "締切日を更新できません。");
 });
 
 test("タスクとプロジェクトをIDで削除できる", () => {

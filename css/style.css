@@ -122,9 +122,30 @@ input::placeholder {
     animation: modal-content-out 150ms ease-in both;
 }
 
+.deadline-settings {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+        grid-template-rows 180ms ease,
+        opacity 150ms ease;
+}
+
+.deadline-settings.is-open {
+    grid-template-rows: 1fr;
+    opacity: 1;
+}
+
+.deadline-settings-content {
+    min-height: 0;
+    overflow: hidden;
+}
+
 @media (prefers-reduced-motion: reduce) {
     .modal-overlay,
-    .modal-content {
+    .modal-content,
+    .deadline-settings {
         animation-duration: 1ms;
+        transition-duration: 1ms;
     }
 }

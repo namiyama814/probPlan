@@ -10,6 +10,21 @@ function isOptionalNumber(value) {
     (typeof value === "number" && Number.isFinite(value));
 }
 
+function isOptionalDeadline(value) {
+  if (value === null || value === undefined) return true;
+  if (typeof value !== "string") return false;
+
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!match) return false;
+
+  const [, year, month, day] = match.map(Number);
+  const date = new Date(year, month - 1, day);
+
+  return date.getFullYear() === year &&
+    date.getMonth() === month - 1 &&
+    date.getDate() === day;
+}
+
 function isValidTask(task) {
   return isObject(task) &&
     typeof task.id === "string" &&
@@ -32,6 +47,7 @@ function isValidData(data) {
       isObject(project) &&
       typeof project.id === "string" &&
       typeof project.name === "string" &&
+      isOptionalDeadline(project.deadline) &&
       Array.isArray(project.tasks) &&
       project.tasks.every(isValidTask)
     );
