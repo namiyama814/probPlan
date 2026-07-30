@@ -25,6 +25,26 @@ export class ProjectManager {
     return this.projects;
   }
 
+  searchTasks(query) {
+    const normalizedQuery = String(query ?? "")
+      .normalize("NFKC")
+      .toLocaleLowerCase()
+      .trim();
+
+    if (!normalizedQuery) return [];
+
+    return this.projects.flatMap(project =>
+      project.tasks
+        .filter(task =>
+          task.name
+            .normalize("NFKC")
+            .toLocaleLowerCase()
+            .includes(normalizedQuery)
+        )
+        .map(task => ({ task, project }))
+    );
+  }
+
   getRecentTasks(limit = 3, { includeCompleted = true } = {}) {
     let fallbackOrder = 0;
 

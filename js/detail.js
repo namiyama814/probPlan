@@ -15,6 +15,7 @@ import {
   updateProjectName,
 } from "./controllers/projectController.js";
 import { initializeTheme } from "./ui/theme.js";
+import { initializeTaskSearch } from "./ui/taskSearch.js";
 
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
@@ -29,6 +30,7 @@ const taskSection = document.getElementById("task-section");
 let isDeadlineSettingsOpen = false;
 
 initializeTheme();
+initializeTaskSearch(() => manager);
 
 function render() {
   renderProjectHeader(

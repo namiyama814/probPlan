@@ -7,6 +7,7 @@ import {
 import { renderProjectSection } from "./ui/projectView.js";
 import { renderRecentTaskSection } from "./ui/recentTaskView.js";
 import { initializeTheme } from "./ui/theme.js";
+import { initializeTaskSearch } from "./ui/taskSearch.js";
 import {
   createExportFile,
   getExportFileName,
@@ -23,6 +24,7 @@ if (!manager) {
 };
 
 initializeTheme();
+initializeTaskSearch(() => manager);
 
 function render() {
   renderProjectSection(

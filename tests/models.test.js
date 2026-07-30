@@ -80,6 +80,34 @@ test("タスクとプロジェクトをIDで削除できる", () => {
   assertEqual(manager.projects.length, 0, "プロジェクトを削除できません。");
 });
 
+test("全プロジェクトからタスク名を検索できる", () => {
+  const manager = new ProjectManager([
+    new Project({
+      id: "project-1",
+      name: "開発",
+      tasks: [
+        createTask({ id: "task-1", name: "認証画面を実装" }),
+        createTask({ id: "task-2", name: "APIを接続" }),
+      ],
+    }),
+    new Project({
+      id: "project-2",
+      name: "運用",
+      tasks: [
+        createTask({ id: "task-3", name: "認証ログを確認", status: "completed" }),
+      ],
+    }),
+  ]);
+
+  const results = manager.searchTasks("認証");
+
+  assertEqual(results.length, 2, "検索結果の件数が正しくありません。");
+  assertEqual(results[0].project.name, "開発", "別プロジェクトを検索できません。");
+  assertEqual(results[1].task.name, "認証ログを確認", "完了タスクも検索対象に含める必要があります。");
+  assertEqual(manager.searchTasks(" api ").length, 1, "大文字小文字を区別せずに検索できません。");
+  assertEqual(manager.searchTasks("").length, 0, "空の検索語では結果を返しません。");
+});
+
 test("最新3件の未完了タスクだけを新しい順に取得できる", () => {
   const project = new Project({
     id: "project-1",
