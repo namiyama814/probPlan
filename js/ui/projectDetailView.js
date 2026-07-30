@@ -1,4 +1,5 @@
 import { getProjectDeadlineForecast } from "../simulation/projectSimulation.js";
+import { showEditProjectModal } from "./projectModal.js";
 
 function renderDeadlineForecast(project) {
   const forecast = getProjectDeadlineForecast(project);
@@ -72,6 +73,7 @@ export function renderProjectHeader(
   projectHeader,
   project,
   onUpdateProjectDeadline,
+  onUpdateProjectName = () => {},
   isDeadlineSettingsOpen = false,
   onToggleDeadlineSettings = () => {}
 ) {
@@ -79,9 +81,33 @@ export function renderProjectHeader(
 
   projectHeader.innerHTML = `
     <div class="max-w-2xl">
-      <h1 class="text-3xl font-bold">
-        ${project.name}
-      </h1>
+      <div class="group flex items-center gap-2">
+        <h1 class="text-3xl font-bold">
+          ${project.name}
+        </h1>
+
+        <button
+          id="edit-project-name"
+          type="button"
+          class="flex h-9 w-9 shrink-0 pointer-events-none items-center justify-center rounded-lg text-[var(--color-text)]/60 opacity-0 transition-[opacity,colors] hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)] group-hover:pointer-events-auto group-hover:opacity-100 focus:pointer-events-auto focus:opacity-100"
+          aria-label="プロジェクト名を編集"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z" />
+          </svg>
+        </button>
+      </div>
 
       <p class="mt-2 text-sm text-[var(--color-text)]/60">
         タスク数：${project.tasks.length}
@@ -171,6 +197,11 @@ export function renderProjectHeader(
   const deadlineSettingsIcon = projectHeader.querySelector(
     "#deadline-settings-icon"
   );
+  projectHeader
+    .querySelector("#edit-project-name")
+    .addEventListener("click", () => {
+      showEditProjectModal(project, onUpdateProjectName);
+    });
 
   deadlineSettingsButton.addEventListener("click", () => {
     const isOpen = deadlineSettings.classList.toggle("is-open");

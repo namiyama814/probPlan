@@ -35,6 +35,10 @@ export class Project {
     this.deadline = deadline;
   }
 
+  setName(name) {
+    this.name = name;
+  }
+
   addTask(task) {
     this.tasks.push(task);
   }

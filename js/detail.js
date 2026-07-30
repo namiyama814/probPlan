@@ -10,7 +10,10 @@ import {
   setTaskCompleted,
   updateTask,
 } from "./controllers/taskController.js";
-import { updateProjectDeadline } from "./controllers/projectController.js";
+import {
+  updateProjectDeadline,
+  updateProjectName,
+} from "./controllers/projectController.js";
 import { initializeTheme } from "./ui/theme.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -32,6 +35,7 @@ function render() {
     projectHeader,
     project,
     onUpdateProjectDeadline,
+    onUpdateProjectName,
     isDeadlineSettingsOpen,
     onToggleDeadlineSettings
   );
@@ -110,6 +114,11 @@ function onSetTaskCompleted(task, isCompleted) {
 
 function onUpdateProjectDeadline(deadline) {
   updateProjectDeadline(manager, project, deadline);
+  render();
+}
+
+function onUpdateProjectName(projectName) {
+  updateProjectName(manager, project, projectName);
   render();
 }
 

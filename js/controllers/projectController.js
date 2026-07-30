@@ -19,3 +19,8 @@ export function updateProjectDeadline(manager, project, deadline) {
   project.setDeadline(deadline);
   StorageService.save(manager);
 }
+
+export function updateProjectName(manager, project, projectName) {
+  project.setName(projectName);
+  StorageService.save(manager);
+}
