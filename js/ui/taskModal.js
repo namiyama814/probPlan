@@ -91,6 +91,12 @@ submitButton.addEventListener("click", () => {
   onCreateTask(validation.value);
   closeModal();
   });
+
+input.addEventListener("keydown", event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  submitButton.click();
+});
 }
 
 export function showEditTaskModal(task, onUpdateTask) {
@@ -181,6 +187,7 @@ export function showEditTaskModal(task, onUpdateTask) {
 
     <button
       id="save-task"
+      type="button"
       class="mt-6 w-full rounded-md bg-[var(--color-text)] py-2 text-[var(--color-bg)]"
     >
       保存

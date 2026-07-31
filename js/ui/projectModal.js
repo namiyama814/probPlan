@@ -105,6 +105,12 @@ export function showCreateProjectModal(onCreateProject) {
     onCreateProject(validation.value, deadlineInput.value || null);
     closeModal();
   });
+
+  input.addEventListener("keydown", event => {
+    if (event.key !== "Enter") return;
+    event.preventDefault();
+    submitButton.click();
+  });
 };
 
 export function showEditProjectModal(project, onUpdateProjectName) {

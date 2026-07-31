@@ -74,6 +74,31 @@ test("タスク名の必須・文字数バリデーションを表示する", ()
   }
 });
 
+test("作成モーダルはEnterキーで送信できる", () => {
+  let projectName = null;
+  let taskName = null;
+
+  try {
+    showCreateProjectModal(name => {
+      projectName = name;
+    });
+    const projectInput = document.getElementById("project-name");
+    projectInput.value = "Enterプロジェクト";
+    projectInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    assertEqual(projectName, "Enterプロジェクト", "Enterキーでプロジェクトを作成できません。");
+
+    showCreateTaskModal(name => {
+      taskName = name;
+    });
+    const taskInput = document.getElementById("task-name");
+    taskInput.value = "Enterタスク";
+    taskInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    assertEqual(taskName, "Enterタスク", "Enterキーでタスクを作成できません。");
+  } finally {
+    closeModal(true);
+  }
+});
+
 test("タスク見積もりの未入力・範囲・順序エラーを表示する", () => {
   let updated = null;
   const task = {
