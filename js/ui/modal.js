@@ -8,7 +8,8 @@ export function openModal(content, options = {}) {
   closeModal(true);
 
   const {
-    maxWidth = "max-w-md"
+    maxWidth = "max-w-md",
+    closeOnBackdrop = true,
   } = options;
 
   overlay = document.createElement("div");
@@ -29,7 +30,7 @@ export function openModal(content, options = {}) {
   `;
 
   overlay.addEventListener("click", event => {
-    if (event.target === event.currentTarget) {
+    if (closeOnBackdrop && event.target === event.currentTarget) {
       closeModal();
     }
   });
