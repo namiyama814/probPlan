@@ -6,6 +6,7 @@ export class Task {
     mostLikely = null,
     pessimistic = null,
     status = "todo",
+    createdAt = null,
   }) {
     this.id = id;
     this.name = name;
@@ -15,11 +16,13 @@ export class Task {
     this.pessimistic = pessimistic;
 
     this.status = status;
+    this.createdAt = createdAt;
   }
 
   static create(data) {
     return new Task({
       id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
       ...data,
     });
   }
@@ -33,5 +36,13 @@ export class Task {
     this.optimistic = data.optimistic;
     this.mostLikely = data.mostLikely;
     this.pessimistic = data.pessimistic;
+  }
+
+  setCompleted(isCompleted) {
+    this.status = isCompleted ? "completed" : "todo";
+  }
+
+  getProgress() {
+    return this.status === "completed" ? 100 : 0;
   }
 }

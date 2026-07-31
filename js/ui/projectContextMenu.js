@@ -1,0 +1,136 @@
+import { showDeleteProjectModal } from "./projectDeleteModal.js";
+
+let contextMenu = null;
+
+function handlePointerDown(event) {
+  if (contextMenu?.contains(event.target)) return;
+  closeProjectContextMenu();
+}
+
+function handleKeydown(event) {
+  if (event.key === "Escape") {
+    closeProjectContextMenu();
+  }
+}
+
+export function closeProjectContextMenu() {
+  if (contextMenu) {
+    contextMenu.remove();
+    contextMenu = null;
+  }
+
+  document.removeEventListener("pointerdown", handlePointerDown);
+  document.removeEventListener("keydown", handleKeydown);
+  window.removeEventListener("resize", closeProjectContextMenu);
+  window.removeEventListener("scroll", closeProjectContextMenu, true);
+}
+
+function openProjectContextMenu(
+  x,
+  y,
+  project,
+  onDeleteProject
+) {
+  closeProjectContextMenu();
+
+  contextMenu = document.createElement("div");
+  contextMenu.className = `
+    fixed z-[60] w-48 rounded-md
+    border border-[var(--color-text)]/10
+    bg-[var(--color-surface)] p-1 shadow-lg
+  `;
+  contextMenu.setAttribute("role", "menu");
+
+  contextMenu.innerHTML = `
+    <button
+      id="context-delete-project"
+      type="button"
+      role="menuitem"
+      class="flex w-full items-center gap-3 rounded-sm px-3 py-2 text-left text-sm text-[var(--color-danger)] outline-none transition-colors hover:bg-[var(--color-danger-soft)] focus:bg-[var(--color-danger-soft)]"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="h-4 w-4"
+        aria-hidden="true"
+      >
+        <path d="M3 6h18"/>
+        <path d="M8 6V4h8v2"/>
+        <path d="M19 6l-1 14H6L5 6"/>
+        <path d="M10 11v5"/>
+        <path d="M14 11v5"/>
+      </svg>
+      プロジェクトを削除
+    </button>
+  `;
+
+  document.body.appendChild(contextMenu);
+
+  const menuRect = contextMenu.getBoundingClientRect();
+  const margin = 8;
+  const left = Math.min(
+    Math.max(x, margin),
+    window.innerWidth - menuRect.width - margin
+  );
+  const top = Math.min(
+    Math.max(y, margin),
+    window.innerHeight - menuRect.height - margin
+  );
+
+  contextMenu.style.left = `${left}px`;
+  contextMenu.style.top = `${top}px`;
+
+  contextMenu
+    .querySelector("#context-delete-project")
+    .addEventListener("click", () => {
+      closeProjectContextMenu();
+      showDeleteProjectModal(project, onDeleteProject);
+    });
+
+  document.addEventListener("pointerdown", handlePointerDown);
+  document.addEventListener("keydown", handleKeydown);
+  window.addEventListener("resize", closeProjectContextMenu);
+  window.addEventListener("scroll", closeProjectContextMenu, true);
+
+  contextMenu.querySelector("button").focus();
+}
+
+export function bindProjectContextMenu(
+  card,
+  project,
+  onDeleteProject
+) {
+  card.addEventListener("contextmenu", event => {
+    event.preventDefault();
+
+    openProjectContextMenu(
+      event.clientX,
+      event.clientY,
+      project,
+      onDeleteProject
+    );
+  });
+
+  card.addEventListener("keydown", event => {
+    const isKeyboardMenu =
+      event.key === "ContextMenu" ||
+      (event.shiftKey && event.key === "F10");
+
+    if (!isKeyboardMenu) return;
+
+    event.preventDefault();
+
+    const cardRect = card.getBoundingClientRect();
+    openProjectContextMenu(
+      cardRect.left + 16,
+      cardRect.top + 16,
+      project,
+      onDeleteProject
+    );
+  });
+}

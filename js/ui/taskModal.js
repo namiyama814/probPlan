@@ -72,7 +72,7 @@ submitButton.addEventListener("click", () => {
   });
 }
 
-export function showEditTaskModal(task, onUpdateTask, onDeleteTask) {
+export function showEditTaskModal(task, onUpdateTask) {
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">タスクを編集</h2>
@@ -155,14 +155,6 @@ export function showEditTaskModal(task, onUpdateTask, onDeleteTask) {
     >
       保存
     </button>
-
-    <button
-      id="delete-task"
-      type="button"
-      class="mt-3 w-full rounded-md py-2 text-[var(--color-danger)] transition-colors hover:bg-[var(--color-danger-soft)]"
-    >
-      タスクを削除
-    </button>
   `);
 
   document
@@ -238,15 +230,9 @@ export function showEditTaskModal(task, onUpdateTask, onDeleteTask) {
         
       closeModal();
     });
-
-  document
-    .getElementById("delete-task")
-    .addEventListener("click", () => {
-      showDeleteTaskModal(task, onUpdateTask, onDeleteTask);
-    });
 }
 
-function showDeleteTaskModal(task, onUpdateTask, onDeleteTask) {
+export function showDeleteTaskModal(task, onDeleteTask) {
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">タスクを削除</h2>
@@ -304,9 +290,7 @@ function showDeleteTaskModal(task, onUpdateTask, onDeleteTask) {
 
   document
     .getElementById("cancel-delete-task")
-    .addEventListener("click", () => {
-      showEditTaskModal(task, onUpdateTask, onDeleteTask);
-    });
+    .addEventListener("click", closeModal);
 
   document
     .getElementById("confirm-delete-task")
