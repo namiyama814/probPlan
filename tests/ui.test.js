@@ -27,6 +27,7 @@ import {
 } from "../js/ui/taskModal.js";
 import { renderTaskSection } from "../js/ui/taskView.js";
 import { initializeTheme } from "../js/ui/theme.js";
+import { escapeHtml } from "../js/ui/escapeHtml.js";
 import { assert, assertEqual, createTestSuite } from "./testUtils.js";
 
 const suite = createTestSuite();
@@ -122,6 +123,23 @@ test("テーマ切替は表示と保存内容を更新する", async () => {
       localStorage.setItem("probplan-theme", previousTheme);
     }
   }
+});
+
+test("ユーザー入力をHTMLとして解釈せず表示する", async () => {
+  await withTestDocument(async root => {
+    const unsafeName = "<img src=x onerror=alert(1)>";
+    const project = createProject({ name: unsafeName });
+
+    renderProjectSection(root, new ProjectManager([project]), () => {}, () => {}, () => {}, () => {});
+
+    assertEqual(
+      root.querySelector(".project-card h3").textContent.trim(),
+      unsafeName,
+      "プロジェクト名を安全に表示できません。"
+    );
+    assertEqual(root.querySelectorAll(".project-card img").length, 0, "プロジェクト名がHTMLとして実行されます。");
+    assertEqual(escapeHtml(unsafeName), "&lt;img src=x onerror=alert(1)&gt;", "HTMLエスケープが正しくありません。");
+  });
 });
 
 test("プロジェクトの作成・編集・削除モーダルは各コールバックを実行する", async () => {

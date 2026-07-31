@@ -1,6 +1,7 @@
 import { ProjectManager } from "../models/projectManager.js";
 
 const MAX_NAME_LENGTH = 100;
+const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 function isObject(value) {
   return typeof value === "object" && value !== null;
@@ -11,6 +12,10 @@ function isValidName(value) {
 
   const name = value.trim();
   return name.length > 0 && name.length <= MAX_NAME_LENGTH;
+}
+
+function isValidId(value) {
+  return typeof value === "string" && ID_PATTERN.test(value);
 }
 
 function areValidEstimates(task) {
@@ -47,8 +52,7 @@ function isOptionalDeadline(value) {
 
 function isValidTask(task) {
   return isObject(task) &&
-    typeof task.id === "string" &&
-    task.id.trim().length > 0 &&
+    isValidId(task.id) &&
     isValidName(task.name) &&
     areValidEstimates(task) &&
     (task.status === undefined ||
@@ -66,8 +70,7 @@ function isValidData(data) {
 
   return data.projects.every(project => {
     if (!isObject(project) ||
-      typeof project.id !== "string" ||
-      project.id.trim().length === 0 ||
+      !isValidId(project.id) ||
       projectIds.has(project.id) ||
       !isValidName(project.name) ||
       !isOptionalDeadline(project.deadline) ||

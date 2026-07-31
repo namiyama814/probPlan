@@ -183,6 +183,13 @@ test("空の名前・不正な見積もり・重複IDを含むデータを拒否
         { id: "project-1", name: "B", tasks: [] },
       ],
     },
+    {
+      projects: [{
+        id: "project\"><script>",
+        name: "危険なID",
+        tasks: [],
+      }],
+    },
   ];
 
   invalidFixtures.forEach(fixture => {

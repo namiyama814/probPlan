@@ -1,4 +1,5 @@
 import { showSimulationModal } from "./simulationModal.js";
+import { escapeHtml } from "./escapeHtml.js";
 import {
   showCreateTaskModal,
   showDeleteTaskModal,
@@ -90,7 +91,7 @@ export function renderTaskSection(
                 ? "text-[var(--color-text)]/50 line-through"
                 : ""
             }">
-              ${task.name}
+                ${escapeHtml(task.name)}
             </h3>
       
             <p class="mt-1 text-sm text-[var(--color-text)]/60">

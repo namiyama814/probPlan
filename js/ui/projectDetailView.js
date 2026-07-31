@@ -3,6 +3,7 @@ import {
   getProjectDeadlineForecast,
 } from "../simulation/projectSimulation.js";
 import { showEditProjectModal } from "./projectModal.js";
+import { escapeHtml } from "./escapeHtml.js";
 
 function formatForecastDate(duration, now = new Date()) {
   const date = new Date(
@@ -134,7 +135,7 @@ export function renderProjectHeader(
     <div class="max-w-2xl">
       <div class="group flex items-center gap-2">
         <h1 class="text-3xl font-bold">
-          ${project.name}
+          ${escapeHtml(project.name)}
         </h1>
 
         <button

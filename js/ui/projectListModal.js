@@ -1,5 +1,6 @@
 import { openModal, closeModal } from "./modal.js";
 import { bindProjectContextMenu } from "./projectContextMenu.js";
+import { escapeHtml } from "./escapeHtml.js";
 
 export function showProjectListModal(projects, onDeleteProject) {
   openModal(`
@@ -48,7 +49,7 @@ export function showProjectListModal(projects, onDeleteProject) {
             type="button"
           >
             <h3 class="truncate font-semibold">
-              ${project.name}
+              ${escapeHtml(project.name)}
             </h3>
 
             <div class="mt-1 flex items-center justify-between text-sm">

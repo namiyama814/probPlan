@@ -1,5 +1,6 @@
 import { showCreateProjectModal } from "./projectModal.js";
 import { showProjectListModal } from "./projectListModal.js";
+import { escapeHtml } from "./escapeHtml.js";
 import {
   bindProjectContextMenu,
   closeProjectContextMenu,
@@ -263,7 +264,7 @@ export function renderProjectSection(
         data-project-id="${project.id}"
       >
         <h3 class="font-semibold">
-          ${project.name}
+        ${escapeHtml(project.name)}
         </h3>
 
         <div class="mt-1 flex items-center justify-between text-sm">
