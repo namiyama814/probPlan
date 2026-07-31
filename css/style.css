@@ -141,10 +141,52 @@ input::placeholder {
     overflow: hidden;
 }
 
+.deadline-probability-label {
+    display: grid;
+    grid-template-columns: 0fr;
+    margin-right: 0;
+    min-width: 0;
+    opacity: 0;
+    transform: translateX(0.25rem);
+    transition:
+        grid-template-columns 180ms ease,
+        margin-right 180ms ease,
+        opacity 150ms ease,
+        transform 180ms ease;
+}
+
+.deadline-probability-label.is-visible {
+    grid-template-columns: 1fr;
+    margin-right: 0.75rem;
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.deadline-probability-label-content {
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.deadline-probability-marker {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(0.65);
+    transition:
+        opacity 150ms ease,
+        transform 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.deadline-probability-marker.is-visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
 @media (prefers-reduced-motion: reduce) {
     .modal-overlay,
     .modal-content,
-    .deadline-settings {
+    .deadline-settings,
+    .deadline-probability-label,
+    .deadline-probability-marker {
         animation-duration: 1ms;
         transition-duration: 1ms;
     }

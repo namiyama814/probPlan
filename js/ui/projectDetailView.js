@@ -1,36 +1,91 @@
-import { getProjectDeadlineForecast } from "../simulation/projectSimulation.js";
+import {
+  getProjectCompletionForecast,
+  getProjectDeadlineForecast,
+} from "../simulation/projectSimulation.js";
 import { showEditProjectModal } from "./projectModal.js";
 
-function renderDeadlineForecast(project) {
-  const forecast = getProjectDeadlineForecast(project);
+function formatForecastDate(duration, now = new Date()) {
+  const date = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate()
+  );
+  const daysToAdd = Math.max(0, Math.ceil(duration) - 1);
+
+  date.setDate(date.getDate() + daysToAdd);
+
+  return new Intl.DateTimeFormat("ja-JP", {
+    month: "numeric",
+    day: "numeric",
+  }).format(date);
+}
+
+function renderProjectCompletionForecast(project, deadlineForecast) {
+  if (project.tasks.length === 0) {
+    return `
+      <p class="mt-5 border-t border-[var(--color-text)]/10 pt-4 text-xs text-[var(--color-text)]/60">
+        タスクを追加すると、プロジェクト全体の完了予測を確認できます。
+      </p>
+    `;
+  }
+
+  const forecast = getProjectCompletionForecast(project);
+
+  if (forecast.status === "completed") {
+    return `
+      <p class="mt-5 border-t border-[var(--color-text)]/10 pt-4 text-xs text-[var(--color-text)]/60">
+        すべてのタスクが完了しています。
+      </p>
+    `;
+  }
+
+  if (forecast.status === "missing-estimates") {
+    return `
+      <p class="mt-5 border-t border-[var(--color-text)]/10 pt-4 text-xs leading-5 text-[var(--color-text)]/60">
+        未完了タスク${forecast.missingEstimateCount}件の見積もりを入力すると、プロジェクト全体の完了予測を確認できます。
+      </p>
+    `;
+  }
+
+  const forecasts = [
+    { label: "50%", duration: forecast.p50 },
+    { label: "80%", duration: forecast.p80 },
+    { label: "90%", duration: forecast.p90 },
+  ];
+
+  return `
+    <section class="mt-5 border-t border-[var(--color-text)]/10 pt-4" aria-labelledby="project-completion-forecast-title">
+      <div class="flex items-center justify-between gap-3">
+        <h2 id="project-completion-forecast-title" class="text-sm font-medium">
+          プロジェクト完了予測
+        </h2>
+        <div class="flex items-center gap-3 text-xs text-[var(--color-text)]/60">
+          <span>平均 ${forecast.average.toFixed(1)}日</span>
+          ${deadlineForecast.status === "available" ? `
+            <span>締切まであと${deadlineForecast.daysRemaining}日</span>
+          ` : ""}
+        </div>
+      </div>
+
+      <dl class="mt-3 grid grid-cols-3 gap-3">
+        ${forecasts.map(({ label, duration }) => `
+          <div>
+            <dt class="text-xs text-[var(--color-text)]/60">${label}</dt>
+            <dd class="mt-1 text-lg font-bold">${Math.ceil(duration)}日</dd>
+            <p class="mt-1 text-xs text-[var(--color-text)]/60">
+              ${formatForecastDate(duration)}ごろ
+            </p>
+          </div>
+        `).join("")}
+      </dl>
+    </section>
+  `;
+}
+
+function renderDeadlineForecast(forecast) {
 
   if (forecast.status === "available") {
-    return `
-      <div class="mt-4">
-        <div class="flex items-center justify-between text-sm">
-          <span class="text-[var(--color-text)]/60">期限達成率</span>
-          <span class="font-medium">${forecast.probability}%</span>
-        </div>
-
-        <div
-          class="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--color-text)]/10"
-          role="progressbar"
-          aria-label="期限達成率"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="${forecast.probability}"
-        >
-          <div
-            class="h-full rounded-full bg-[var(--color-text)] transition-[width] duration-300"
-            style="width: ${forecast.probability}%"
-          ></div>
-        </div>
-
-        <p class="mt-2 text-xs text-[var(--color-text)]/60">
-          締切まであと${forecast.daysRemaining}日
-        </p>
-      </div>
-    `;
+    return "";
   }
 
   if (forecast.status === "missing-estimates") {
@@ -54,13 +109,7 @@ function renderDeadlineForecast(project) {
     `;
   }
 
-  if (forecast.status === "completed") {
-    return `
-      <p class="mt-4 text-xs text-[var(--color-text)]/60">
-        すべてのタスクが完了しています。
-      </p>
-    `;
-  }
+  if (forecast.status === "completed") return "";
 
   return `
     <p class="mt-4 text-xs leading-5 text-[var(--color-text)]/60">
@@ -78,6 +127,8 @@ export function renderProjectHeader(
   onToggleDeadlineSettings = () => {}
 ) {
   const progress = project.getProgress();
+  const deadlineForecast = getProjectDeadlineForecast(project);
+  const hasDeadlineForecast = deadlineForecast.status === "available";
 
   projectHeader.innerHTML = `
     <div class="max-w-2xl">
@@ -116,21 +167,48 @@ export function renderProjectHeader(
       <div class="mt-6 max-w-xl">
         <div class="flex items-center justify-between text-sm">
           <span class="text-[var(--color-text)]/60">プロジェクト進捗</span>
-          <span class="font-medium">${progress}%</span>
+          <div class="flex items-center gap-0">
+            ${hasDeadlineForecast ? `
+              <span
+                id="deadline-probability-label"
+                class="deadline-probability-label ${
+                  isDeadlineSettingsOpen ? "is-visible" : ""
+                }"
+                aria-hidden="${!isDeadlineSettingsOpen}"
+              >
+                <span class="deadline-probability-label-content">
+                  期限達成率 ${deadlineForecast.probability}%
+                </span>
+              </span>
+            ` : ""}
+            <span class="font-medium">${progress}%</span>
+          </div>
         </div>
 
-        <div
-          class="mt-3 h-1.5 overflow-hidden rounded-full bg-[var(--color-text)]/10"
-          role="progressbar"
-          aria-label="プロジェクト進捗"
-          aria-valuemin="0"
-          aria-valuemax="100"
-          aria-valuenow="${progress}"
-        >
+        <div class="relative mt-3 h-2">
+          <div class="absolute inset-0 rounded-full bg-[var(--color-text)]/10"></div>
           <div
-            class="h-full rounded-full bg-[var(--color-text)] transition-[width] duration-300"
+            class="absolute inset-y-0 left-0 rounded-full bg-[var(--color-text)] transition-[width] duration-300"
             style="width: ${progress}%"
+            role="progressbar"
+            aria-label="プロジェクト進捗"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="${progress}"
           ></div>
+          ${hasDeadlineForecast ? `
+            <span
+              id="deadline-probability-marker"
+              class="deadline-probability-marker ${
+                isDeadlineSettingsOpen ? "is-visible" : ""
+              } absolute top-1/2 h-3 w-3 rounded-full border-2 border-[var(--color-surface)] bg-[var(--color-text)] shadow-sm"
+              style="left: ${deadlineForecast.probability}%"
+              role="img"
+              aria-label="期限達成率 ${deadlineForecast.probability}%"
+              aria-hidden="${!isDeadlineSettingsOpen}"
+              title="期限達成率 ${deadlineForecast.probability}%"
+            ></span>
+          ` : ""}
         </div>
 
         <button
@@ -180,7 +258,8 @@ export function renderProjectHeader(
                 >
               </div>
 
-              ${renderDeadlineForecast(project)}
+              ${renderProjectCompletionForecast(project, deadlineForecast)}
+              ${renderDeadlineForecast(deadlineForecast)}
             </div>
           </div>
         </section>
@@ -197,6 +276,12 @@ export function renderProjectHeader(
   const deadlineSettingsIcon = projectHeader.querySelector(
     "#deadline-settings-icon"
   );
+  const deadlineProbabilityLabel = projectHeader.querySelector(
+    "#deadline-probability-label"
+  );
+  const deadlineProbabilityMarker = projectHeader.querySelector(
+    "#deadline-probability-marker"
+  );
   projectHeader
     .querySelector("#edit-project-name")
     .addEventListener("click", () => {
@@ -210,6 +295,10 @@ export function renderProjectHeader(
     deadlineSettingsIcon.classList.toggle("rotate-180", isOpen);
     deadlineSettings.setAttribute("aria-hidden", String(!isOpen));
     deadlineSettings.inert = !isOpen;
+    deadlineProbabilityLabel?.classList.toggle("is-visible", isOpen);
+    deadlineProbabilityLabel?.setAttribute("aria-hidden", String(!isOpen));
+    deadlineProbabilityMarker?.classList.toggle("is-visible", isOpen);
+    deadlineProbabilityMarker?.setAttribute("aria-hidden", String(!isOpen));
     onToggleDeadlineSettings(isOpen);
   });
 

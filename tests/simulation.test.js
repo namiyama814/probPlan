@@ -1,5 +1,8 @@
 import { runTaskSimulation } from "../js/simulation/taskSimulation.js";
-import { getProjectDeadlineForecast } from "../js/simulation/projectSimulation.js";
+import {
+  getProjectCompletionForecast,
+  getProjectDeadlineForecast,
+} from "../js/simulation/projectSimulation.js";
 import { randomTriangular } from "../js/simulation/triangular.js";
 import { assert, assertEqual, createTestSuite } from "./testUtils.js";
 
@@ -52,6 +55,42 @@ test("タスクシミュレーションは指定回数の結果と確率別の�
   } finally {
     Math.random = originalRandom;
   }
+});
+
+test("プロジェクト全体の完了予測を未完了タスクから算出できる", () => {
+  const forecast = getProjectCompletionForecast(
+    {
+      tasks: [
+        { status: "todo", optimistic: 2, mostLikely: 2, pessimistic: 2 },
+        { status: "todo", optimistic: 3, mostLikely: 3, pessimistic: 3 },
+        { status: "completed", optimistic: 10, mostLikely: 10, pessimistic: 10 },
+      ],
+    },
+    20
+  );
+
+  assertEqual(forecast.status, "available", "完了予測を算出できません。");
+  assertEqual(forecast.samples.length, 20, "試行回数が正しくありません。");
+  assertEqual(forecast.average, 5, "平均完了日数が正しくありません。");
+  assertEqual(forecast.p50, 5, "50%完了予測が正しくありません。");
+  assertEqual(forecast.p80, 5, "80%完了予測が正しくありません。");
+  assertEqual(forecast.p90, 5, "90%完了予測が正しくありません。");
+});
+
+test("プロジェクト完了済みと見積未設定の状態を区別できる", () => {
+  const completed = getProjectCompletionForecast(
+    { tasks: [{ status: "completed", optimistic: 1, mostLikely: 1, pessimistic: 1 }] }
+  );
+  const missingEstimates = getProjectCompletionForecast(
+    { tasks: [{ status: "todo", optimistic: null, mostLikely: null, pessimistic: null }] }
+  );
+
+  assertEqual(completed.status, "completed", "完了済みを判定できません。");
+  assertEqual(
+    missingEstimates.status,
+    "missing-estimates",
+    "見積未設定を判定できません。"
+  );
 });
 
 test("締切内に完了できる確率を未完了タスクの合計日数から算出できる", () => {

@@ -51,20 +51,16 @@ function hasValidEstimate(task) {
     task.mostLikely <= task.pessimistic;
 }
 
-export function getProjectDeadlineForecast(
+function percentile(sorted, probability) {
+  const index = Math.floor((sorted.length - 1) * probability);
+
+  return sorted[index];
+}
+
+export function getProjectCompletionForecast(
   project,
-  now = new Date(),
   iterations = 10000
 ) {
-  if (!project.deadline) {
-    return { status: "not-set" };
-  }
-
-  const daysRemaining = getDaysUntilDeadline(project.deadline, now);
-  if (daysRemaining === null) {
-    return { status: "not-set" };
-  }
-
   const remainingTasks = project.tasks.filter(
     task => task.status !== "completed"
   );
@@ -83,6 +79,67 @@ export function getProjectDeadlineForecast(
     };
   }
 
+  const samples = [];
+
+  for (let iteration = 0; iteration < iterations; iteration++) {
+    samples.push(
+      remainingTasks.reduce(
+        (total, task) => total + randomTriangular(
+          task.optimistic,
+          task.mostLikely,
+          task.pessimistic
+        ),
+        0
+      )
+    );
+  }
+
+  const sorted = [...samples].sort((a, b) => a - b);
+  const average = samples.reduce(
+    (total, duration) => total + duration,
+    0
+  ) / samples.length;
+
+  return {
+    status: "available",
+    samples,
+    average,
+    p50: percentile(sorted, 0.5),
+    p80: percentile(sorted, 0.8),
+    p90: percentile(sorted, 0.9),
+  };
+}
+
+export function getProjectDeadlineForecast(
+  project,
+  now = new Date(),
+  iterations = 10000
+) {
+  if (!project.deadline) {
+    return { status: "not-set" };
+  }
+
+  const daysRemaining = getDaysUntilDeadline(project.deadline, now);
+  if (daysRemaining === null) {
+    return { status: "not-set" };
+  }
+
+  const completionForecast = getProjectCompletionForecast(
+    project,
+    iterations
+  );
+
+  if (completionForecast.status === "completed") {
+    return { status: "completed" };
+  }
+
+  if (completionForecast.status === "missing-estimates") {
+    return {
+      status: "missing-estimates",
+      missingEstimateCount: completionForecast.missingEstimateCount,
+    };
+  }
+
   if (daysRemaining <= 0) {
     return {
       status: "overdue",
@@ -91,22 +148,9 @@ export function getProjectDeadlineForecast(
     };
   }
 
-  let completedByDeadlineCount = 0;
-
-  for (let iteration = 0; iteration < iterations; iteration++) {
-    const totalDuration = remainingTasks.reduce(
-      (total, task) => total + randomTriangular(
-        task.optimistic,
-        task.mostLikely,
-        task.pessimistic
-      ),
-      0
-    );
-
-    if (totalDuration <= daysRemaining) {
-      completedByDeadlineCount++;
-    }
-  }
+  const completedByDeadlineCount = completionForecast.samples.filter(
+    duration => duration <= daysRemaining
+  ).length;
 
   return {
     status: "available",
