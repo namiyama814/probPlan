@@ -3,6 +3,7 @@ import { runDataTransferServiceTests } from "./dataTransferService.test.js";
 import { runModelTests } from "./models.test.js";
 import { runSimulationTests } from "./simulation.test.js";
 import { runUiTests } from "./ui.test.js";
+import { runTutorialTests } from "./tutorial.test.js";
 
 export async function runAllTests() {
   const results = [
@@ -11,6 +12,7 @@ export async function runAllTests() {
     ...(await runSimulationTests()),
     ...(await runControllerTests()),
     ...(await runUiTests()),
+    ...(await runTutorialTests()),
   ];
   const failedTests = results.filter(result => !result.passed);
 

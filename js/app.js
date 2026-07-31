@@ -8,6 +8,7 @@ import { renderProjectSection } from "./ui/projectView.js";
 import { renderRecentTaskSection } from "./ui/recentTaskView.js";
 import { initializeTheme } from "./ui/theme.js";
 import { initializeTaskSearch } from "./ui/taskSearch.js";
+import { shouldShowTutorial, showTutorial } from "./ui/tutorialModal.js";
 import {
   createExportFile,
   getExportFileName,
@@ -128,3 +129,7 @@ async function importData(event) {
 }
 
 render();
+
+if (shouldShowTutorial()) {
+  window.requestAnimationFrame(showTutorial);
+}
