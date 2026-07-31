@@ -1,13 +1,33 @@
 import { ProjectManager } from "../models/projectManager.js";
 
+const MAX_NAME_LENGTH = 100;
+
 function isObject(value) {
   return typeof value === "object" && value !== null;
 }
 
-function isOptionalNumber(value) {
-  return value === null ||
-    value === undefined ||
-    (typeof value === "number" && Number.isFinite(value));
+function isValidName(value) {
+  if (typeof value !== "string") return false;
+
+  const name = value.trim();
+  return name.length > 0 && name.length <= MAX_NAME_LENGTH;
+}
+
+function areValidEstimates(task) {
+  const estimates = [
+    task.optimistic,
+    task.mostLikely,
+    task.pessimistic,
+  ];
+  const isUnset = estimates.every(value => value === null || value === undefined);
+
+  if (isUnset) return true;
+  if (estimates.some(value => typeof value !== "number" || !Number.isFinite(value) || value < 0)) {
+    return false;
+  }
+
+  return task.optimistic <= task.mostLikely &&
+    task.mostLikely <= task.pessimistic;
 }
 
 function isOptionalDeadline(value) {
@@ -28,10 +48,9 @@ function isOptionalDeadline(value) {
 function isValidTask(task) {
   return isObject(task) &&
     typeof task.id === "string" &&
-    typeof task.name === "string" &&
-    isOptionalNumber(task.optimistic) &&
-    isOptionalNumber(task.mostLikely) &&
-    isOptionalNumber(task.pessimistic) &&
+    task.id.trim().length > 0 &&
+    isValidName(task.name) &&
+    areValidEstimates(task) &&
     (task.status === undefined ||
       task.status === "todo" ||
       task.status === "completed") &&
@@ -41,16 +60,30 @@ function isValidTask(task) {
 }
 
 function isValidData(data) {
-  return isObject(data) &&
-    Array.isArray(data.projects) &&
-    data.projects.every(project =>
-      isObject(project) &&
-      typeof project.id === "string" &&
-      typeof project.name === "string" &&
-      isOptionalDeadline(project.deadline) &&
-      Array.isArray(project.tasks) &&
-      project.tasks.every(isValidTask)
-    );
+  if (!isObject(data) || !Array.isArray(data.projects)) return false;
+
+  const projectIds = new Set();
+
+  return data.projects.every(project => {
+    if (!isObject(project) ||
+      typeof project.id !== "string" ||
+      project.id.trim().length === 0 ||
+      projectIds.has(project.id) ||
+      !isValidName(project.name) ||
+      !isOptionalDeadline(project.deadline) ||
+      !Array.isArray(project.tasks)) {
+      return false;
+    }
+
+    projectIds.add(project.id);
+    const taskIds = new Set();
+
+    return project.tasks.every(task => {
+      if (!isValidTask(task) || taskIds.has(task.id)) return false;
+      taskIds.add(task.id);
+      return true;
+    });
+  });
 }
 
 export function createExportFile(manager) {

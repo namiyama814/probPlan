@@ -159,6 +159,40 @@ test("プロジェクトまたはタスクの形式が不正なデータを拒�
   );
 });
 
+test("空の名前・不正な見積もり・重複IDを含むデータを拒否する", () => {
+  const invalidFixtures = [
+    {
+      projects: [{ id: "project-1", name: " ", tasks: [] }],
+    },
+    {
+      projects: [{
+        id: "project-1",
+        name: "有効なプロジェクト",
+        tasks: [{
+          id: "task-1",
+          name: "不正な見積もり",
+          optimistic: 3,
+          mostLikely: 2,
+          pessimistic: 1,
+        }],
+      }],
+    },
+    {
+      projects: [
+        { id: "project-1", name: "A", tasks: [] },
+        { id: "project-1", name: "B", tasks: [] },
+      ],
+    },
+  ];
+
+  invalidFixtures.forEach(fixture => {
+    assertThrows(
+      () => parseImportData(JSON.stringify(fixture)),
+      "不正な取込データが受け入れられました。"
+    );
+  });
+});
+
 export async function runDataTransferServiceTests() {
   const results = [];
 

@@ -15,9 +15,11 @@ export const StorageService = {
 
     if (!json) return null;
 
-    return ProjectManager.fromJSON(
-      JSON.parse(json)
-    );
+    try {
+      return ProjectManager.fromJSON(JSON.parse(json));
+    } catch {
+      return null;
+    }
   },
 
   clear() {

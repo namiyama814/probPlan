@@ -81,6 +81,21 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
   }
 });
 
+test("壊れた保存データがあっても読み込みで画面を壊さない", () => {
+  const savedData = localStorage.getItem(STORAGE_KEY);
+
+  try {
+    localStorage.setItem(STORAGE_KEY, "{壊れたJSON");
+    assertEqual(StorageService.load(), null, "壊れた保存データを安全に扱えません。");
+  } finally {
+    if (savedData === null) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, savedData);
+    }
+  }
+});
+
 export function runControllerTests() {
   return suite.run();
 }
