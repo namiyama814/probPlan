@@ -1,6 +1,7 @@
 // 詳細画面のタスク一覧。編集・シミュレーション・完了・削除をまとめる。
 import { showSimulationModal } from "./simulationModal.js";
 import { escapeHtml } from "./escapeHtml.js";
+import { getTaskDeadlineInfo } from "./taskDeadline.js";
 import {
   showCreateTaskModal,
   showDeleteTaskModal,
@@ -79,7 +80,15 @@ export function renderTaskSection(
             </p>
           </div>
         `
-        : project.tasks.map(task => `
+        : project.tasks.map(task => {
+        const deadline = getTaskDeadlineInfo(task.deadline);
+        const deadlineMarkup = deadline
+          ? `<p class="mt-1 text-xs ${deadline.isOverdue ? "text-[var(--color-danger)]" : "text-[var(--color-text)]/60"}">
+              ${deadline.isOverdue ? "期限超過" : "期限"}：${deadline.label}
+            </p>`
+          : "";
+
+        return `
         <div
           class="flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
         >
@@ -103,6 +112,7 @@ export function renderTaskSection(
                   : `${task.optimistic} / ${task.mostLikely} / ${task.pessimistic} 日`
               }
             </p>
+            ${deadlineMarkup}
           </button>
 
           <div class="ml-4 flex items-center gap-1">
@@ -227,7 +237,8 @@ export function renderTaskSection(
           </div>
 
         </div>
-      `).join("")}
+      `;
+      }).join("")}
     </div>
   `;
 

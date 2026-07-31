@@ -262,10 +262,12 @@ test("タスク作成・編集・完了切替・削除のUI操作を実行でき
     document.getElementById("optimistic").value = "2";
     document.getElementById("most-likely").value = "3";
     document.getElementById("pessimistic").value = "5";
+    document.getElementById("task-deadline").value = "2026-08-20";
     document.getElementById("save-task").click();
     assertEqual(updated.target, task, "編集対象を渡せません。");
     assertEqual(updated.data.name, "変更後", "タスク名を更新できません。");
     assertEqual(updated.data.pessimistic, 5, "見積もりを更新できません。");
+    assertEqual(updated.data.deadline, "2026-08-20", "タスク期限を更新できません。");
 
     const project = createProject({ tasks: [task] });
     let completion = null;

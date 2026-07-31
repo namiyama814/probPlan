@@ -59,9 +59,10 @@ function createDataFixture() {
           {
             id: "task-2",
             name: "実装",
-            optimistic: null,
-            mostLikely: null,
-            pessimistic: null,
+          optimistic: null,
+          mostLikely: null,
+          pessimistic: null,
+            deadline: "2026-08-20",
             status: "todo",
             createdAt: "2026-07-30T01:00:00.000Z",
           },

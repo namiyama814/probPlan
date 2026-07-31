@@ -62,6 +62,14 @@ openModal(`
         aria-live="polite"
       ></p>
     </div>
+    <div class="mt-4">
+      <label for="task-deadline" class="block text-sm font-medium">期限日（任意）</label>
+      <input
+        id="task-deadline"
+        type="date"
+        class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
+      >
+    </div>
     <button
       id="create-task-submit"
       type="button"
@@ -74,6 +82,7 @@ openModal(`
 const closeButton = document.getElementById("close-task-modal");
 const submitButton = document.getElementById("create-task-submit");
 const input = document.getElementById("task-name");
+const deadlineInput = document.getElementById("task-deadline");
 const error = document.getElementById("create-task-error");
 
 closeButton.addEventListener("click", () => {
@@ -89,7 +98,7 @@ submitButton.addEventListener("click", () => {
   }
 
   clearFieldError(error, [input]);
-  onCreateTask(validation.value);
+  onCreateTask(validation.value, deadlineInput.value || null);
   closeModal();
   });
 
@@ -139,6 +148,15 @@ export function showEditTaskModal(task, onUpdateTask) {
         type="text"
         maxlength="${MAX_NAME_LENGTH}"
         aria-describedby="task-error"
+        class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
+      >
+    </div>
+
+    <div class="mt-4">
+      <label for="task-deadline" class="block text-sm font-medium">期限日（任意）</label>
+      <input
+        id="task-deadline"
+        type="date"
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
       >
     </div>
@@ -199,6 +217,7 @@ export function showEditTaskModal(task, onUpdateTask) {
   document.getElementById("optimistic").value = task.optimistic ?? "";
   document.getElementById("most-likely").value = task.mostLikely ?? "";
   document.getElementById("pessimistic").value = task.pessimistic ?? "";
+  document.getElementById("task-deadline").value = task.deadline ?? "";
 
   document
     .getElementById("close-task-modal")
@@ -212,6 +231,7 @@ export function showEditTaskModal(task, onUpdateTask) {
       const optimisticInput = document.getElementById("optimistic");
       const mostLikelyInput = document.getElementById("most-likely");
       const pessimisticInput = document.getElementById("pessimistic");
+      const deadlineInput = document.getElementById("task-deadline");
 
       const error = document.getElementById("task-error");
 
@@ -288,6 +308,7 @@ export function showEditTaskModal(task, onUpdateTask) {
           optimistic,
           mostLikely,
           pessimistic,
+          deadline: deadlineInput.value || null,
       });
 
       closeModal();

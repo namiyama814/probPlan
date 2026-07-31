@@ -6,6 +6,7 @@ export class Task {
     optimistic = null,
     mostLikely = null,
     pessimistic = null,
+    deadline = null,
     status = "todo",
     createdAt = null,
   }) {
@@ -15,6 +16,7 @@ export class Task {
     this.optimistic = optimistic;
     this.mostLikely = mostLikely;
     this.pessimistic = pessimistic;
+    this.deadline = deadline;
 
     this.status = status;
     this.createdAt = createdAt;
@@ -38,6 +40,7 @@ export class Task {
     this.optimistic = data.optimistic;
     this.mostLikely = data.mostLikely;
     this.pessimistic = data.pessimistic;
+    this.deadline = data.deadline ?? null;
   }
 
   setCompleted(isCompleted) {

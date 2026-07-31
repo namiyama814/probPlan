@@ -56,6 +56,7 @@ function isValidTask(task) {
   return isObject(task) &&
     isValidId(task.id) &&
     isValidName(task.name) &&
+    isOptionalDeadline(task.deadline) &&
     areValidEstimates(task) &&
     (task.status === undefined ||
       task.status === "todo" ||
