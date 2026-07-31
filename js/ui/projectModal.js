@@ -1,4 +1,10 @@
 import { openModal, closeModal } from "./modal.js";
+import {
+  MAX_NAME_LENGTH,
+  clearFieldError,
+  showFieldError,
+  validateName,
+} from "./formValidation.js";
 
 export function showCreateProjectModal(onCreateProject) {
   openModal(`
@@ -40,9 +46,17 @@ export function showCreateProjectModal(onCreateProject) {
       <input
         id="project-name"
         type="text"
+        maxlength="${MAX_NAME_LENGTH}"
+        aria-describedby="create-project-error"
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2 outline-none focus:border-[var(--color-text)]"
         placeholder="スマイル動画開発"
       >
+      <p
+        id="create-project-error"
+        class="mt-2 min-h-5 text-sm text-[var(--color-danger)]"
+        role="alert"
+        aria-live="polite"
+      ></p>
     </div>
 
     <div class="mt-4">
@@ -62,6 +76,7 @@ export function showCreateProjectModal(onCreateProject) {
 
     <button
       id="create-project-submit"
+      type="button"
       class="mt-6 w-full rounded-md bg-[var(--color-text)] py-2 text-[var(--color-bg)]"
     >
       作成
@@ -72,19 +87,22 @@ export function showCreateProjectModal(onCreateProject) {
   const submitButton = document.getElementById("create-project-submit");
   const input = document.getElementById("project-name");
   const deadlineInput = document.getElementById("project-deadline");
+  const error = document.getElementById("create-project-error");
 
   closeButton.addEventListener("click", () => {
     closeModal();
   });
 
   submitButton.addEventListener("click", () => {
-    const projectName = input.value.trim();
+    const validation = validateName(input.value, "プロジェクト名");
 
-    if (!projectName) {
+    if (validation.error) {
+      showFieldError(error, input, validation.error);
       return;
     }
 
-    onCreateProject(projectName, deadlineInput.value || null);
+    clearFieldError(error, [input]);
+    onCreateProject(validation.value, deadlineInput.value || null);
     closeModal();
   });
 };
@@ -118,7 +136,7 @@ export function showEditProjectModal(project, onUpdateProjectName) {
       </button>
     </div>
 
-    <form id="edit-project-name-form" class="mt-6">
+    <form id="edit-project-name-form" class="mt-6" novalidate>
       <label
         for="edit-project-name-input"
         class="block text-sm font-medium"
@@ -129,7 +147,8 @@ export function showEditProjectModal(project, onUpdateProjectName) {
       <input
         id="edit-project-name-input"
         type="text"
-        value="${project.name}"
+        maxlength="${MAX_NAME_LENGTH}"
+        aria-describedby="edit-project-name-error"
         required
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2 outline-none focus:border-[var(--color-text)]"
       >
@@ -137,6 +156,8 @@ export function showEditProjectModal(project, onUpdateProjectName) {
       <p
         id="edit-project-name-error"
         class="mt-2 min-h-5 text-sm text-[var(--color-danger)]"
+        role="alert"
+        aria-live="polite"
       ></p>
 
       <button
@@ -153,21 +174,24 @@ export function showEditProjectModal(project, onUpdateProjectName) {
   const input = document.getElementById("edit-project-name-input");
   const error = document.getElementById("edit-project-name-error");
 
+  input.value = project.name;
+
   closeButton.addEventListener("click", closeModal);
 
   form.addEventListener("submit", event => {
     event.preventDefault();
 
-    const projectName = input.value.trim();
+    const validation = validateName(input.value, "プロジェクト名");
 
-    if (!projectName) {
-      error.textContent = "プロジェクト名を入力してください。";
-      input.focus();
+    if (validation.error) {
+      showFieldError(error, input, validation.error);
       return;
     }
 
-    if (projectName !== project.name) {
-      onUpdateProjectName(projectName);
+    clearFieldError(error, [input]);
+
+    if (validation.value !== project.name) {
+      onUpdateProjectName(validation.value);
     }
 
     closeModal();
