@@ -1,3 +1,4 @@
+// 詳細画面のタスク一覧。編集・シミュレーション・完了・削除をまとめる。
 import { showSimulationModal } from "./simulationModal.js";
 import { escapeHtml } from "./escapeHtml.js";
 import {
@@ -36,6 +37,7 @@ export function renderTaskSection(
     onDeleteTask,
     onSetTaskCompleted
 ) {
+  // タスク更新後の再描画で、古いメニュー状態とイベントを残さない。
   closeActiveTaskMenu();
 
   taskSection.innerHTML = `

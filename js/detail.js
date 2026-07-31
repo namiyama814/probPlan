@@ -1,3 +1,4 @@
+// プロジェクト詳細画面のエントリポイント。URLのidから対象を決め、タスク操作を接続する。
 import { StorageService } from "./services/storageService.js";
 import {
   renderProjectError,
@@ -33,6 +34,7 @@ initializeTheme();
 initializeTaskSearch(() => manager);
 
 function render() {
+  // 対象がない場合も空画面にせず、原因が分かるエラー表示へ切り替える。
   renderProjectHeader(
     projectHeader,
     project,

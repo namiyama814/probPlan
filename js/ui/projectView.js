@@ -1,3 +1,4 @@
+// ホーム画面のプロジェクト一覧と、追加・データ入出力メニューを描画する。
 import { showCreateProjectModal } from "./projectModal.js";
 import { showProjectListModal } from "./projectListModal.js";
 import { escapeHtml } from "./escapeHtml.js";
@@ -47,6 +48,7 @@ export function renderProjectSection(
   onExportData,
   onImportData
 ) {
+  // 再描画時に古い右クリック／データメニューのイベントを解除する。
   closeProjectContextMenu();
   closeDataMenu();
 

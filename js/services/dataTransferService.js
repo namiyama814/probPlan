@@ -1,3 +1,4 @@
+// 独自拡張子.pplpのJSONを、安全に書き出し・読み込みするサービス。
 import { ProjectManager } from "../models/projectManager.js";
 
 const MAX_NAME_LENGTH = 100;
@@ -19,6 +20,7 @@ function isValidId(value) {
 }
 
 function areValidEstimates(task) {
+  // 見積もり未設定は許可するが、一部欠落や順序逆転は取込時に拒否する。
   const estimates = [
     task.optimistic,
     task.mostLikely,
@@ -64,6 +66,7 @@ function isValidTask(task) {
 }
 
 function isValidData(data) {
+  // ID重複も確認し、画面のdata属性やメニューを壊すデータを入れない。
   if (!isObject(data) || !Array.isArray(data.projects)) return false;
 
   const projectIds = new Set();
@@ -106,6 +109,7 @@ export function getExportFileName(date = new Date()) {
 }
 
 export function parseImportData(json) {
+  // JSON構文とアプリ固有の形式を段階的に検証してからモデルへ変換する。
   const data = JSON.parse(json);
 
   if (!isValidData(data)) {

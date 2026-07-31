@@ -1,3 +1,4 @@
+// 複数プロジェクトを横断して検索・一覧取得するコレクションモデル。
 import { Project } from "./project.js";
 
 export class ProjectManager {
@@ -26,6 +27,7 @@ export class ProjectManager {
   }
 
   searchTasks(query) {
+    // Unicode正規化と小文字化で、表記ゆれを吸収した検索を行う。
     const normalizedQuery = String(query ?? "")
       .normalize("NFKC")
       .toLocaleLowerCase()
@@ -46,6 +48,7 @@ export class ProjectManager {
   }
 
   getRecentTasks(limit = 3, { includeCompleted = true } = {}) {
+    // 日付が壊れた古いデータも表示できるよう、元の配列順をフォールバックにする。
     let fallbackOrder = 0;
 
     const tasks = this.projects.flatMap(project =>

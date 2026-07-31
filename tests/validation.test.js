@@ -1,3 +1,4 @@
+// 必須入力、文字数、見積もり整合性、キーボード送信を確認するテスト。
 import { closeModal } from "../js/ui/modal.js";
 import {
   showCreateProjectModal,

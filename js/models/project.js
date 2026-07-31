@@ -1,3 +1,4 @@
+// プロジェクト本体。タスクの集合と、プロジェクト単位の進捗を管理する。
 import { Task } from "./task.js";
 
 export class Project {
@@ -52,6 +53,7 @@ export class Project {
   }
 
   getProgress() {
+    // 各タスクの完了率を平均し、プロジェクト全体の進捗として表示する。
     if (this.tasks.length === 0) return 0;
 
     const totalProgress = this.tasks.reduce(

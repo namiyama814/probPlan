@@ -1,3 +1,4 @@
+// 外部テストライブラリを使わず、ブラウザだけで結果を収集する最小テスト基盤。
 export function createTestSuite() {
   const tests = [];
 
@@ -7,6 +8,7 @@ export function createTestSuite() {
     },
 
     async run() {
+      // 各テストを独立して実行し、後続テストも続けられるよう結果を記録する。
       const results = [];
 
       for (const { name, callback } of tests) {

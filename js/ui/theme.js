@@ -1,3 +1,4 @@
+// 保存テーマ、OSのカラースキーム、切替ボタンを同期する。
 const THEME_STORAGE_KEY = "probplan-theme";
 
 function getSavedTheme() {
@@ -16,6 +17,7 @@ function getSystemTheme() {
 }
 
 function setTheme(theme) {
+  // CSS変数はhtml要素のdata属性を基準に切り替える。
   document.documentElement.dataset.theme = theme;
 }
 

@@ -1,3 +1,4 @@
+// ホーム画面に最新の未完了タスクだけを表示する。
 import { escapeHtml } from "./escapeHtml.js";
 
 export function renderRecentTaskSection(taskSection, manager) {

@@ -1,3 +1,4 @@
+// プロジェクト削除前に対象と不可逆操作であることを確認するモーダル。
 import { openModal, closeModal } from "./modal.js";
 
 export function showDeleteProjectModal(project, onDeleteProject) {

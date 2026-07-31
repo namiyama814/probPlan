@@ -1,3 +1,4 @@
+// 作成・編集モーダルで共通利用する入力検証とエラー表示のヘルパー。
 export const MAX_NAME_LENGTH = 100;
 
 export function validateName(value, label) {

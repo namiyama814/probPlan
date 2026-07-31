@@ -1,3 +1,4 @@
+// 全モーダルで共有するオーバーレイ管理。閉じる時はCSSアニメーションも開始する。
 let overlay = null;
 
 function removeOverlay(target) {
@@ -5,6 +6,7 @@ function removeOverlay(target) {
 }
 
 export function openModal(content, options = {}) {
+  // 新しいモーダルを開く前に、前のモーダルを即時除去して二重表示を防ぐ。
   closeModal(true);
 
   const {
@@ -45,6 +47,7 @@ export function closeModal(immediately = false) {
   overlay = null;
 
   if (immediately) {
+    // テストや再描画時はアニメーションを待たずに片付ける。
     removeOverlay(closingOverlay);
     return;
   }

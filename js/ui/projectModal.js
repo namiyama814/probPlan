@@ -1,3 +1,4 @@
+// プロジェクト作成・名称編集の入力モーダル。
 import { openModal, closeModal } from "./modal.js";
 import {
   MAX_NAME_LENGTH,
@@ -94,6 +95,7 @@ export function showCreateProjectModal(onCreateProject) {
   });
 
   submitButton.addEventListener("click", () => {
+    // エラー時は保存せず、具体的なメッセージとフォーカスで修正箇所を示す。
     const validation = validateName(input.value, "プロジェクト名");
 
     if (validation.error) {

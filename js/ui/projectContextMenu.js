@@ -1,3 +1,4 @@
+// プロジェクトカードの右クリック／キーボードメニューを管理する。
 import { showDeleteProjectModal } from "./projectDeleteModal.js";
 
 let contextMenu = null;
@@ -31,6 +32,7 @@ function openProjectContextMenu(
   project,
   onDeleteProject
 ) {
+  // 既存メニューを閉じてから新しい位置に1つだけ表示する。
   closeProjectContextMenu();
 
   contextMenu = document.createElement("div");

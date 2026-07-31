@@ -1,3 +1,4 @@
+// タスク作成・編集・削除の各モーダルを提供する。
 import { openModal, closeModal } from "./modal.js";
 import {
   MAX_NAME_LENGTH,
@@ -249,6 +250,7 @@ export function showEditTaskModal(task, onUpdateTask) {
         mostLikely === null ||
         pessimistic === null
       ) {
+        // 3点見積もりは順序が予測の前提になるため、保存前に確認する。
         const missingInput = [optimisticInput, mostLikelyInput, pessimisticInput]
           .find(input => input.value === "");
         showFieldError(error, missingInput, "見積日数を全て入力してください。");

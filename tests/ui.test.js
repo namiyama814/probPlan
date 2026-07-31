@@ -1,3 +1,4 @@
+// モーダル、テーマ、一覧、検索などブラウザDOMを使うUIテスト。
 import { Project } from "../js/models/project.js";
 import { ProjectManager } from "../js/models/projectManager.js";
 import { Task } from "../js/models/task.js";

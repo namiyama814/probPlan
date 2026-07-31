@@ -1,3 +1,4 @@
+// ホーム画面のエントリポイント。保存データを読み込み、各UIと操作を接続する。
 import { ProjectManager } from "./models/projectManager.js";
 import { StorageService } from "./services/storageService.js";
 import {
@@ -28,6 +29,7 @@ initializeTheme();
 initializeTaskSearch(() => manager);
 
 function render() {
+  // データ更新後はホームの2セクションを同じマネージャーから再描画する。
   renderProjectSection(
     projectSection,
     manager,
@@ -99,6 +101,7 @@ function exportData() {
 }
 
 async function importData(event) {
+  // ファイル選択の結果を検証し、成功したデータだけを現在の状態へ置き換える。
   const [file] = event.target.files;
 
   if (!file) return;

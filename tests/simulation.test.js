@@ -1,3 +1,4 @@
+// 確率分布、タスク予測、プロジェクト予測の計算を確認するテスト。
 import { runTaskSimulation } from "../js/simulation/taskSimulation.js";
 import {
   getProjectCompletionForecast,

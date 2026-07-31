@@ -1,3 +1,4 @@
+// .pplpの書き出し・読み込み・不正データ拒否を確認するテスト。
 import {
   createExportFile,
   getExportFileName,

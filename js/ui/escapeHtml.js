@@ -1,3 +1,4 @@
+// ユーザー入力をinnerHTMLへ表示する際の最低限のHTMLエスケープ。
 const HTML_ENTITIES = {
   "&": "&amp;",
   "<": "&lt;",

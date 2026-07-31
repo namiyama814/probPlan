@@ -1,3 +1,4 @@
+// 4件目以降のプロジェクトを一覧表示するモーダル。
 import { openModal, closeModal } from "./modal.js";
 import { bindProjectContextMenu } from "./projectContextMenu.js";
 import { escapeHtml } from "./escapeHtml.js";

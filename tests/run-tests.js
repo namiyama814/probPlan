@@ -1,3 +1,4 @@
+// ブラウザ上で外部ライブラリなしに全テストスイートを実行するランナー。
 import { runControllerTests } from "./controllers.test.js";
 import { runDataTransferServiceTests } from "./dataTransferService.test.js";
 import { runModelTests } from "./models.test.js";
@@ -7,6 +8,7 @@ import { runTutorialTests } from "./tutorial.test.js";
 import { runValidationTests } from "./validation.test.js";
 
 export async function runAllTests() {
+  // 機能領域ごとの結果を結合し、1件でも失敗したら呼び出し元へ通知する。
   const results = [
     ...(await runDataTransferServiceTests()),
     ...(await runModelTests()),
