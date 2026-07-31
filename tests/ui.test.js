@@ -29,6 +29,7 @@ import {
 import { renderTaskSection } from "../js/ui/taskView.js";
 import { initializeTheme } from "../js/ui/theme.js";
 import { hideUndoToast, showUndoToast } from "../js/ui/undoToast.js";
+import { showImportPreviewModal } from "../js/ui/importPreviewModal.js";
 import { escapeHtml } from "../js/ui/escapeHtml.js";
 import { assert, assertEqual, createTestSuite } from "./testUtils.js";
 
@@ -181,6 +182,22 @@ test("削除取り消し通知から元の処理を実行できる", async () =>
     assert(undone, "削除取り消し処理を実行できません。");
     assert(!document.querySelector('[role="status"]'), "取り消し後に通知が残っています。");
     hideUndoToast();
+  });
+});
+
+test("インポート前に件数を確認し、確定後にコールバックを実行する", async () => {
+  await withTestDocument(async () => {
+    const project = createProject({ tasks: [createTask()] });
+    let confirmed = null;
+
+    showImportPreviewModal(new ProjectManager([project]), manager => {
+      confirmed = manager;
+    });
+
+    assert(document.querySelector(".modal-content").textContent.includes("プロジェクト：1件"), "インポート件数を表示できません。");
+    assertEqual(confirmed, null, "確認前にインポートを実行しています。");
+    document.getElementById("confirm-import-preview").click();
+    assert(confirmed instanceof ProjectManager, "確認後にインポートできません。");
   });
 });
 

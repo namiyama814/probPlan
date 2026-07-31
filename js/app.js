@@ -10,6 +10,7 @@ import { renderRecentTaskSection } from "./ui/recentTaskView.js";
 import { initializeTheme } from "./ui/theme.js";
 import { initializeTaskSearch } from "./ui/taskSearch.js";
 import { showUndoToast } from "./ui/undoToast.js";
+import { showImportPreviewModal } from "./ui/importPreviewModal.js";
 import { shouldShowTutorial, showTutorial } from "./ui/tutorialModal.js";
 import {
   createExportFile,
@@ -125,9 +126,11 @@ async function importData(event) {
   try {
     const importedManager = parseImportData(await file.text());
 
-    manager = importedManager;
-    StorageService.save(manager);
-    render();
+    showImportPreviewModal(importedManager, confirmedManager => {
+      manager = confirmedManager;
+      StorageService.save(manager);
+      render();
+    });
   } catch {
     showDataTransferStatus(
       "ファイルを読み込めませんでした。内容を確認してください。",
