@@ -33,11 +33,26 @@ function handleDataMenuPointerDown(event) {
 }
 
 function handleDataMenuKeydown(event) {
-  if (event.key !== "Escape") return;
+  if (event.key === "Escape") {
+    const button = activeDataMenuButton;
+    closeDataMenu();
+    button?.focus();
+    return;
+  }
 
-  const button = activeDataMenuButton;
-  closeDataMenu();
-  button?.focus();
+  const items = [...(activeDataMenu?.querySelectorAll('[role="menuitem"]') ?? [])];
+  const currentIndex = items.indexOf(document.activeElement);
+  if (items.length === 0 || currentIndex < 0) return;
+
+  let nextIndex = currentIndex;
+  if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % items.length;
+  if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + items.length) % items.length;
+  if (event.key === "Home") nextIndex = 0;
+  if (event.key === "End") nextIndex = items.length - 1;
+  if (nextIndex === currentIndex) return;
+
+  event.preventDefault();
+  items[nextIndex].focus();
 }
 
 export function renderProjectSection(
@@ -204,6 +219,7 @@ export function renderProjectSection(
     activeDataMenuButton = dataMenuButton;
     dataMenu.classList.remove("hidden");
     dataMenuButton.setAttribute("aria-expanded", "true");
+    dataMenu.querySelector('[role="menuitem"]')?.focus();
 
     document.addEventListener("pointerdown", handleDataMenuPointerDown);
     document.addEventListener("keydown", handleDataMenuKeydown);

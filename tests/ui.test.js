@@ -99,6 +99,30 @@ test("モーダルは背景クリックでアニメーション終了後に閉�
   });
 });
 
+test("モーダルはEscapeで閉じ、Tabフォーカスを内部に留める", async () => {
+  await withTestDocument(async () => {
+    const trigger = document.createElement("button");
+    trigger.textContent = "開く";
+    document.getElementById("test-root").appendChild(trigger);
+    trigger.focus();
+
+    openModal('<button id="first-modal-button">最初</button><button id="last-modal-button">最後</button>');
+    await wait(0);
+    const first = document.getElementById("first-modal-button");
+    const last = document.getElementById("last-modal-button");
+    assertEqual(document.activeElement, first, "モーダル開始時にフォーカスできません。");
+
+    last.focus();
+    last.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    assertEqual(document.activeElement, first, "Tabフォーカスをモーダル内で循環できません。");
+
+    first.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await wait(300);
+    assert(!document.querySelector(".modal-overlay"), "Escapeでモーダルを閉じられません。");
+    assertEqual(document.activeElement, trigger, "閉じた後に元のフォーカスへ戻れません。");
+  });
+});
+
 test("テーマ切替は表示と保存内容を更新する", async () => {
   const previousTheme = localStorage.getItem("probplan-theme");
 

@@ -12,11 +12,26 @@ let activeTaskMenu = null;
 let activeTaskMenuButton = null;
 
 function handleMenuKeydown(event) {
-  if (event.key !== "Escape") return;
+  if (event.key === "Escape") {
+    const button = activeTaskMenuButton;
+    closeActiveTaskMenu();
+    button?.focus();
+    return;
+  }
 
-  const button = activeTaskMenuButton;
-  closeActiveTaskMenu();
-  button?.focus();
+  const items = [...(activeTaskMenu?.querySelectorAll('[role="menuitem"]') ?? [])];
+  const currentIndex = items.indexOf(document.activeElement);
+  if (items.length === 0 || currentIndex < 0) return;
+
+  let nextIndex = currentIndex;
+  if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % items.length;
+  if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + items.length) % items.length;
+  if (event.key === "Home") nextIndex = 0;
+  if (event.key === "End") nextIndex = items.length - 1;
+  if (nextIndex === currentIndex) return;
+
+  event.preventDefault();
+  items[nextIndex].focus();
 }
 
 function closeActiveTaskMenu() {
@@ -275,6 +290,7 @@ export function renderTaskSection(
       activeTaskMenuButton = button;
       menu.classList.remove("hidden");
       button.setAttribute("aria-expanded", "true");
+      menu.querySelector('[role="menuitem"]')?.focus();
 
       document.addEventListener("click", closeActiveTaskMenu);
       document.addEventListener("keydown", handleMenuKeydown);
