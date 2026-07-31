@@ -7,14 +7,12 @@ export class Project {
     name,
     deadline = null,
     archived = false,
-    progressHistory = [],
     tasks = []
   }) {
     this.id = id;
     this.name = name;
     this.deadline = deadline;
     this.archived = archived;
-    this.progressHistory = progressHistory;
     this.tasks = tasks;
   }
   
@@ -33,9 +31,6 @@ export class Project {
       name: data.name,
       deadline: data.deadline ?? null,
       archived: data.archived ?? false,
-      progressHistory: Array.isArray(data.progressHistory)
-        ? data.progressHistory
-        : [],
       tasks: data.tasks.map(task => Task.fromJSON(task))
     });
   }
@@ -50,22 +45,6 @@ export class Project {
 
   setArchived(isArchived) {
     this.archived = isArchived;
-  }
-
-  recordProgressSnapshot(at = new Date()) {
-    const progress = this.getProgress();
-    const latest = this.progressHistory.at(-1);
-
-    // 同じ進捗を何度保存しても履歴を増やさない。
-    if (latest?.progress === progress) return;
-
-    this.progressHistory.push({
-      at: at.toISOString(),
-      progress,
-    });
-
-    // 長期間使ってもlocalStorageが肥大化しないよう、直近30件に制限する。
-    this.progressHistory = this.progressHistory.slice(-30);
   }
 
   addTask(task) {

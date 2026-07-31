@@ -19,18 +19,6 @@ function isValidId(value) {
   return typeof value === "string" && ID_PATTERN.test(value);
 }
 
-function isValidProgressHistory(value) {
-  if (value === undefined) return true;
-  return Array.isArray(value) && value.every(snapshot =>
-    isObject(snapshot) &&
-    typeof snapshot.at === "string" &&
-    !Number.isNaN(Date.parse(snapshot.at)) &&
-    Number.isInteger(snapshot.progress) &&
-    snapshot.progress >= 0 &&
-    snapshot.progress <= 100
-  );
-}
-
 function areValidEstimates(task) {
   // 見積もり未設定は許可するが、一部欠落や順序逆転は取込時に拒否する。
   const estimates = [
@@ -91,7 +79,6 @@ function isValidData(data) {
       !isValidName(project.name) ||
       !isOptionalDeadline(project.deadline) ||
       (project.archived !== undefined && typeof project.archived !== "boolean") ||
-      !isValidProgressHistory(project.progressHistory) ||
       !Array.isArray(project.tasks)) {
       return false;
     }

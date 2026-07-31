@@ -122,36 +122,6 @@ function renderDeadlineForecast(forecast) {
   `;
 }
 
-function renderProgressHistory(project) {
-  const history = project.progressHistory ?? [];
-  if (history.length === 0) return "";
-
-  const snapshots = history.slice(-14);
-  return `
-    <section class="mt-8 border-t border-[var(--color-text)]/10 pt-5" aria-labelledby="progress-history-title">
-      <div class="flex items-center justify-between">
-        <h2 id="progress-history-title" class="text-sm font-medium">進捗履歴</h2>
-        <span class="text-xs text-[var(--color-text)]/60">直近${snapshots.length}件</span>
-      </div>
-      <div class="mt-4 flex h-28 items-end gap-1" role="img" aria-label="プロジェクト進捗の推移">
-        ${snapshots.map(snapshot => {
-          const date = new Intl.DateTimeFormat("ja-JP", {
-            month: "numeric",
-            day: "numeric",
-          }).format(new Date(snapshot.at));
-          return `
-            <div class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1" title="${date} ${snapshot.progress}%">
-              <span class="text-[10px] text-[var(--color-text)]/60">${snapshot.progress}%</span>
-              <div class="w-full rounded-t-sm bg-[var(--color-text)] transition-[height] duration-300" style="height: ${Math.max(snapshot.progress, 4)}%"></div>
-              <span class="truncate text-[10px] text-[var(--color-text)]/50">${date}</span>
-            </div>
-          `;
-        }).join("")}
-      </div>
-    </section>
-  `;
-}
-
 export function renderProjectHeader(
   projectHeader,
   project,
@@ -166,6 +136,28 @@ export function renderProjectHeader(
 
   projectHeader.innerHTML = `
     <div class="max-w-2xl">
+      <a
+        id="back-to-home"
+        href="./index.html"
+        class="mb-6 inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-[var(--color-text)]/60 transition-colors hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-text)]/30"
+        aria-label="ホーム画面に戻る"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-4 w-4"
+          aria-hidden="true"
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        ホームに戻る
+      </a>
+
       <div class="group flex items-center gap-2">
         <h1 class="text-3xl font-bold">
           ${escapeHtml(project.name)}
@@ -298,7 +290,6 @@ export function renderProjectHeader(
           </div>
         </section>
       </div>
-      ${renderProgressHistory(project)}
     </div>
   `;
 

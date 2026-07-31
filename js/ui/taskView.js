@@ -10,6 +10,7 @@ import {
 
 let activeTaskMenu = null;
 let activeTaskMenuButton = null;
+let taskMenuCloseTimer = null;
 
 function handleMenuKeydown(event) {
   if (event.key === "Escape") {
@@ -35,7 +36,22 @@ function handleMenuKeydown(event) {
 }
 
 function closeActiveTaskMenu() {
-  activeTaskMenu?.classList.add("hidden");
+  const menu = activeTaskMenu;
+
+  if (taskMenuCloseTimer !== null) {
+    window.clearTimeout(taskMenuCloseTimer);
+    taskMenuCloseTimer = null;
+  }
+
+  if (menu) {
+    // 閉じる状態を先に反映し、アニメーション完了後に非表示へ戻す。
+    menu.classList.remove("is-open");
+    taskMenuCloseTimer = window.setTimeout(() => {
+      menu.classList.add("hidden");
+      taskMenuCloseTimer = null;
+    }, 150);
+  }
+
   activeTaskMenuButton?.setAttribute("aria-expanded", "false");
 
   activeTaskMenu = null;
@@ -288,7 +304,15 @@ export function renderTaskSection(
 
       activeTaskMenu = menu;
       activeTaskMenuButton = button;
+      if (taskMenuCloseTimer !== null) {
+        window.clearTimeout(taskMenuCloseTimer);
+        taskMenuCloseTimer = null;
+      }
       menu.classList.remove("hidden");
+      // display の反映後に開く状態を付けて、開くアニメーションを開始する。
+      window.requestAnimationFrame(() => {
+        if (activeTaskMenu === menu) menu.classList.add("is-open");
+      });
       button.setAttribute("aria-expanded", "true");
       menu.querySelector('[role="menuitem"]')?.focus();
 

@@ -5,10 +5,6 @@ const STORAGE_KEY = "probplan";
 
 export const StorageService = {
   save(manager) {
-    manager.projects.forEach(project => {
-      project.recordProgressSnapshot();
-    });
-
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(manager)

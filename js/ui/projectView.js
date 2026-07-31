@@ -9,10 +9,27 @@ import {
 
 let activeDataMenu = null;
 let activeDataMenuButton = null;
+let dataMenuCloseTimer = null;
 let showArchivedProjects = false;
 
 function closeDataMenu() {
-  activeDataMenu?.classList.add("hidden");
+  const menu = activeDataMenu;
+
+  if (dataMenuCloseTimer !== null) {
+    window.clearTimeout(dataMenuCloseTimer);
+    dataMenuCloseTimer = null;
+  }
+
+  if (menu) {
+    // hidden をすぐ付けると閉じるアニメーションが描画されないため、
+    // 先に開閉状態だけを戻してから display を切り替える。
+    menu.classList.remove("is-open");
+    dataMenuCloseTimer = window.setTimeout(() => {
+      menu.classList.add("hidden");
+      dataMenuCloseTimer = null;
+    }, 150);
+  }
+
   activeDataMenuButton?.setAttribute("aria-expanded", "false");
 
   activeDataMenu = null;
@@ -78,14 +95,6 @@ export function renderProjectSection(
 
       <div class="flex items-center gap-1">
         <button
-          id="toggle-archived-projects"
-          type="button"
-          class="rounded-md px-2 py-1 text-xs text-[var(--color-text)]/60 transition-colors hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)]"
-          aria-pressed="${showArchivedProjects}"
-        >
-          ${showArchivedProjects ? "通常を表示" : "アーカイブを表示"}
-        </button>
-        <button
           id="add-project-button"
           class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-text)]/5"
           aria-label="プロジェクトを追加"
@@ -131,9 +140,35 @@ export function renderProjectSection(
 
           <div
             id="data-menu"
-            class="absolute right-0 top-11 z-30 hidden w-44 rounded-md border border-[var(--color-text)]/10 bg-[var(--color-surface)] p-1 shadow-lg"
+            class="data-menu absolute right-0 top-11 z-30 hidden w-44 rounded-md border border-[var(--color-text)]/10 bg-[var(--color-surface)] p-1 shadow-lg"
             role="menu"
           >
+            <button
+              id="toggle-archived-projects"
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-3 rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-text)]/5"
+              aria-pressed="${showArchivedProjects}"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path d="M3 7h18" />
+                <path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
+                <path d="M9 11h6" />
+                <path d="M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2Z" />
+              </svg>
+              ${showArchivedProjects ? "通常を表示" : "アーカイブを表示"}
+            </button>
+
             <button
               id="export-data-button"
               type="button"
@@ -210,13 +245,14 @@ export function renderProjectSection(
   const addButton = document.getElementById("add-project-button");
   const dataMenuButton = document.getElementById("data-menu-button");
   const dataMenu = document.getElementById("data-menu");
+  const archivedToggle = document.getElementById("toggle-archived-projects");
   const exportButton = document.getElementById("export-data-button");
   const importButton = document.getElementById("import-data-button");
   const importInput = document.getElementById("import-data-input");
-  const archivedToggle = document.getElementById("toggle-archived-projects");
 
   archivedToggle.addEventListener("click", () => {
     showArchivedProjects = !showArchivedProjects;
+    closeDataMenu();
     onToggleArchivedProjects(showArchivedProjects);
   });
 
@@ -236,7 +272,15 @@ export function renderProjectSection(
 
     activeDataMenu = dataMenu;
     activeDataMenuButton = dataMenuButton;
+    if (dataMenuCloseTimer !== null) {
+      window.clearTimeout(dataMenuCloseTimer);
+      dataMenuCloseTimer = null;
+    }
     dataMenu.classList.remove("hidden");
+    // display の反映後に状態を変更して、開くアニメーションを確実に開始する。
+    window.requestAnimationFrame(() => {
+      if (activeDataMenu === dataMenu) dataMenu.classList.add("is-open");
+    });
     dataMenuButton.setAttribute("aria-expanded", "true");
     dataMenu.querySelector('[role="menuitem"]')?.focus();
 
