@@ -122,6 +122,36 @@ function renderDeadlineForecast(forecast) {
   `;
 }
 
+function renderProgressHistory(project) {
+  const history = project.progressHistory ?? [];
+  if (history.length === 0) return "";
+
+  const snapshots = history.slice(-14);
+  return `
+    <section class="mt-8 border-t border-[var(--color-text)]/10 pt-5" aria-labelledby="progress-history-title">
+      <div class="flex items-center justify-between">
+        <h2 id="progress-history-title" class="text-sm font-medium">進捗履歴</h2>
+        <span class="text-xs text-[var(--color-text)]/60">直近${snapshots.length}件</span>
+      </div>
+      <div class="mt-4 flex h-28 items-end gap-1" role="img" aria-label="プロジェクト進捗の推移">
+        ${snapshots.map(snapshot => {
+          const date = new Intl.DateTimeFormat("ja-JP", {
+            month: "numeric",
+            day: "numeric",
+          }).format(new Date(snapshot.at));
+          return `
+            <div class="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1" title="${date} ${snapshot.progress}%">
+              <span class="text-[10px] text-[var(--color-text)]/60">${snapshot.progress}%</span>
+              <div class="w-full rounded-t-sm bg-[var(--color-text)] transition-[height] duration-300" style="height: ${Math.max(snapshot.progress, 4)}%"></div>
+              <span class="truncate text-[10px] text-[var(--color-text)]/50">${date}</span>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </section>
+  `;
+}
+
 export function renderProjectHeader(
   projectHeader,
   project,
@@ -268,6 +298,7 @@ export function renderProjectHeader(
           </div>
         </section>
       </div>
+      ${renderProgressHistory(project)}
     </div>
   `;
 

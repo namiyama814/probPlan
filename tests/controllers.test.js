@@ -63,6 +63,10 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
       "2026-08-20",
       "締切日が保存されていません。"
     );
+    assert(
+      savedManager.projects[0].progressHistory.length >= 2,
+      "進捗履歴が保存されていません。"
+    );
 
     deleteTask(manager, project, task.id);
     assertEqual(project.tasks.length, 0, "タスクを削除できません。");

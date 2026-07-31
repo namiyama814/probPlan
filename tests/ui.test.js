@@ -60,9 +60,10 @@ function createProject({
   id = crypto.randomUUID(),
   name = "テストプロジェクト",
   deadline = null,
+  progressHistory = [],
   tasks = [],
 } = {}) {
-  return new Project({ id, name, deadline, tasks });
+  return new Project({ id, name, deadline, progressHistory, tasks });
 }
 
 function wait(milliseconds) {
@@ -417,6 +418,21 @@ test("プロジェクト詳細の進捗・完了予測・締切マーカーを�
       description: "確認してください。",
     });
     assert(root.textContent.includes("プロジェクトが見つかりません"), "エラー画面を表示できません。");
+  });
+});
+
+test("プロジェクト詳細に進捗履歴を表示できる", async () => {
+  await withTestDocument(async root => {
+    const project = createProject({
+      progressHistory: [
+        { at: "2026-08-01T00:00:00.000Z", progress: 0 },
+        { at: "2026-08-02T00:00:00.000Z", progress: 50 },
+      ],
+    });
+
+    renderProjectHeader(root, project, () => {}, () => {}, false, () => {});
+    assert(root.textContent.includes("進捗履歴"), "進捗履歴の見出しを表示できません。");
+    assertEqual(root.querySelectorAll('[role="img"] > div').length, 2, "進捗履歴の棒を表示できません。");
   });
 });
 
