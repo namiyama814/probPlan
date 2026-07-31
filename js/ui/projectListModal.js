@@ -1,7 +1,9 @@
+// 4件目以降のプロジェクトを一覧表示するモーダル。
 import { openModal, closeModal } from "./modal.js";
 import { bindProjectContextMenu } from "./projectContextMenu.js";
+import { escapeHtml } from "./escapeHtml.js";
 
-export function showProjectListModal(projects, onDeleteProject) {
+export function showProjectListModal(projects, onDeleteProject, onToggleArchive) {
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">その他のプロジェクト</h2>
@@ -48,7 +50,7 @@ export function showProjectListModal(projects, onDeleteProject) {
             type="button"
           >
             <h3 class="truncate font-semibold">
-              ${project.name}
+              ${escapeHtml(project.name)}
             </h3>
 
             <div class="mt-1 flex items-center justify-between text-sm">
@@ -91,7 +93,8 @@ export function showProjectListModal(projects, onDeleteProject) {
       bindProjectContextMenu(
         button,
         project,
-        onDeleteProject
+        onDeleteProject,
+        onToggleArchive
       );
     });
 }

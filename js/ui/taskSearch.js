@@ -1,3 +1,4 @@
+// 全プロジェクトのタスクを検索するモーダルと、⌘K／Ctrl+Kショートカット。
 import { closeModal, openModal } from "./modal.js";
 
 function isMacPlatform() {
@@ -11,6 +12,7 @@ function getShortcutLabel() {
 }
 
 function renderSearchResults(container, manager, query) {
+  // 結果はtextContentで組み立て、タスク名をHTMLとして解釈しない。
   const normalizedQuery = query.trim();
 
   if (!normalizedQuery) {
@@ -169,6 +171,7 @@ export function showTaskSearchModal(manager) {
 }
 
 export function initializeTaskSearch(getManager) {
+  // OS標準Spotlightと競合しにくい、アプリ内ショートカットを登録する。
   document.addEventListener("keydown", event => {
     const isMacShortcut =
       event.metaKey && !event.altKey && !event.ctrlKey && !event.shiftKey &&

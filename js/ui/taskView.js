@@ -1,4 +1,7 @@
+// 詳細画面のタスク一覧。編集・シミュレーション・完了・削除をまとめる。
 import { showSimulationModal } from "./simulationModal.js";
+import { escapeHtml } from "./escapeHtml.js";
+import { getTaskDeadlineInfo } from "./taskDeadline.js";
 import {
   showCreateTaskModal,
   showDeleteTaskModal,
@@ -7,17 +10,48 @@ import {
 
 let activeTaskMenu = null;
 let activeTaskMenuButton = null;
+let taskMenuCloseTimer = null;
 
 function handleMenuKeydown(event) {
-  if (event.key !== "Escape") return;
+  if (event.key === "Escape") {
+    const button = activeTaskMenuButton;
+    closeActiveTaskMenu();
+    button?.focus();
+    return;
+  }
 
-  const button = activeTaskMenuButton;
-  closeActiveTaskMenu();
-  button?.focus();
+  const items = [...(activeTaskMenu?.querySelectorAll('[role="menuitem"]') ?? [])];
+  const currentIndex = items.indexOf(document.activeElement);
+  if (items.length === 0 || currentIndex < 0) return;
+
+  let nextIndex = currentIndex;
+  if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % items.length;
+  if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + items.length) % items.length;
+  if (event.key === "Home") nextIndex = 0;
+  if (event.key === "End") nextIndex = items.length - 1;
+  if (nextIndex === currentIndex) return;
+
+  event.preventDefault();
+  items[nextIndex].focus();
 }
 
 function closeActiveTaskMenu() {
-  activeTaskMenu?.classList.add("hidden");
+  const menu = activeTaskMenu;
+
+  if (taskMenuCloseTimer !== null) {
+    window.clearTimeout(taskMenuCloseTimer);
+    taskMenuCloseTimer = null;
+  }
+
+  if (menu) {
+    // 閉じる状態を先に反映し、アニメーション完了後に非表示へ戻す。
+    menu.classList.remove("is-open");
+    taskMenuCloseTimer = window.setTimeout(() => {
+      menu.classList.add("hidden");
+      taskMenuCloseTimer = null;
+    }, 150);
+  }
+
   activeTaskMenuButton?.setAttribute("aria-expanded", "false");
 
   activeTaskMenu = null;
@@ -35,6 +69,7 @@ export function renderTaskSection(
     onDeleteTask,
     onSetTaskCompleted
 ) {
+  // タスク更新後の再描画で、古いメニュー状態とイベントを残さない。
   closeActiveTaskMenu();
 
   taskSection.innerHTML = `
@@ -76,7 +111,15 @@ export function renderTaskSection(
             </p>
           </div>
         `
-        : project.tasks.map(task => `
+        : project.tasks.map(task => {
+        const deadline = getTaskDeadlineInfo(task.deadline);
+        const deadlineMarkup = deadline
+          ? `<p class="mt-1 text-xs ${deadline.isOverdue ? "text-[var(--color-danger)]" : "text-[var(--color-text)]/60"}">
+              ${deadline.isOverdue ? "期限超過" : "期限"}：${deadline.label}
+            </p>`
+          : "";
+
+        return `
         <div
           class="flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
         >
@@ -90,7 +133,7 @@ export function renderTaskSection(
                 ? "text-[var(--color-text)]/50 line-through"
                 : ""
             }">
-              ${task.name}
+                ${escapeHtml(task.name)}
             </h3>
       
             <p class="mt-1 text-sm text-[var(--color-text)]/60">
@@ -100,6 +143,7 @@ export function renderTaskSection(
                   : `${task.optimistic} / ${task.mostLikely} / ${task.pessimistic} 日`
               }
             </p>
+            ${deadlineMarkup}
           </button>
 
           <div class="ml-4 flex items-center gap-1">
@@ -224,7 +268,8 @@ export function renderTaskSection(
           </div>
 
         </div>
-      `).join("")}
+      `;
+      }).join("")}
     </div>
   `;
 
@@ -259,8 +304,17 @@ export function renderTaskSection(
 
       activeTaskMenu = menu;
       activeTaskMenuButton = button;
+      if (taskMenuCloseTimer !== null) {
+        window.clearTimeout(taskMenuCloseTimer);
+        taskMenuCloseTimer = null;
+      }
       menu.classList.remove("hidden");
+      // display の反映後に開く状態を付けて、開くアニメーションを開始する。
+      window.requestAnimationFrame(() => {
+        if (activeTaskMenu === menu) menu.classList.add("is-open");
+      });
       button.setAttribute("aria-expanded", "true");
+      menu.querySelector('[role="menuitem"]')?.focus();
 
       document.addEventListener("click", closeActiveTaskMenu);
       document.addEventListener("keydown", handleMenuKeydown);

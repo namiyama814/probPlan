@@ -1,3 +1,4 @@
+// プロジェクト詳細画面のエントリポイント。URLのidから対象を決め、タスク操作を接続する。
 import { StorageService } from "./services/storageService.js";
 import {
   renderProjectError,
@@ -16,6 +17,7 @@ import {
 } from "./controllers/projectController.js";
 import { initializeTheme } from "./ui/theme.js";
 import { initializeTaskSearch } from "./ui/taskSearch.js";
+import { showUndoToast } from "./ui/undoToast.js";
 
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
@@ -33,6 +35,7 @@ initializeTheme();
 initializeTaskSearch(() => manager);
 
 function render() {
+  // 対象がない場合も空画面にせず、原因が分かるエラー表示へ切り替える。
   renderProjectHeader(
     projectHeader,
     project,
@@ -78,11 +81,12 @@ if (!projectId) {
   render();
 }
 
-function onCreateTask(taskName) {
+function onCreateTask(taskName, deadline) {
   createTask(
     manager,
     project,
-    taskName
+    taskName,
+    deadline
   );
   render();
 }
@@ -97,12 +101,18 @@ function onUpdateTask(task, data) {
 }
 
 function onDeleteTask(task) {
+  const originalIndex = project.tasks.indexOf(task);
   deleteTask(
     manager,
     project,
     task.id
   );
   render();
+  showUndoToast("タスクを削除しました", () => {
+    project.tasks.splice(originalIndex, 0, task);
+    StorageService.save(manager);
+    render();
+  });
 }
 
 function onSetTaskCompleted(task, isCompleted) {

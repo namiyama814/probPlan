@@ -1,3 +1,4 @@
+// localStorageへの保存・復元を担当する薄いアダプター。
 import { ProjectManager } from "../models/projectManager.js";
 
 const STORAGE_KEY = "probplan";
@@ -15,9 +16,12 @@ export const StorageService = {
 
     if (!json) return null;
 
-    return ProjectManager.fromJSON(
-      JSON.parse(json)
-    );
+    try {
+      // 壊れた保存データがあっても、アプリ全体の起動失敗にはしない。
+      return ProjectManager.fromJSON(JSON.parse(json));
+    } catch {
+      return null;
+    }
   },
 
   clear() {

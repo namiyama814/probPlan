@@ -1,3 +1,4 @@
+// モデル単体の進捗、検索、削除、最新タスク取得を確認するテスト。
 import { ProjectManager } from "../js/models/projectManager.js";
 import { Project } from "../js/models/project.js";
 import { Task } from "../js/models/task.js";

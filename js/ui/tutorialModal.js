@@ -1,3 +1,4 @@
+// 初回アクセス時だけ表示する3ステップのチュートリアル。
 import { closeModal, openModal } from "./modal.js";
 
 const TUTORIAL_STORAGE_KEY = "probplan-tutorial-completed";
@@ -50,6 +51,7 @@ export function shouldShowTutorial() {
 }
 
 function completeTutorial() {
+  // 完了・スキップのどちらでも、次回から自動表示しない。
   try {
     localStorage.setItem(TUTORIAL_STORAGE_KEY, "true");
   } catch {
@@ -73,6 +75,7 @@ export function showTutorial() {
   const content = document.getElementById("tutorial-content");
 
   function renderStep() {
+    // ステップを描き直すたびにボタンの役割と表示を更新する。
     const step = steps[stepIndex];
     const isLastStep = stepIndex === steps.length - 1;
 

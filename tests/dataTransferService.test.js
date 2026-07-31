@@ -1,3 +1,4 @@
+// .pplpの書き出し・読み込み・不正データ拒否を確認するテスト。
 import {
   createExportFile,
   getExportFileName,
@@ -58,9 +59,10 @@ function createDataFixture() {
           {
             id: "task-2",
             name: "実装",
-            optimistic: null,
-            mostLikely: null,
-            pessimistic: null,
+          optimistic: null,
+          mostLikely: null,
+          pessimistic: null,
+            deadline: "2026-08-20",
             status: "todo",
             createdAt: "2026-07-30T01:00:00.000Z",
           },
@@ -157,6 +159,47 @@ test("プロジェクトまたはタスクの形式が不正なデータを拒�
     () => parseImportData(JSON.stringify(invalidData)),
     "不正なデータ形式が受け入れられました。"
   );
+});
+
+test("空の名前・不正な見積もり・重複IDを含むデータを拒否する", () => {
+  const invalidFixtures = [
+    {
+      projects: [{ id: "project-1", name: " ", tasks: [] }],
+    },
+    {
+      projects: [{
+        id: "project-1",
+        name: "有効なプロジェクト",
+        tasks: [{
+          id: "task-1",
+          name: "不正な見積もり",
+          optimistic: 3,
+          mostLikely: 2,
+          pessimistic: 1,
+        }],
+      }],
+    },
+    {
+      projects: [
+        { id: "project-1", name: "A", tasks: [] },
+        { id: "project-1", name: "B", tasks: [] },
+      ],
+    },
+    {
+      projects: [{
+        id: "project\"><script>",
+        name: "危険なID",
+        tasks: [],
+      }],
+    },
+  ];
+
+  invalidFixtures.forEach(fixture => {
+    assertThrows(
+      () => parseImportData(JSON.stringify(fixture)),
+      "不正な取込データが受け入れられました。"
+    );
+  });
 });
 
 export async function runDataTransferServiceTests() {

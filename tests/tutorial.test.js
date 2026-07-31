@@ -1,3 +1,4 @@
+// 初回チュートリアルの表示、進行、スキップ、再表示抑制を確認するテスト。
 import { closeModal } from "../js/ui/modal.js";
 import {
   shouldShowTutorial,

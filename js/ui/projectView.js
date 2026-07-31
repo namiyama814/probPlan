@@ -1,5 +1,7 @@
+// ホーム画面のプロジェクト一覧と、追加・データ入出力メニューを描画する。
 import { showCreateProjectModal } from "./projectModal.js";
 import { showProjectListModal } from "./projectListModal.js";
+import { escapeHtml } from "./escapeHtml.js";
 import {
   bindProjectContextMenu,
   closeProjectContextMenu,
@@ -7,9 +9,27 @@ import {
 
 let activeDataMenu = null;
 let activeDataMenuButton = null;
+let dataMenuCloseTimer = null;
+let showArchivedProjects = false;
 
 function closeDataMenu() {
-  activeDataMenu?.classList.add("hidden");
+  const menu = activeDataMenu;
+
+  if (dataMenuCloseTimer !== null) {
+    window.clearTimeout(dataMenuCloseTimer);
+    dataMenuCloseTimer = null;
+  }
+
+  if (menu) {
+    // hidden をすぐ付けると閉じるアニメーションが描画されないため、
+    // 先に開閉状態だけを戻してから display を切り替える。
+    menu.classList.remove("is-open");
+    dataMenuCloseTimer = window.setTimeout(() => {
+      menu.classList.add("hidden");
+      dataMenuCloseTimer = null;
+    }, 150);
+  }
+
   activeDataMenuButton?.setAttribute("aria-expanded", "false");
 
   activeDataMenu = null;
@@ -31,11 +51,26 @@ function handleDataMenuPointerDown(event) {
 }
 
 function handleDataMenuKeydown(event) {
-  if (event.key !== "Escape") return;
+  if (event.key === "Escape") {
+    const button = activeDataMenuButton;
+    closeDataMenu();
+    button?.focus();
+    return;
+  }
 
-  const button = activeDataMenuButton;
-  closeDataMenu();
-  button?.focus();
+  const items = [...(activeDataMenu?.querySelectorAll('[role="menuitem"]') ?? [])];
+  const currentIndex = items.indexOf(document.activeElement);
+  if (items.length === 0 || currentIndex < 0) return;
+
+  let nextIndex = currentIndex;
+  if (event.key === "ArrowDown") nextIndex = (currentIndex + 1) % items.length;
+  if (event.key === "ArrowUp") nextIndex = (currentIndex - 1 + items.length) % items.length;
+  if (event.key === "Home") nextIndex = 0;
+  if (event.key === "End") nextIndex = items.length - 1;
+  if (nextIndex === currentIndex) return;
+
+  event.preventDefault();
+  items[nextIndex].focus();
 }
 
 export function renderProjectSection(
@@ -44,8 +79,13 @@ export function renderProjectSection(
   onCreateProject,
   onDeleteProject,
   onExportData,
-  onImportData
+  onImportData,
+  onToggleProjectArchive = () => {},
+  onToggleArchivedProjects = () => {},
+  archivedProjectsVisible = false
 ) {
+  // 再描画時に古い右クリック／データメニューのイベントを解除する。
+  showArchivedProjects = archivedProjectsVisible;
   closeProjectContextMenu();
   closeDataMenu();
 
@@ -100,9 +140,35 @@ export function renderProjectSection(
 
           <div
             id="data-menu"
-            class="absolute right-0 top-11 z-30 hidden w-44 rounded-md border border-[var(--color-text)]/10 bg-[var(--color-surface)] p-1 shadow-lg"
+            class="data-menu absolute right-0 top-11 z-30 hidden w-44 rounded-md border border-[var(--color-text)]/10 bg-[var(--color-surface)] p-1 shadow-lg"
             role="menu"
           >
+            <button
+              id="toggle-archived-projects"
+              type="button"
+              role="menuitem"
+              class="flex w-full items-center gap-3 rounded-sm px-3 py-2 text-left text-sm transition-colors hover:bg-[var(--color-text)]/5"
+              aria-pressed="${showArchivedProjects}"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                class="h-4 w-4"
+                aria-hidden="true"
+              >
+                <path d="M3 7h18" />
+                <path d="M5 7v11a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7" />
+                <path d="M9 11h6" />
+                <path d="M10 3h4a2 2 0 0 1 2 2v2H8V5a2 2 0 0 1 2-2Z" />
+              </svg>
+              ${showArchivedProjects ? "通常を表示" : "アーカイブを表示"}
+            </button>
+
             <button
               id="export-data-button"
               type="button"
@@ -179,9 +245,16 @@ export function renderProjectSection(
   const addButton = document.getElementById("add-project-button");
   const dataMenuButton = document.getElementById("data-menu-button");
   const dataMenu = document.getElementById("data-menu");
+  const archivedToggle = document.getElementById("toggle-archived-projects");
   const exportButton = document.getElementById("export-data-button");
   const importButton = document.getElementById("import-data-button");
   const importInput = document.getElementById("import-data-input");
+
+  archivedToggle.addEventListener("click", () => {
+    showArchivedProjects = !showArchivedProjects;
+    closeDataMenu();
+    onToggleArchivedProjects(showArchivedProjects);
+  });
 
   addButton.addEventListener("click", () => {
     showCreateProjectModal(onCreateProject);
@@ -199,8 +272,17 @@ export function renderProjectSection(
 
     activeDataMenu = dataMenu;
     activeDataMenuButton = dataMenuButton;
+    if (dataMenuCloseTimer !== null) {
+      window.clearTimeout(dataMenuCloseTimer);
+      dataMenuCloseTimer = null;
+    }
     dataMenu.classList.remove("hidden");
+    // display の反映後に状態を変更して、開くアニメーションを確実に開始する。
+    window.requestAnimationFrame(() => {
+      if (activeDataMenu === dataMenu) dataMenu.classList.add("is-open");
+    });
     dataMenuButton.setAttribute("aria-expanded", "true");
+    dataMenu.querySelector('[role="menuitem"]')?.focus();
 
     document.addEventListener("pointerdown", handleDataMenuPointerDown);
     document.addEventListener("keydown", handleDataMenuKeydown);
@@ -220,7 +302,11 @@ export function renderProjectSection(
     onImportData(event);
   });
 
-  if (manager.projects.length === 0) {
+  const listedProjects = manager.projects.filter(
+    project => showArchivedProjects || !project.archived
+  );
+
+  if (listedProjects.length === 0) {
 
     addButton.classList.remove("flex");
     addButton.classList.add("hidden");
@@ -251,8 +337,8 @@ export function renderProjectSection(
   addButton.classList.remove("hidden");
   addButton.classList.add("flex");
 
-  const visibleProjects = manager.projects.slice(0, 3);
-  const overflowProjects = manager.projects.slice(3);
+  const visibleProjects = listedProjects.slice(0, 3);
+  const overflowProjects = listedProjects.slice(3);
 
   content.innerHTML = visibleProjects.map(project => {
     const progress = project.getProgress();
@@ -262,9 +348,10 @@ export function renderProjectSection(
         class="project-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
         data-project-id="${project.id}"
       >
-        <h3 class="font-semibold">
-          ${project.name}
+        <h3 class="font-semibold ${project.archived ? "text-[var(--color-text)]/50" : ""}">
+        ${escapeHtml(project.name)}
         </h3>
+        ${project.archived ? `<span class="text-xs text-[var(--color-muted)]">アーカイブ済み</span>` : ""}
 
         <div class="mt-1 flex items-center justify-between text-sm">
           <span class="text-[var(--color-text)]/60">
@@ -306,7 +393,8 @@ export function renderProjectSection(
     bindProjectContextMenu(
       button,
       project,
-      onDeleteProject
+      onDeleteProject,
+      onToggleProjectArchive
     );
   });
 
@@ -315,7 +403,8 @@ export function renderProjectSection(
     ?.addEventListener("click", () => {
       showProjectListModal(
         overflowProjects,
-        onDeleteProject
+        onDeleteProject,
+        onToggleProjectArchive
       );
     });
 }

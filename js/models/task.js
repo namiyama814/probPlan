@@ -1,3 +1,4 @@
+// タスク本体。3点見積もり、完了状態、作成日時を保持する。
 export class Task {
   constructor({
     id,
@@ -5,6 +6,7 @@ export class Task {
     optimistic = null,
     mostLikely = null,
     pessimistic = null,
+    deadline = null,
     status = "todo",
     createdAt = null,
   }) {
@@ -14,12 +16,14 @@ export class Task {
     this.optimistic = optimistic;
     this.mostLikely = mostLikely;
     this.pessimistic = pessimistic;
+    this.deadline = deadline;
 
     this.status = status;
     this.createdAt = createdAt;
   }
 
   static create(data) {
+    // 新規タスクだけに一意なIDと作成日時を自動付与する。
     return new Task({
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
@@ -36,6 +40,7 @@ export class Task {
     this.optimistic = data.optimistic;
     this.mostLikely = data.mostLikely;
     this.pessimistic = data.pessimistic;
+    this.deadline = data.deadline ?? null;
   }
 
   setCompleted(isCompleted) {

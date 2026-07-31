@@ -1,3 +1,4 @@
+// タスクごとの三角分布を合算し、プロジェクトの完了日と締切達成率を推定する。
 import { randomTriangular } from "./triangular.js";
 
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -52,6 +53,7 @@ function hasValidEstimate(task) {
 }
 
 function percentile(sorted, probability) {
+  // 補間はせず、並べ替えたサンプル上の該当順位を採用する。
   const index = Math.floor((sorted.length - 1) * probability);
 
   return sorted[index];
@@ -81,6 +83,7 @@ export function getProjectCompletionForecast(
 
   const samples = [];
 
+  // 未完了タスクを毎回サンプリングして、合計作業日数の分布を作る。
   for (let iteration = 0; iteration < iterations; iteration++) {
     samples.push(
       remainingTasks.reduce(
@@ -115,6 +118,7 @@ export function getProjectDeadlineForecast(
   now = new Date(),
   iterations = 10000
 ) {
+  // 先に締切・見積もりの状態を判定し、確率を計算できない理由も返す。
   if (!project.deadline) {
     return { status: "not-set" };
   }

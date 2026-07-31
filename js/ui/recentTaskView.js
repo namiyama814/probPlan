@@ -1,3 +1,6 @@
+// ホーム画面に最新の未完了タスクだけを表示する。
+import { escapeHtml } from "./escapeHtml.js";
+
 export function renderRecentTaskSection(taskSection, manager) {
   const recentTasks = manager.getRecentTasks(3, {
     includeCompleted: false,
@@ -26,11 +29,11 @@ export function renderRecentTaskSection(taskSection, manager) {
           >
             <div class="min-w-0">
               <h3 class="truncate font-medium">
-                ${task.name}
+                ${escapeHtml(task.name)}
               </h3>
 
               <p class="mt-1 truncate text-sm text-[var(--color-text)]/60">
-                ${project.name}
+                ${escapeHtml(project.name)}
               </p>
             </div>
           </button>

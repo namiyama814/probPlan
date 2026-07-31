@@ -1,3 +1,4 @@
+// モーダル、テーマ、一覧、検索などブラウザDOMを使うUIテスト。
 import { Project } from "../js/models/project.js";
 import { ProjectManager } from "../js/models/projectManager.js";
 import { Task } from "../js/models/task.js";
@@ -27,6 +28,9 @@ import {
 } from "../js/ui/taskModal.js";
 import { renderTaskSection } from "../js/ui/taskView.js";
 import { initializeTheme } from "../js/ui/theme.js";
+import { hideUndoToast, showUndoToast } from "../js/ui/undoToast.js";
+import { showImportPreviewModal } from "../js/ui/importPreviewModal.js";
+import { escapeHtml } from "../js/ui/escapeHtml.js";
 import { assert, assertEqual, createTestSuite } from "./testUtils.js";
 
 const suite = createTestSuite();
@@ -96,6 +100,30 @@ test("モーダルは背景クリックでアニメーション終了後に閉�
   });
 });
 
+test("モーダルはEscapeで閉じ、Tabフォーカスを内部に留める", async () => {
+  await withTestDocument(async () => {
+    const trigger = document.createElement("button");
+    trigger.textContent = "開く";
+    document.getElementById("test-root").appendChild(trigger);
+    trigger.focus();
+
+    openModal('<button id="first-modal-button">最初</button><button id="last-modal-button">最後</button>');
+    await wait(0);
+    const first = document.getElementById("first-modal-button");
+    const last = document.getElementById("last-modal-button");
+    assertEqual(document.activeElement, first, "モーダル開始時にフォーカスできません。");
+
+    last.focus();
+    last.dispatchEvent(new KeyboardEvent("keydown", { key: "Tab", bubbles: true, cancelable: true }));
+    assertEqual(document.activeElement, first, "Tabフォーカスをモーダル内で循環できません。");
+
+    first.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+    await wait(300);
+    assert(!document.querySelector(".modal-overlay"), "Escapeでモーダルを閉じられません。");
+    assertEqual(document.activeElement, trigger, "閉じた後に元のフォーカスへ戻れません。");
+  });
+});
+
 test("テーマ切替は表示と保存内容を更新する", async () => {
   const previousTheme = localStorage.getItem("probplan-theme");
 
@@ -122,6 +150,90 @@ test("テーマ切替は表示と保存内容を更新する", async () => {
       localStorage.setItem("probplan-theme", previousTheme);
     }
   }
+});
+
+test("ユーザー入力をHTMLとして解釈せず表示する", async () => {
+  await withTestDocument(async root => {
+    const unsafeName = "<img src=x onerror=alert(1)>";
+    const project = createProject({ name: unsafeName });
+
+    renderProjectSection(root, new ProjectManager([project]), () => {}, () => {}, () => {}, () => {});
+
+    assertEqual(
+      root.querySelector(".project-card h3").textContent.trim(),
+      unsafeName,
+      "プロジェクト名を安全に表示できません。"
+    );
+    assertEqual(root.querySelectorAll(".project-card img").length, 0, "プロジェクト名がHTMLとして実行されます。");
+    assertEqual(escapeHtml(unsafeName), "&lt;img src=x onerror=alert(1)&gt;", "HTMLエスケープが正しくありません。");
+  });
+});
+
+test("削除取り消し通知から元の処理を実行できる", async () => {
+  await withTestDocument(async () => {
+    let undone = false;
+    showUndoToast("タスクを削除しました", () => {
+      undone = true;
+    });
+
+    const toast = document.querySelector('[role="status"]');
+    assert(toast.textContent.includes("タスクを削除しました"), "削除通知を表示できません。");
+    toast.querySelector("button").click();
+    assert(undone, "削除取り消し処理を実行できません。");
+    assert(toast.classList.contains("is-closing"), "取り消し後の閉じるアニメーションが始まりません。");
+    await wait(220);
+    assert(!document.querySelector('[role="status"]'), "取り消し後に通知が残っています。");
+    hideUndoToast();
+  });
+});
+
+test("インポート前に件数を確認し、確定後にコールバックを実行する", async () => {
+  await withTestDocument(async () => {
+    const project = createProject({ tasks: [createTask()] });
+    let confirmed = null;
+
+    showImportPreviewModal(new ProjectManager([project]), manager => {
+      confirmed = manager;
+    });
+
+    assert(document.querySelector(".modal-content").textContent.includes("プロジェクト：1件"), "インポート件数を表示できません。");
+    assertEqual(confirmed, null, "確認前にインポートを実行しています。");
+    document.getElementById("confirm-import-preview").click();
+    assert(confirmed instanceof ProjectManager, "確認後にインポートできません。");
+  });
+});
+
+test("プロジェクトのアーカイブ表示を切り替えられる", async () => {
+  await withTestDocument(async root => {
+    const archived = createProject({ id: "archived-project", name: "保管済み" });
+    archived.archived = true;
+    const manager = new ProjectManager([archived]);
+    let visible = null;
+
+    const rerenderWithArchiveState = value => {
+      visible = value;
+      renderProjectSection(
+        root,
+        manager,
+        () => {},
+        () => {},
+        () => {},
+        () => {},
+        () => {},
+        rerenderWithArchiveState,
+        value
+      );
+    };
+
+    rerenderWithArchiveState(false);
+    assertEqual(root.querySelectorAll(".project-card").length, 0, "アーカイブ済みを通常一覧に表示しています。");
+    assert(root.querySelector("#data-menu").classList.contains("hidden"), "初期状態でメニューが開いています。");
+    root.querySelector("#data-menu-button").click();
+    assertEqual(root.querySelector("#toggle-archived-projects").textContent.trim(), "アーカイブを表示", "アーカイブ切替がメニュー内にありません。");
+    root.querySelector("#toggle-archived-projects").click();
+    assertEqual(visible, true, "アーカイブ表示を切り替えられません。");
+    assertEqual(root.querySelectorAll(".project-card").length, 1, "アーカイブ済みプロジェクトを表示できません。");
+  });
 });
 
 test("プロジェクトの作成・編集・削除モーダルは各コールバックを実行する", async () => {
@@ -176,8 +288,13 @@ test("プロジェクト一覧は3件表示・追加一覧・データメニュ�
     assertEqual(root.querySelectorAll(".project-card").length, 3, "ホームに3件だけ表示できません。");
     root.querySelector("#data-menu-button").click();
     assertEqual(root.querySelector("#data-menu").classList.contains("hidden"), false, "データメニューを開けません。");
+    await wait(30);
+    assert(root.querySelector("#data-menu").classList.contains("is-open"), "データメニューの開くアニメーション状態になりません。");
     root.querySelector("#export-data-button").click();
     assertEqual(exportCount, 1, "エクスポート操作を呼び出せません。");
+    assert(!root.querySelector("#data-menu").classList.contains("is-open"), "データメニューの閉じるアニメーションを開始できません。");
+    await wait(180);
+    assert(root.querySelector("#data-menu").classList.contains("hidden"), "データメニューを閉じた後に非表示にできません。");
 
     root.querySelector("#show-more-projects").click();
     assertEqual(document.querySelectorAll(".overflow-project-card").length, 1, "追加プロジェクトをモーダルに表示できません。");
@@ -200,6 +317,9 @@ test("プロジェクトの右クリックメニューから削除確認を開�
       clientX: 20,
       clientY: 20,
     }));
+    const menuItems = [...document.querySelectorAll('[role="menuitem"]')];
+    assertEqual(menuItems[0].id, "context-toggle-archive", "アーカイブ項目が上にありません。");
+    assert(Boolean(document.querySelector("#context-toggle-archive svg")), "アーカイブ項目のSVGがありません。");
     document.getElementById("context-delete-project").click();
     document.getElementById("confirm-delete-project").click();
 
@@ -226,10 +346,12 @@ test("タスク作成・編集・完了切替・削除のUI操作を実行でき
     document.getElementById("optimistic").value = "2";
     document.getElementById("most-likely").value = "3";
     document.getElementById("pessimistic").value = "5";
+    document.getElementById("task-deadline").value = "2026-08-20";
     document.getElementById("save-task").click();
     assertEqual(updated.target, task, "編集対象を渡せません。");
     assertEqual(updated.data.name, "変更後", "タスク名を更新できません。");
     assertEqual(updated.data.pessimistic, 5, "見積もりを更新できません。");
+    assertEqual(updated.data.deadline, "2026-08-20", "タスク期限を更新できません。");
 
     const project = createProject({ tasks: [task] });
     let completion = null;
@@ -237,9 +359,15 @@ test("タスク作成・編集・完了切替・削除のUI操作を実行でき
       completion = { target, completed };
     });
     root.querySelector(".task-menu-button").click();
+    await wait(30);
+    assert(root.querySelector(".task-menu").classList.contains("is-open"), "タスクメニューの開くアニメーション状態になりません。");
     root.querySelector(".task-completion-button").click();
     assertEqual(completion.target, task, "完了対象を渡せません。");
     assertEqual(completion.completed, true, "完了状態を切り替えられません。");
+    document.body.click();
+    assert(!root.querySelector(".task-menu").classList.contains("is-open"), "タスクメニューの閉じるアニメーションを開始できません。");
+    await wait(180);
+    assert(root.querySelector(".task-menu").classList.contains("hidden"), "タスクメニューを閉じた後に非表示にできません。");
 
     let deleted = null;
     showDeleteTaskModal(task, value => {
@@ -294,6 +422,9 @@ test("プロジェクト詳細の進捗・完了予測・締切マーカーを�
       isOpen = value;
     });
 
+    const backLink = root.querySelector("#back-to-home");
+    assert(backLink, "ホーム画面への戻るリンクを表示できません。");
+    assertEqual(backLink.getAttribute("href"), "./index.html", "戻るリンクの遷移先が正しくありません。");
     assertEqual(root.querySelector("[role=progressbar]").getAttribute("aria-valuenow"), "50", "進捗バーが正しくありません。");
     root.querySelector("#toggle-deadline-settings").click();
     assertEqual(isOpen, true, "詳細設定を開けません。");

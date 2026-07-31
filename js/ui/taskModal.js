@@ -1,4 +1,11 @@
+// タスク作成・編集・削除の各モーダルを提供する。
 import { openModal, closeModal } from "./modal.js";
+import {
+  MAX_NAME_LENGTH,
+  clearFieldError,
+  showFieldError,
+  validateName,
+} from "./formValidation.js";
 
 export function showCreateTaskModal(onCreateTask) {
 
@@ -43,12 +50,29 @@ openModal(`
       <input
         id="task-name"
         type="text"
+        maxlength="${MAX_NAME_LENGTH}"
+        aria-describedby="create-task-error"
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2 outline-none focus:border-[var(--color-text)]"
         placeholder="認証画面を実装"
+      >
+      <p
+        id="create-task-error"
+        class="mt-2 min-h-5 text-sm text-[var(--color-danger)]"
+        role="alert"
+        aria-live="polite"
+      ></p>
+    </div>
+    <div class="mt-4">
+      <label for="task-deadline" class="block text-sm font-medium">期限日（任意）</label>
+      <input
+        id="task-deadline"
+        type="date"
+        class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
       >
     </div>
     <button
       id="create-task-submit"
+      type="button"
       class="mt-6 w-full rounded-md bg-[var(--color-text)] py-2 text-[var(--color-bg)]"
     >
       作成
@@ -58,18 +82,31 @@ openModal(`
 const closeButton = document.getElementById("close-task-modal");
 const submitButton = document.getElementById("create-task-submit");
 const input = document.getElementById("task-name");
+const deadlineInput = document.getElementById("task-deadline");
+const error = document.getElementById("create-task-error");
 
 closeButton.addEventListener("click", () => {
   closeModal();
 });
 
 submitButton.addEventListener("click", () => {
-  const taskName = input.value.trim();
-  if (!taskName) { return; }
+  const validation = validateName(input.value, "タスク名");
 
-  onCreateTask(taskName);
+  if (validation.error) {
+    showFieldError(error, input, validation.error);
+    return;
+  }
+
+  clearFieldError(error, [input]);
+  onCreateTask(validation.value, deadlineInput.value || null);
   closeModal();
   });
+
+input.addEventListener("keydown", event => {
+  if (event.key !== "Enter") return;
+  event.preventDefault();
+  submitButton.click();
+});
 }
 
 export function showEditTaskModal(task, onUpdateTask) {
@@ -109,53 +146,78 @@ export function showEditTaskModal(task, onUpdateTask) {
       <input
         id="task-name"
         type="text"
-        value="${task.name}"
+        maxlength="${MAX_NAME_LENGTH}"
+        aria-describedby="task-error"
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
       >
     </div>
 
     <div class="mt-4">
-      <label class="block text-sm font-medium">最短日数</label>
+      <label for="task-deadline" class="block text-sm font-medium">期限日（任意）</label>
+      <input
+        id="task-deadline"
+        type="date"
+        class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
+      >
+    </div>
+
+    <div class="mt-4">
+      <label for="optimistic" class="block text-sm font-medium">最短日数</label>
       <input
         id="optimistic"
         type="number"
-        value="${task.optimistic ?? ""}"
+        min="0"
+        step="0.1"
+        aria-describedby="task-error"
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
       >
     </div>
 
     <div class="mt-4">
-      <label class="block text-sm font-medium">最頻日数</label>
+      <label for="most-likely" class="block text-sm font-medium">最頻日数</label>
       <input
         id="most-likely"
         type="number"
-        value="${task.mostLikely ?? ""}"
+        min="0"
+        step="0.1"
+        aria-describedby="task-error"
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
       >
     </div>
 
     <div class="mt-4">
-      <label class="block text-sm font-medium">最長日数</label>
+      <label for="pessimistic" class="block text-sm font-medium">最長日数</label>
       <input
         id="pessimistic"
         type="number"
-        value="${task.pessimistic ?? ""}"
+        min="0"
+        step="0.1"
+        aria-describedby="task-error"
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
       >
     </div>
 
     <p
       id="task-error"
-      class="mt-4 text-sm text-red-500 min-h-5"
+      class="mt-4 min-h-5 text-sm text-[var(--color-danger)]"
+      role="alert"
+      aria-live="polite"
     ></p>
 
     <button
       id="save-task"
+      type="button"
       class="mt-6 w-full rounded-md bg-[var(--color-text)] py-2 text-[var(--color-bg)]"
     >
       保存
     </button>
   `);
+
+  document.getElementById("task-name").value = task.name;
+  document.getElementById("optimistic").value = task.optimistic ?? "";
+  document.getElementById("most-likely").value = task.mostLikely ?? "";
+  document.getElementById("pessimistic").value = task.pessimistic ?? "";
+  document.getElementById("task-deadline").value = task.deadline ?? "";
 
   document
     .getElementById("close-task-modal")
@@ -164,18 +226,27 @@ export function showEditTaskModal(task, onUpdateTask) {
   document
     .getElementById("save-task")
     .addEventListener("click", () => {
-      const name = document.getElementById("task-name").value.trim();
-  
+      const nameInput = document.getElementById("task-name");
+
       const optimisticInput = document.getElementById("optimistic");
       const mostLikelyInput = document.getElementById("most-likely");
       const pessimisticInput = document.getElementById("pessimistic");
+      const deadlineInput = document.getElementById("task-deadline");
 
       const error = document.getElementById("task-error");
 
-      error.textContent = "";
+      const inputs = [
+        nameInput,
+        optimisticInput,
+        mostLikelyInput,
+        pessimisticInput,
+      ];
+      clearFieldError(error, inputs);
 
-      if (name === "") {
-        error.textContent = "タスク名を入力してください";
+      const nameValidation = validateName(nameInput.value, "タスク名");
+
+      if (nameValidation.error) {
+        showFieldError(error, nameInput, nameValidation.error);
         return;
       }
 
@@ -183,12 +254,12 @@ export function showEditTaskModal(task, onUpdateTask) {
         optimisticInput.value === ""
           ? null
           : Number(optimisticInput.value);
-      
+
       const mostLikely =
         mostLikelyInput.value === ""
           ? null
           : Number(mostLikelyInput.value);
-      
+
       const pessimistic =
         pessimisticInput.value === ""
           ? null
@@ -199,16 +270,24 @@ export function showEditTaskModal(task, onUpdateTask) {
         mostLikely === null ||
         pessimistic === null
       ) {
-        error.textContent = "見積日数を全て入力してください";
+        // 3点見積もりは順序が予測の前提になるため、保存前に確認する。
+        const missingInput = [optimisticInput, mostLikelyInput, pessimisticInput]
+          .find(input => input.value === "");
+        showFieldError(error, missingInput, "見積日数を全て入力してください。");
         return;
       }
 
       if (
+        !Number.isFinite(optimistic) ||
+        !Number.isFinite(mostLikely) ||
+        !Number.isFinite(pessimistic) ||
         optimistic < 0 ||
         mostLikely < 0 ||
         pessimistic < 0
       ) {
-        error.textContent = "日数は0以上で入力してください";
+        const invalidInput = [optimisticInput, mostLikelyInput, pessimisticInput]
+          .find(input => !Number.isFinite(Number(input.value)) || Number(input.value) < 0);
+        showFieldError(error, invalidInput, "日数は0以上で入力してください。");
         return;
       }
 
@@ -216,18 +295,22 @@ export function showEditTaskModal(task, onUpdateTask) {
         optimistic > mostLikely ||
         mostLikely > pessimistic
       ) {
-        error.textContent =
-          "最短日数 ≤ 最頻日数 ≤ 最長日数の順で入力してください";
+        showFieldError(
+          error,
+          optimisticInput,
+          "最短日数 ≤ 最頻日数 ≤ 最長日数の順で入力してください。"
+        );
         return;
       }
 
       onUpdateTask(task, {
-          name,
+          name: nameValidation.value,
           optimistic,
           mostLikely,
           pessimistic,
+          deadline: deadlineInput.value || null,
       });
-        
+
       closeModal();
     });
 }

@@ -1,3 +1,4 @@
+// シミュレーション結果の配列を、テーマカラーに合わせた棒グラフへ描画する。
 export function drawHistogram(canvas, samples) {
   const ctx = canvas.getContext("2d");
 
@@ -10,6 +11,7 @@ export function drawHistogram(canvas, samples) {
   ctx.clearRect(0, 0, width, height);
 
   const bins = window.innerWidth < 640 ? 12 : 20;
+  // 小さい画面では階級数を減らして、ラベルと棒が重ならないようにする。
 
   const min = Math.min(...samples);
   const max = Math.max(...samples);

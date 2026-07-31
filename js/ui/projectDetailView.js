@@ -1,8 +1,10 @@
+// 詳細画面のヘッダー、進捗バー、完了予測、締切設定を描画する。
 import {
   getProjectCompletionForecast,
   getProjectDeadlineForecast,
 } from "../simulation/projectSimulation.js";
 import { showEditProjectModal } from "./projectModal.js";
+import { escapeHtml } from "./escapeHtml.js";
 
 function formatForecastDate(duration, now = new Date()) {
   const date = new Date(
@@ -21,6 +23,7 @@ function formatForecastDate(duration, now = new Date()) {
 }
 
 function renderProjectCompletionForecast(project, deadlineForecast) {
+  // 見積もり不足や完了済みも、数値の代わりに理由を表示する。
   if (project.tasks.length === 0) {
     return `
       <p class="mt-5 border-t border-[var(--color-text)]/10 pt-4 text-xs text-[var(--color-text)]/60">
@@ -83,6 +86,7 @@ function renderProjectCompletionForecast(project, deadlineForecast) {
 }
 
 function renderDeadlineForecast(forecast) {
+  // 締切予測の状態ごとに、ユーザーが次に取るべき行動を示す。
 
   if (forecast.status === "available") {
     return "";
@@ -132,9 +136,31 @@ export function renderProjectHeader(
 
   projectHeader.innerHTML = `
     <div class="max-w-2xl">
+      <a
+        id="back-to-home"
+        href="./index.html"
+        class="mb-6 inline-flex items-center gap-1.5 rounded-md px-2 py-1.5 text-sm text-[var(--color-text)]/60 transition-colors hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)] focus:outline-none focus:ring-2 focus:ring-[var(--color-text)]/30"
+        aria-label="ホーム画面に戻る"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-4 w-4"
+          aria-hidden="true"
+        >
+          <path d="m15 18-6-6 6-6" />
+        </svg>
+        ホームに戻る
+      </a>
+
       <div class="group flex items-center gap-2">
         <h1 class="text-3xl font-bold">
-          ${project.name}
+          ${escapeHtml(project.name)}
         </h1>
 
         <button
@@ -289,6 +315,7 @@ export function renderProjectHeader(
     });
 
   deadlineSettingsButton.addEventListener("click", () => {
+    // 開閉状態をDOM・ARIA・親画面の状態へ同時に反映する。
     const isOpen = deadlineSettings.classList.toggle("is-open");
 
     deadlineSettingsButton.setAttribute("aria-expanded", String(isOpen));

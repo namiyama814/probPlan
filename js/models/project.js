@@ -1,3 +1,4 @@
+// プロジェクト本体。タスクの集合と、プロジェクト単位の進捗を管理する。
 import { Task } from "./task.js";
 
 export class Project {
@@ -5,11 +6,13 @@ export class Project {
     id,
     name,
     deadline = null,
+    archived = false,
     tasks = []
   }) {
     this.id = id;
     this.name = name;
     this.deadline = deadline;
+    this.archived = archived;
     this.tasks = tasks;
   }
   
@@ -27,6 +30,7 @@ export class Project {
       id: data.id,
       name: data.name,
       deadline: data.deadline ?? null,
+      archived: data.archived ?? false,
       tasks: data.tasks.map(task => Task.fromJSON(task))
     });
   }
@@ -37,6 +41,10 @@ export class Project {
 
   setName(name) {
     this.name = name;
+  }
+
+  setArchived(isArchived) {
+    this.archived = isArchived;
   }
 
   addTask(task) {
@@ -52,6 +60,7 @@ export class Project {
   }
 
   getProgress() {
+    // 各タスクの完了率を平均し、プロジェクト全体の進捗として表示する。
     if (this.tasks.length === 0) return 0;
 
     const totalProgress = this.tasks.reduce(

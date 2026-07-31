@@ -1,8 +1,10 @@
+// タスクシミュレーションの結果、ヒストグラム、共有操作をまとめて表示する。
 import { openModal, closeModal } from "./modal.js";
 import { runTaskSimulation } from "../simulation/taskSimulation.js";
 import { drawHistogram } from "../simulation/histogram.js";
 
 async function copyToClipboard(text) {
+  // 標準Clipboard APIが使えない環境では、従来のtextarea方式へフォールバックする。
   if (navigator.clipboard?.writeText) {
     try {
       await navigator.clipboard.writeText(text);
@@ -31,6 +33,7 @@ async function copyToClipboard(text) {
 export function showSimulationModal(task) {
 
   const result = runTaskSimulation(task);
+  // 共有文言は画面の確率表示と同じ結果から生成する。
   const shareText = `${task.name}は50%の確率で${Math.round(result.p50)}日、80%の確率で${Math.round(result.p80)}日、90%の確率で${Math.round(result.p90)}日で終了します`;
 
   openModal(`

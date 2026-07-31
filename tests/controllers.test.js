@@ -1,3 +1,4 @@
+// コントローラーがモデル変更と保存処理を正しく連携するかを確認する。
 import {
   createProject,
   deleteProject,
@@ -62,7 +63,6 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
       "2026-08-20",
       "締切日が保存されていません。"
     );
-
     deleteTask(manager, project, task.id);
     assertEqual(project.tasks.length, 0, "タスクを削除できません。");
 
@@ -72,6 +72,21 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
       StorageService.load().projects.length === 0,
       "プロジェクト削除が保存されていません。"
     );
+  } finally {
+    if (savedData === null) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, savedData);
+    }
+  }
+});
+
+test("壊れた保存データがあっても読み込みで画面を壊さない", () => {
+  const savedData = localStorage.getItem(STORAGE_KEY);
+
+  try {
+    localStorage.setItem(STORAGE_KEY, "{壊れたJSON");
+    assertEqual(StorageService.load(), null, "壊れた保存データを安全に扱えません。");
   } finally {
     if (savedData === null) {
       localStorage.removeItem(STORAGE_KEY);
