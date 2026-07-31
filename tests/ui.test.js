@@ -28,6 +28,7 @@ import {
 } from "../js/ui/taskModal.js";
 import { renderTaskSection } from "../js/ui/taskView.js";
 import { initializeTheme } from "../js/ui/theme.js";
+import { hideUndoToast, showUndoToast } from "../js/ui/undoToast.js";
 import { escapeHtml } from "../js/ui/escapeHtml.js";
 import { assert, assertEqual, createTestSuite } from "./testUtils.js";
 
@@ -140,6 +141,22 @@ test("ユーザー入力をHTMLとして解釈せず表示する", async () => {
     );
     assertEqual(root.querySelectorAll(".project-card img").length, 0, "プロジェクト名がHTMLとして実行されます。");
     assertEqual(escapeHtml(unsafeName), "&lt;img src=x onerror=alert(1)&gt;", "HTMLエスケープが正しくありません。");
+  });
+});
+
+test("削除取り消し通知から元の処理を実行できる", async () => {
+  await withTestDocument(async () => {
+    let undone = false;
+    showUndoToast("タスクを削除しました", () => {
+      undone = true;
+    });
+
+    const toast = document.querySelector('[role="status"]');
+    assert(toast.textContent.includes("タスクを削除しました"), "削除通知を表示できません。");
+    toast.querySelector("button").click();
+    assert(undone, "削除取り消し処理を実行できません。");
+    assert(!document.querySelector('[role="status"]'), "取り消し後に通知が残っています。");
+    hideUndoToast();
   });
 });
 

@@ -17,6 +17,7 @@ import {
 } from "./controllers/projectController.js";
 import { initializeTheme } from "./ui/theme.js";
 import { initializeTaskSearch } from "./ui/taskSearch.js";
+import { showUndoToast } from "./ui/undoToast.js";
 
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
@@ -99,12 +100,18 @@ function onUpdateTask(task, data) {
 }
 
 function onDeleteTask(task) {
+  const originalIndex = project.tasks.indexOf(task);
   deleteTask(
     manager,
     project,
     task.id
   );
   render();
+  showUndoToast("タスクを削除しました", () => {
+    project.tasks.splice(originalIndex, 0, task);
+    StorageService.save(manager);
+    render();
+  });
 }
 
 function onSetTaskCompleted(task, isCompleted) {

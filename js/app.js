@@ -9,6 +9,7 @@ import { renderProjectSection } from "./ui/projectView.js";
 import { renderRecentTaskSection } from "./ui/recentTaskView.js";
 import { initializeTheme } from "./ui/theme.js";
 import { initializeTaskSearch } from "./ui/taskSearch.js";
+import { showUndoToast } from "./ui/undoToast.js";
 import { shouldShowTutorial, showTutorial } from "./ui/tutorialModal.js";
 import {
   createExportFile,
@@ -51,8 +52,14 @@ function onCreateProject(projectName, deadline) {
 };
 
 function onDeleteProject(project) {
+  const originalIndex = manager.projects.indexOf(project);
   deleteProject(manager, project.id);
   render();
+  showUndoToast("プロジェクトを削除しました", () => {
+    manager.projects.splice(originalIndex, 0, project);
+    StorageService.save(manager);
+    render();
+  });
 }
 
 function showDataTransferStatus(message, isError = false) {
