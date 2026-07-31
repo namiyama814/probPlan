@@ -78,6 +78,7 @@ function isValidData(data) {
       projectIds.has(project.id) ||
       !isValidName(project.name) ||
       !isOptionalDeadline(project.deadline) ||
+      (project.archived !== undefined && typeof project.archived !== "boolean") ||
       !Array.isArray(project.tasks)) {
       return false;
     }

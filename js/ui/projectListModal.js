@@ -3,7 +3,7 @@ import { openModal, closeModal } from "./modal.js";
 import { bindProjectContextMenu } from "./projectContextMenu.js";
 import { escapeHtml } from "./escapeHtml.js";
 
-export function showProjectListModal(projects, onDeleteProject) {
+export function showProjectListModal(projects, onDeleteProject, onToggleArchive) {
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">その他のプロジェクト</h2>
@@ -93,7 +93,8 @@ export function showProjectListModal(projects, onDeleteProject) {
       bindProjectContextMenu(
         button,
         project,
-        onDeleteProject
+        onDeleteProject,
+        onToggleArchive
       );
     });
 }

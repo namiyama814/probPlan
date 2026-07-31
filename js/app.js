@@ -4,6 +4,7 @@ import { StorageService } from "./services/storageService.js";
 import {
   createProject,
   deleteProject,
+  toggleProjectArchive,
 } from "./controllers/projectController.js";
 import { renderProjectSection } from "./ui/projectView.js";
 import { renderRecentTaskSection } from "./ui/recentTaskView.js";
@@ -22,6 +23,7 @@ const projectSection = document.getElementById("project-section");
 const taskSection = document.getElementById("task-section");
 
 let manager = StorageService.load();
+let showArchivedProjects = false;
 
 if (!manager) {
   manager = new ProjectManager();
@@ -38,7 +40,10 @@ function render() {
     onCreateProject,
     onDeleteProject,
     exportData,
-    importData
+    importData,
+    onToggleProjectArchive,
+    onToggleArchivedProjects,
+    showArchivedProjects
   );
 
   renderRecentTaskSection(
@@ -61,6 +66,16 @@ function onDeleteProject(project) {
     StorageService.save(manager);
     render();
   });
+}
+
+function onToggleProjectArchive(project) {
+  toggleProjectArchive(manager, project);
+  render();
+}
+
+function onToggleArchivedProjects(isVisible) {
+  showArchivedProjects = isVisible;
+  render();
 }
 
 function showDataTransferStatus(message, isError = false) {

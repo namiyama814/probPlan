@@ -6,11 +6,13 @@ export class Project {
     id,
     name,
     deadline = null,
+    archived = false,
     tasks = []
   }) {
     this.id = id;
     this.name = name;
     this.deadline = deadline;
+    this.archived = archived;
     this.tasks = tasks;
   }
   
@@ -28,6 +30,7 @@ export class Project {
       id: data.id,
       name: data.name,
       deadline: data.deadline ?? null,
+      archived: data.archived ?? false,
       tasks: data.tasks.map(task => Task.fromJSON(task))
     });
   }
@@ -38,6 +41,10 @@ export class Project {
 
   setName(name) {
     this.name = name;
+  }
+
+  setArchived(isArchived) {
+    this.archived = isArchived;
   }
 
   addTask(task) {

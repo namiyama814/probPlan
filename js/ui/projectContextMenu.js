@@ -30,7 +30,8 @@ function openProjectContextMenu(
   x,
   y,
   project,
-  onDeleteProject
+  onDeleteProject,
+  onToggleArchive
 ) {
   // 既存メニューを閉じてから新しい位置に1つだけ表示する。
   closeProjectContextMenu();
@@ -69,6 +70,14 @@ function openProjectContextMenu(
       </svg>
       プロジェクトを削除
     </button>
+    <button
+      id="context-toggle-archive"
+      type="button"
+      role="menuitem"
+      class="mt-1 flex w-full items-center gap-3 rounded-sm px-3 py-2 text-left text-sm outline-none transition-colors hover:bg-[var(--color-text)]/5 focus:bg-[var(--color-text)]/5"
+    >
+      ${project.archived ? "アーカイブを解除" : "アーカイブする"}
+    </button>
   `;
 
   document.body.appendChild(contextMenu);
@@ -94,6 +103,13 @@ function openProjectContextMenu(
       showDeleteProjectModal(project, onDeleteProject);
     });
 
+  contextMenu
+    .querySelector("#context-toggle-archive")
+    .addEventListener("click", () => {
+      closeProjectContextMenu();
+      onToggleArchive(project);
+    });
+
   document.addEventListener("pointerdown", handlePointerDown);
   document.addEventListener("keydown", handleKeydown);
   window.addEventListener("resize", closeProjectContextMenu);
@@ -105,7 +121,8 @@ function openProjectContextMenu(
 export function bindProjectContextMenu(
   card,
   project,
-  onDeleteProject
+  onDeleteProject,
+  onToggleArchive = () => {}
 ) {
   card.addEventListener("contextmenu", event => {
     event.preventDefault();
@@ -114,7 +131,8 @@ export function bindProjectContextMenu(
       event.clientX,
       event.clientY,
       project,
-      onDeleteProject
+      onDeleteProject,
+      onToggleArchive
     );
   });
 
@@ -132,7 +150,8 @@ export function bindProjectContextMenu(
       cardRect.left + 16,
       cardRect.top + 16,
       project,
-      onDeleteProject
+      onDeleteProject,
+      onToggleArchive
     );
   });
 }

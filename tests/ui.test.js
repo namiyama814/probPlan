@@ -201,6 +201,36 @@ test("インポート前に件数を確認し、確定後にコールバック�
   });
 });
 
+test("プロジェクトのアーカイブ表示を切り替えられる", async () => {
+  await withTestDocument(async root => {
+    const archived = createProject({ id: "archived-project", name: "保管済み" });
+    archived.archived = true;
+    const manager = new ProjectManager([archived]);
+    let visible = null;
+
+    const rerenderWithArchiveState = value => {
+      visible = value;
+      renderProjectSection(
+        root,
+        manager,
+        () => {},
+        () => {},
+        () => {},
+        () => {},
+        () => {},
+        rerenderWithArchiveState,
+        value
+      );
+    };
+
+    rerenderWithArchiveState(false);
+    assertEqual(root.querySelectorAll(".project-card").length, 0, "アーカイブ済みを通常一覧に表示しています。");
+    root.querySelector("#toggle-archived-projects").click();
+    assertEqual(visible, true, "アーカイブ表示を切り替えられません。");
+    assertEqual(root.querySelectorAll(".project-card").length, 1, "アーカイブ済みプロジェクトを表示できません。");
+  });
+});
+
 test("プロジェクトの作成・編集・削除モーダルは各コールバックを実行する", async () => {
   await withTestDocument(async () => {
     let created = null;

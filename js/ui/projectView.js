@@ -9,6 +9,7 @@ import {
 
 let activeDataMenu = null;
 let activeDataMenuButton = null;
+let showArchivedProjects = false;
 
 function closeDataMenu() {
   activeDataMenu?.classList.add("hidden");
@@ -61,9 +62,13 @@ export function renderProjectSection(
   onCreateProject,
   onDeleteProject,
   onExportData,
-  onImportData
+  onImportData,
+  onToggleProjectArchive = () => {},
+  onToggleArchivedProjects = () => {},
+  archivedProjectsVisible = false
 ) {
   // 再描画時に古い右クリック／データメニューのイベントを解除する。
+  showArchivedProjects = archivedProjectsVisible;
   closeProjectContextMenu();
   closeDataMenu();
 
@@ -72,6 +77,14 @@ export function renderProjectSection(
       <h2 class="text-lg font-bold">プロジェクト</h2>
 
       <div class="flex items-center gap-1">
+        <button
+          id="toggle-archived-projects"
+          type="button"
+          class="rounded-md px-2 py-1 text-xs text-[var(--color-text)]/60 transition-colors hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)]"
+          aria-pressed="${showArchivedProjects}"
+        >
+          ${showArchivedProjects ? "通常を表示" : "アーカイブを表示"}
+        </button>
         <button
           id="add-project-button"
           class="hidden h-9 w-9 items-center justify-center rounded-lg transition-colors hover:bg-[var(--color-text)]/5"
@@ -200,6 +213,12 @@ export function renderProjectSection(
   const exportButton = document.getElementById("export-data-button");
   const importButton = document.getElementById("import-data-button");
   const importInput = document.getElementById("import-data-input");
+  const archivedToggle = document.getElementById("toggle-archived-projects");
+
+  archivedToggle.addEventListener("click", () => {
+    showArchivedProjects = !showArchivedProjects;
+    onToggleArchivedProjects(showArchivedProjects);
+  });
 
   addButton.addEventListener("click", () => {
     showCreateProjectModal(onCreateProject);
@@ -239,7 +258,11 @@ export function renderProjectSection(
     onImportData(event);
   });
 
-  if (manager.projects.length === 0) {
+  const listedProjects = manager.projects.filter(
+    project => showArchivedProjects || !project.archived
+  );
+
+  if (listedProjects.length === 0) {
 
     addButton.classList.remove("flex");
     addButton.classList.add("hidden");
@@ -270,8 +293,8 @@ export function renderProjectSection(
   addButton.classList.remove("hidden");
   addButton.classList.add("flex");
 
-  const visibleProjects = manager.projects.slice(0, 3);
-  const overflowProjects = manager.projects.slice(3);
+  const visibleProjects = listedProjects.slice(0, 3);
+  const overflowProjects = listedProjects.slice(3);
 
   content.innerHTML = visibleProjects.map(project => {
     const progress = project.getProgress();
@@ -281,9 +304,10 @@ export function renderProjectSection(
         class="project-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
         data-project-id="${project.id}"
       >
-        <h3 class="font-semibold">
+        <h3 class="font-semibold ${project.archived ? "text-[var(--color-text)]/50" : ""}">
         ${escapeHtml(project.name)}
         </h3>
+        ${project.archived ? `<span class="text-xs text-[var(--color-muted)]">アーカイブ済み</span>` : ""}
 
         <div class="mt-1 flex items-center justify-between text-sm">
           <span class="text-[var(--color-text)]/60">
@@ -325,7 +349,8 @@ export function renderProjectSection(
     bindProjectContextMenu(
       button,
       project,
-      onDeleteProject
+      onDeleteProject,
+      onToggleProjectArchive
     );
   });
 
@@ -334,7 +359,8 @@ export function renderProjectSection(
     ?.addEventListener("click", () => {
       showProjectListModal(
         overflowProjects,
-        onDeleteProject
+        onDeleteProject,
+        onToggleProjectArchive
       );
     });
 }

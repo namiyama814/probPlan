@@ -26,3 +26,8 @@ export function updateProjectName(manager, project, projectName) {
   project.setName(projectName);
   StorageService.save(manager);
 }
+
+export function toggleProjectArchive(manager, project) {
+  project.setArchived(!project.archived);
+  StorageService.save(manager);
+}
