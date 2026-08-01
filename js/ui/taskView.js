@@ -181,20 +181,22 @@ export function renderTaskSection(
             class="task-card min-w-0 flex-1 text-left"
             data-task-id="${task.id}"
           >
-            <h3 class="truncate font-medium ${
-              task.status === "completed"
-                ? "text-[var(--color-text)]/50 line-through"
-                : ""
-            }">
-                ${escapeHtml(task.name)}
-            </h3>
-            <span class="mt-1 inline-flex rounded-full px-2 py-0.5 text-xs ${
-              task.priority === "high"
-                ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
-                : "bg-[var(--color-text)]/10 text-[var(--color-text)]/70"
-            }">
-              優先度：${PRIORITY_LABELS[task.priority] ?? PRIORITY_LABELS.medium}
-            </span>
+            <div class="flex min-w-0 items-center gap-2">
+              <h3 class="min-w-0 truncate font-medium ${
+                task.status === "completed"
+                  ? "text-[var(--color-text)]/50 line-through"
+                  : ""
+              }">
+                  ${escapeHtml(task.name)}
+              </h3>
+              <span class="shrink-0 rounded-full px-2 py-0.5 text-xs ${
+                task.priority === "high"
+                  ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
+                  : "bg-[var(--color-text)]/10 text-[var(--color-text)]/70"
+              }" aria-label="優先度 ${PRIORITY_LABELS[task.priority] ?? PRIORITY_LABELS.medium}">
+                ${PRIORITY_LABELS[task.priority] ?? PRIORITY_LABELS.medium}
+              </span>
+            </div>
 
             <p class="mt-1 text-sm text-[var(--color-text)]/60">
               ${task.status === "completed" ? "完了 · " : ""}${
