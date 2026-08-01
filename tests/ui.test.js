@@ -40,6 +40,7 @@ function createTask({
   id = crypto.randomUUID(),
   name = "テストタスク",
   status = "todo",
+  deadline = null,
   optimistic = 1,
   mostLikely = 2,
   pessimistic = 3,
@@ -49,6 +50,7 @@ function createTask({
     id,
     name,
     status,
+    deadline,
     optimistic,
     mostLikely,
     pessimistic,
@@ -421,7 +423,7 @@ test("タスク一覧を状態と期限でフィルターできる", async () =>
     root.querySelector("#task-filter").value = "completed";
     root.querySelector("#task-filter").dispatchEvent(new Event("change"));
     assertEqual(root.querySelectorAll(".task-card").length, 1, "完了済みフィルターが機能しません。");
-    assertEqual(root.querySelector(".task-card").textContent.trim(), "完了", "完了済みタスクを絞り込めません。");
+    assertEqual(root.querySelector(".task-card h3").textContent.trim(), "完了", "完了済みタスクを絞り込めません。");
 
     root.querySelector("#task-filter").value = "overdue";
     root.querySelector("#task-filter").dispatchEvent(new Event("change"));
