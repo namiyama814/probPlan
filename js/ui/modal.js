@@ -18,6 +18,9 @@ function removeOverlay(target) {
 export function openModal(content, options = {}) {
   // 新しいモーダルを開く前に、前のモーダルを即時除去して二重表示を防ぐ。
   closeModal(true);
+  document.querySelectorAll(".modal-overlay").forEach(existingOverlay => {
+    existingOverlay.remove();
+  });
 
   const {
     maxWidth = "max-w-md",

@@ -86,7 +86,7 @@ openModal(`
     >
       作成
     </button>
-`, { onBackdrop: () => saveTask() });
+`, { onBackdrop: () => saveTask({ silent: true }) });
 
 const closeButton = document.getElementById("close-task-modal");
 const submitButton = document.getElementById("create-task-submit");
@@ -99,10 +99,11 @@ closeButton.addEventListener("click", () => {
   closeModal();
 });
 
-saveTask = () => {
+saveTask = ({ silent = false } = {}) => {
   const validation = validateName(input.value, "タスク名");
 
   if (validation.error) {
+    if (silent) return true;
     showFieldError(error, input, validation.error);
     return false;
   }
@@ -235,7 +236,7 @@ export function showEditTaskModal(task, onUpdateTask) {
     >
       保存
     </button>
-  `, { onBackdrop: () => saveTask() });
+  `, { onBackdrop: () => saveTask({ silent: true }) });
 
   document.getElementById("task-name").value = task.name;
   document.getElementById("optimistic").value = task.optimistic ?? "";
@@ -254,7 +255,7 @@ export function showEditTaskModal(task, onUpdateTask) {
       saveTask();
     });
 
-  saveTask = () => {
+  saveTask = ({ silent = false } = {}) => {
       const nameInput = document.getElementById("task-name");
 
       const optimisticInput = document.getElementById("optimistic");
@@ -276,9 +277,23 @@ export function showEditTaskModal(task, onUpdateTask) {
       const nameValidation = validateName(nameInput.value, "タスク名");
 
       if (nameValidation.error) {
+        if (silent) return true;
         showFieldError(error, nameInput, nameValidation.error);
         return false;
       }
+
+      const saveEditableFieldsOnly = () => {
+        onUpdateTask(task, {
+          name: nameValidation.value,
+          optimistic: task.optimistic,
+          mostLikely: task.mostLikely,
+          pessimistic: task.pessimistic,
+          deadline: deadlineInput.value || null,
+          priority: priorityInput.value,
+        });
+        closeModal();
+        return true;
+      };
 
       const optimistic =
         optimisticInput.value === ""
@@ -300,6 +315,9 @@ export function showEditTaskModal(task, onUpdateTask) {
         mostLikely === null ||
         pessimistic === null
       ) {
+        if (silent) {
+          return saveEditableFieldsOnly();
+        }
         // 3点見積もりは順序が予測の前提になるため、保存前に確認する。
         const missingInput = [optimisticInput, mostLikelyInput, pessimisticInput]
           .find(input => input.value === "");
@@ -315,6 +333,9 @@ export function showEditTaskModal(task, onUpdateTask) {
         mostLikely < 0 ||
         pessimistic < 0
       ) {
+        if (silent) {
+          return saveEditableFieldsOnly();
+        }
         const invalidInput = [optimisticInput, mostLikelyInput, pessimisticInput]
           .find(input => !Number.isFinite(Number(input.value)) || Number(input.value) < 0);
         showFieldError(error, invalidInput, "日数は0以上で入力してください。");
@@ -325,6 +346,9 @@ export function showEditTaskModal(task, onUpdateTask) {
         optimistic > mostLikely ||
         mostLikely > pessimistic
       ) {
+        if (silent) {
+          return saveEditableFieldsOnly();
+        }
         showFieldError(
           error,
           optimisticInput,

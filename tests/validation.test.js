@@ -14,6 +14,10 @@ const suite = createTestSuite();
 const { test } = suite;
 const TOO_LONG_NAME = "あ".repeat(101);
 
+function wait(milliseconds) {
+  return new Promise(resolve => window.setTimeout(resolve, milliseconds));
+}
+
 function errorText(id) {
   return document.getElementById(id).textContent;
 }
@@ -136,6 +140,36 @@ test("タスク見積もりの未入力・範囲・順序エラーを表示す�
     assertEqual(errorText("task-error"), "最短日数 ≤ 最頻日数 ≤ 最長日数の順で入力してください。", "順序エラーを表示できません。");
     assertEqual(document.activeElement, optimistic, "順序エラーの見積欄にフォーカスできません。");
     assertEqual(updated, null, "不正な見積もりを更新してしまいました。");
+  } finally {
+    closeModal(true);
+  }
+});
+
+test("タスク編集モーダルは見積未入力でも背景クリックで閉じられる", async () => {
+  let updated = null;
+  const task = {
+    name: "編集前",
+    optimistic: 1,
+    mostLikely: 2,
+    pessimistic: 3,
+    deadline: null,
+    priority: "medium",
+  };
+
+  try {
+    showEditTaskModal(task, (_task, data) => {
+      updated = data;
+    });
+
+    document.getElementById("task-name").value = "背景クリックで保存";
+    document.getElementById("most-likely").value = "";
+    document.querySelector(".modal-overlay").click();
+
+    await wait(500);
+
+    assertEqual(document.querySelector(".modal-overlay"), null, "背景クリックでモーダルを閉じられません。");
+    assertEqual(updated.name, "背景クリックで保存", "背景クリック時に保存可能な入力内容を保存できません。");
+    assertEqual(updated.mostLikely, 2, "未入力の見積で既存値を壊してしまいました。");
   } finally {
     closeModal(true);
   }
