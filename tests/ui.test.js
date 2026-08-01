@@ -385,20 +385,23 @@ test("タスク作成・編集・完了切替・削除のUI操作を実行でき
   });
 });
 
-test("ホームの最新未完了タスク表示とタスク検索・クリア操作を確認できる", async () => {
+test("ホームの期限優先未完了タスク表示とタスク検索・クリア操作を確認できる", async () => {
   await withTestDocument(async root => {
     const project = createProject({
       id: "search-project",
       name: "検索プロジェクト",
       tasks: [
         createTask({ id: "todo", name: "認証画面", createdAt: "2026-07-31T00:00:00.000Z" }),
+        createTask({ id: "overdue", name: "期限超過タスク", deadline: "2020-01-01" }),
         createTask({ id: "done", name: "完了済み", status: "completed" }),
       ],
     });
     const manager = new ProjectManager([project]);
 
     renderRecentTaskSection(root, manager);
-    assertEqual(root.querySelectorAll(".recent-task-card").length, 1, "完了済みタスクを除外できません。");
+    assertEqual(root.querySelectorAll(".recent-task-card").length, 2, "完了済みタスクを除外できません。");
+    assertEqual(root.querySelector(".recent-task-card h3").textContent.trim(), "期限超過タスク", "期限超過タスクを先頭に表示できません。");
+    assert(root.textContent.includes("期限超過"), "期限超過ラベルを表示できません。");
 
     showTaskSearchModal(manager);
     const input = document.getElementById("task-search-input");

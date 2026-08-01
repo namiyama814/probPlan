@@ -1,6 +1,13 @@
 // 複数プロジェクトを横断して検索・一覧取得するコレクションモデル。
 import { Project } from "./project.js";
 
+function getDeadlineTimestamp(deadline) {
+  if (typeof deadline !== "string") return null;
+
+  const timestamp = Date.parse(`${deadline}T00:00:00`);
+  return Number.isNaN(timestamp) ? null : timestamp;
+}
+
 export class ProjectManager {
   constructor(projects = []) {
     this.projects = projects;
@@ -58,10 +65,12 @@ export class ProjectManager {
         )
         .map(task => {
           const timestamp = Date.parse(task.createdAt);
+          const deadlineTimestamp = getDeadlineTimestamp(task.deadline);
 
           return {
             task,
             project,
+            deadlineTimestamp,
             timestamp: Number.isNaN(timestamp) ? null : timestamp,
             fallbackOrder: fallbackOrder++,
           };
@@ -70,6 +79,14 @@ export class ProjectManager {
 
     return tasks
       .sort((a, b) => {
+        if (a.deadlineTimestamp !== null && b.deadlineTimestamp !== null) {
+          return a.deadlineTimestamp - b.deadlineTimestamp ||
+            b.fallbackOrder - a.fallbackOrder;
+        }
+
+        if (a.deadlineTimestamp !== null) return -1;
+        if (b.deadlineTimestamp !== null) return 1;
+
         if (a.timestamp !== null && b.timestamp !== null) {
           return b.timestamp - a.timestamp ||
             b.fallbackOrder - a.fallbackOrder;

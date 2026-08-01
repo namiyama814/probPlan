@@ -1,5 +1,6 @@
-// ホーム画面に最新の未完了タスクだけを表示する。
+// ホーム画面に期限優先の未完了タスクだけを表示する。
 import { escapeHtml } from "./escapeHtml.js";
+import { getTaskDeadlineInfo } from "./taskDeadline.js";
 
 export function renderRecentTaskSection(taskSection, manager) {
   const recentTasks = manager.getRecentTasks(3, {
@@ -20,7 +21,15 @@ export function renderRecentTaskSection(taskSection, manager) {
             </p>
           </div>
         `
-        : recentTasks.map(({ task, project }) => `
+        : recentTasks.map(({ task, project }) => {
+          const deadline = getTaskDeadlineInfo(task.deadline);
+          const deadlineMarkup = deadline
+            ? `<p class="mt-1 text-xs ${deadline.isOverdue ? "text-[var(--color-danger)]" : "text-[var(--color-text)]/60"}">
+                ${deadline.isOverdue ? "期限超過" : "期限"}：${deadline.label}
+              </p>`
+            : "";
+
+          return `
           <button
             class="recent-task-card w-full rounded-xl p-4 text-left transition-colors hover:bg-[var(--color-text)]/5"
             data-project-id="${project.id}"
@@ -35,9 +44,12 @@ export function renderRecentTaskSection(taskSection, manager) {
               <p class="mt-1 truncate text-sm text-[var(--color-text)]/60">
                 ${escapeHtml(project.name)}
               </p>
+
+              ${deadlineMarkup}
             </div>
           </button>
-        `).join("")}
+        `;
+        }).join("")}
     </div>
   `;
 
