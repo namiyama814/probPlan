@@ -57,6 +57,7 @@ function isValidTask(task) {
     isValidId(task.id) &&
     isValidName(task.name) &&
     isOptionalDeadline(task.deadline) &&
+    (task.priority === undefined || ["high", "medium", "low"].includes(task.priority)) &&
     areValidEstimates(task) &&
     (task.status === undefined ||
       task.status === "todo" ||

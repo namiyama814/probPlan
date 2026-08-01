@@ -12,6 +12,8 @@ let activeTaskMenu = null;
 let activeTaskMenuButton = null;
 let taskMenuCloseTimer = null;
 
+const PRIORITY_LABELS = { high: "高", medium: "中", low: "低" };
+
 function handleMenuKeydown(event) {
   if (event.key === "Escape") {
     const button = activeTaskMenuButton;
@@ -135,7 +137,14 @@ export function renderTaskSection(
             }">
                 ${escapeHtml(task.name)}
             </h3>
-      
+            <span class="mt-1 inline-flex rounded-full px-2 py-0.5 text-xs ${
+              task.priority === "high"
+                ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
+                : "bg-[var(--color-text)]/10 text-[var(--color-text)]/70"
+            }">
+              優先度：${PRIORITY_LABELS[task.priority] ?? PRIORITY_LABELS.medium}
+            </span>
+
             <p class="mt-1 text-sm text-[var(--color-text)]/60">
               ${task.status === "completed" ? "完了 · " : ""}${
                 task.optimistic === null

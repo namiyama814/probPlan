@@ -81,12 +81,13 @@ if (!projectId) {
   render();
 }
 
-function onCreateTask(taskName, deadline) {
+function onCreateTask(taskName, deadline, priority) {
   createTask(
     manager,
     project,
     taskName,
-    deadline
+    deadline,
+    priority
   );
   render();
 }

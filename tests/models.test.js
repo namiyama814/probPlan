@@ -44,6 +44,20 @@ test("タスクを完了・未完了に切り替え、見積もりを更新で�
   assertEqual(task.pessimistic, 9, "見積もりを更新できません。");
 });
 
+test("タスクの優先度を保持・更新できる", () => {
+  const task = new Task({ id: "priority-task", name: "優先タスク", priority: "high" });
+  assertEqual(task.priority, "high", "優先度を保持できません。");
+
+  task.update({
+    name: task.name,
+    optimistic: 1,
+    mostLikely: 2,
+    pessimistic: 3,
+    priority: "low",
+  });
+  assertEqual(task.priority, "low", "優先度を更新できません。");
+});
+
 test("プロジェクト進捗を完了タスクの割合から計算できる", () => {
   const project = new Project({
     id: "project-1",

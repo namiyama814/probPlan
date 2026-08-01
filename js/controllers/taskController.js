@@ -2,10 +2,11 @@
 import { Task } from "../models/task.js";
 import { StorageService } from "../services/storageService.js";
 
-export function createTask(manager, project, taskName, deadline = null) {
+export function createTask(manager, project, taskName, deadline = null, priority = "medium") {
   const task = Task.create({
     name: taskName,
     deadline,
+    priority,
   });
 
   project.addTask(task);
