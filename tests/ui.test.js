@@ -408,6 +408,27 @@ test("ホームの最新未完了タスク表示とタスク検索・クリア�
   });
 });
 
+test("タスク一覧を状態と期限でフィルターできる", async () => {
+  await withTestDocument(async root => {
+    const project = createProject({
+      tasks: [
+        createTask({ id: "todo-task", name: "未完了", deadline: "2020-01-01" }),
+        createTask({ id: "done-task", name: "完了", status: "completed" }),
+      ],
+    });
+    renderTaskSection(root, project, () => {}, () => {}, () => {}, () => {});
+
+    root.querySelector("#task-filter").value = "completed";
+    root.querySelector("#task-filter").dispatchEvent(new Event("change"));
+    assertEqual(root.querySelectorAll(".task-card").length, 1, "完了済みフィルターが機能しません。");
+    assertEqual(root.querySelector(".task-card").textContent.trim(), "完了", "完了済みタスクを絞り込めません。");
+
+    root.querySelector("#task-filter").value = "overdue";
+    root.querySelector("#task-filter").dispatchEvent(new Event("change"));
+    assertEqual(root.querySelectorAll(".task-card").length, 1, "期限超過フィルターが機能しません。");
+  });
+});
+
 test("プロジェクト詳細の進捗・完了予測・締切マーカーを開閉できる", async () => {
   await withTestDocument(async root => {
     const project = createProject({

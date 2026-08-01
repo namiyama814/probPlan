@@ -11,6 +11,8 @@ import {
 let activeTaskMenu = null;
 let activeTaskMenuButton = null;
 let taskMenuCloseTimer = null;
+let taskFilter = "all";
+let taskSort = "created";
 
 const PRIORITY_LABELS = { high: "高", medium: "中", low: "低" };
 
@@ -74,6 +76,31 @@ export function renderTaskSection(
   // タスク更新後の再描画で、古いメニュー状態とイベントを残さない。
   closeActiveTaskMenu();
 
+  const visibleTasks = project.tasks
+    .filter(task => {
+      if (taskFilter === "completed") return task.status === "completed";
+      if (taskFilter === "todo") return task.status !== "completed";
+      if (taskFilter === "overdue") {
+        return task.status !== "completed" && getTaskDeadlineInfo(task.deadline)?.isOverdue;
+      }
+      return true;
+    })
+    .slice()
+    .sort((first, second) => {
+      if (taskSort === "priority") {
+        const rank = { high: 0, medium: 1, low: 2 };
+        return (rank[first.priority] ?? 1) - (rank[second.priority] ?? 1);
+      }
+      if (taskSort === "deadline") {
+        if (!first.deadline && !second.deadline) return 0;
+        if (!first.deadline) return 1;
+        if (!second.deadline) return -1;
+        return first.deadline.localeCompare(second.deadline);
+      }
+      if (taskSort === "name") return first.name.localeCompare(second.name, "ja");
+      return String(second.createdAt ?? "").localeCompare(String(first.createdAt ?? ""));
+    });
+
   taskSection.innerHTML = `
     <div class="flex items-center justify-between">
       <h2 class="text-xl font-bold">
@@ -101,19 +128,40 @@ export function renderTaskSection(
       </button>
     </div>
   
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <label class="flex items-center gap-2 text-sm text-[var(--color-text)]/70">
+        <span>表示</span>
+        <select id="task-filter" class="rounded-md border border-[var(--color-text)]/10 bg-[var(--color-field)] px-2 py-1.5">
+          <option value="all" ${taskFilter === "all" ? "selected" : ""}>すべて</option>
+          <option value="todo" ${taskFilter === "todo" ? "selected" : ""}>未完了</option>
+          <option value="completed" ${taskFilter === "completed" ? "selected" : ""}>完了済み</option>
+          <option value="overdue" ${taskFilter === "overdue" ? "selected" : ""}>期限超過</option>
+        </select>
+      </label>
+      <label class="flex items-center gap-2 text-sm text-[var(--color-text)]/70">
+        <span>並び順</span>
+        <select id="task-sort" class="rounded-md border border-[var(--color-text)]/10 bg-[var(--color-field)] px-2 py-1.5">
+          <option value="created" ${taskSort === "created" ? "selected" : ""}>作成日の新しい順</option>
+          <option value="priority" ${taskSort === "priority" ? "selected" : ""}>優先度順</option>
+          <option value="deadline" ${taskSort === "deadline" ? "selected" : ""}>期限の近い順</option>
+          <option value="name" ${taskSort === "name" ? "selected" : ""}>名前順</option>
+        </select>
+      </label>
+    </div>
+
     <div
       id="task-list"
-      class="mt-6 space-y-2"
+      class="mt-4 space-y-2"
     >
-      ${project.tasks.length === 0
+      ${visibleTasks.length === 0
         ? `
           <div class="flex min-h-40 items-center justify-center rounded-xl">
             <p class="text-sm text-[var(--color-text)]/60">
-              タスクはまだありません
+              ${project.tasks.length === 0 ? "タスクはまだありません" : "条件に一致するタスクはありません"}
             </p>
           </div>
         `
-        : project.tasks.map(task => {
+        : visibleTasks.map(task => {
         const deadline = getTaskDeadlineInfo(task.deadline);
         const deadlineMarkup = deadline
           ? `<p class="mt-1 text-xs ${deadline.isOverdue ? "text-[var(--color-danger)]" : "text-[var(--color-text)]/60"}">
@@ -281,6 +329,16 @@ export function renderTaskSection(
       }).join("")}
     </div>
   `;
+
+  taskSection.querySelector("#task-filter").addEventListener("change", event => {
+    taskFilter = event.target.value;
+    renderTaskSection(taskSection, project, onCreateTask, onUpdateTask, onDeleteTask, onSetTaskCompleted);
+  });
+
+  taskSection.querySelector("#task-sort").addEventListener("change", event => {
+    taskSort = event.target.value;
+    renderTaskSection(taskSection, project, onCreateTask, onUpdateTask, onDeleteTask, onSetTaskCompleted);
+  });
 
   taskSection.querySelectorAll(".task-card").forEach(button => {
     button.addEventListener("click", () => {
