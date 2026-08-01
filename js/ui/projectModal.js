@@ -8,6 +8,8 @@ import {
 } from "./formValidation.js";
 
 export function showCreateProjectModal(onCreateProject) {
+  let saveProject = () => false;
+
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">
@@ -82,7 +84,7 @@ export function showCreateProjectModal(onCreateProject) {
     >
       作成
     </button>
-  `);
+  `, { onBackdrop: () => saveProject() });
 
   const closeButton = document.getElementById("close-project-modal");
   const submitButton = document.getElementById("create-project-submit");
@@ -94,19 +96,22 @@ export function showCreateProjectModal(onCreateProject) {
     closeModal();
   });
 
-  submitButton.addEventListener("click", () => {
+  saveProject = () => {
     // エラー時は保存せず、具体的なメッセージとフォーカスで修正箇所を示す。
     const validation = validateName(input.value, "プロジェクト名");
 
     if (validation.error) {
       showFieldError(error, input, validation.error);
-      return;
+      return false;
     }
 
     clearFieldError(error, [input]);
     onCreateProject(validation.value, deadlineInput.value || null);
     closeModal();
-  });
+    return true;
+  };
+
+  submitButton.addEventListener("click", saveProject);
 
   input.addEventListener("keydown", event => {
     if (event.key !== "Enter") return;
@@ -116,6 +121,8 @@ export function showCreateProjectModal(onCreateProject) {
 };
 
 export function showEditProjectModal(project, onUpdateProjectName) {
+  let saveProject = () => false;
+
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">プロジェクト名を編集</h2>
@@ -175,7 +182,7 @@ export function showEditProjectModal(project, onUpdateProjectName) {
         保存
       </button>
     </form>
-  `);
+  `, { onBackdrop: () => saveProject() });
 
   const closeButton = document.getElementById("close-edit-project-modal");
   const form = document.getElementById("edit-project-name-form");
@@ -186,14 +193,12 @@ export function showEditProjectModal(project, onUpdateProjectName) {
 
   closeButton.addEventListener("click", closeModal);
 
-  form.addEventListener("submit", event => {
-    event.preventDefault();
-
+  saveProject = () => {
     const validation = validateName(input.value, "プロジェクト名");
 
     if (validation.error) {
       showFieldError(error, input, validation.error);
-      return;
+      return false;
     }
 
     clearFieldError(error, [input]);
@@ -203,6 +208,12 @@ export function showEditProjectModal(project, onUpdateProjectName) {
     }
 
     closeModal();
+    return true;
+  };
+
+  form.addEventListener("submit", event => {
+    event.preventDefault();
+    saveProject();
   });
 
   window.requestAnimationFrame(() => {

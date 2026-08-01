@@ -8,6 +8,7 @@ import {
 } from "./formValidation.js";
 
 export function showCreateTaskModal(onCreateTask) {
+let saveTask = () => false;
 
 openModal(`
   <div class="relative">
@@ -85,7 +86,7 @@ openModal(`
     >
       作成
     </button>
-`);
+`, { onBackdrop: () => saveTask() });
 
 const closeButton = document.getElementById("close-task-modal");
 const submitButton = document.getElementById("create-task-submit");
@@ -98,18 +99,21 @@ closeButton.addEventListener("click", () => {
   closeModal();
 });
 
-submitButton.addEventListener("click", () => {
+saveTask = () => {
   const validation = validateName(input.value, "タスク名");
 
   if (validation.error) {
     showFieldError(error, input, validation.error);
-    return;
+    return false;
   }
 
   clearFieldError(error, [input]);
   onCreateTask(validation.value, deadlineInput.value || null, priorityInput.value);
   closeModal();
-  });
+  return true;
+  };
+
+submitButton.addEventListener("click", saveTask);
 
 input.addEventListener("keydown", event => {
   if (event.key !== "Enter") return;
@@ -119,6 +123,8 @@ input.addEventListener("keydown", event => {
 }
 
 export function showEditTaskModal(task, onUpdateTask) {
+  let saveTask = () => false;
+
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">タスクを編集</h2>
@@ -229,7 +235,7 @@ export function showEditTaskModal(task, onUpdateTask) {
     >
       保存
     </button>
-  `);
+  `, { onBackdrop: () => saveTask() });
 
   document.getElementById("task-name").value = task.name;
   document.getElementById("optimistic").value = task.optimistic ?? "";
@@ -245,6 +251,10 @@ export function showEditTaskModal(task, onUpdateTask) {
   document
     .getElementById("save-task")
     .addEventListener("click", () => {
+      saveTask();
+    });
+
+  saveTask = () => {
       const nameInput = document.getElementById("task-name");
 
       const optimisticInput = document.getElementById("optimistic");
@@ -267,7 +277,7 @@ export function showEditTaskModal(task, onUpdateTask) {
 
       if (nameValidation.error) {
         showFieldError(error, nameInput, nameValidation.error);
-        return;
+        return false;
       }
 
       const optimistic =
@@ -294,7 +304,7 @@ export function showEditTaskModal(task, onUpdateTask) {
         const missingInput = [optimisticInput, mostLikelyInput, pessimisticInput]
           .find(input => input.value === "");
         showFieldError(error, missingInput, "見積日数を全て入力してください。");
-        return;
+        return false;
       }
 
       if (
@@ -308,7 +318,7 @@ export function showEditTaskModal(task, onUpdateTask) {
         const invalidInput = [optimisticInput, mostLikelyInput, pessimisticInput]
           .find(input => !Number.isFinite(Number(input.value)) || Number(input.value) < 0);
         showFieldError(error, invalidInput, "日数は0以上で入力してください。");
-        return;
+        return false;
       }
 
       if (
@@ -320,7 +330,7 @@ export function showEditTaskModal(task, onUpdateTask) {
           optimisticInput,
           "最短日数 ≤ 最頻日数 ≤ 最長日数の順で入力してください。"
         );
-        return;
+        return false;
       }
 
       onUpdateTask(task, {
@@ -333,7 +343,8 @@ export function showEditTaskModal(task, onUpdateTask) {
       });
 
       closeModal();
-    });
+      return true;
+    };
 }
 
 export function showDeleteTaskModal(task, onDeleteTask) {

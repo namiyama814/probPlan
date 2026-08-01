@@ -23,6 +23,7 @@ export function openModal(content, options = {}) {
     maxWidth = "max-w-md",
     closeOnBackdrop = true,
     closeOnEscape = true,
+    onBackdrop = null,
   } = options;
 
   previousFocusedElement = document.activeElement;
@@ -80,7 +81,8 @@ export function openModal(content, options = {}) {
   });
 
   overlay.addEventListener("click", event => {
-    if (closeOnBackdrop && event.target === event.currentTarget) {
+    if (closeOnBackdrop && event.target === overlay) {
+      if (onBackdrop && onBackdrop() === false) return;
       closeModal();
     }
   });
