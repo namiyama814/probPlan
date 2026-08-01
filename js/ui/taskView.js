@@ -71,7 +71,8 @@ export function renderTaskSection(
     onCreateTask,
     onUpdateTask,
     onDeleteTask,
-    onSetTaskCompleted
+    onSetTaskCompleted,
+    onReorderTask = () => {}
 ) {
   // タスク更新後の再描画で、古いメニュー状態とイベントを残さない。
   closeActiveTaskMenu();
@@ -171,7 +172,9 @@ export function renderTaskSection(
 
         return `
         <div
-          class="flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
+          class="task-row flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
+          data-task-id="${task.id}"
+          draggable="${taskFilter === "all" && taskSort === "created"}"
         >
       
           <button
@@ -338,6 +341,44 @@ export function renderTaskSection(
   taskSection.querySelector("#task-sort").addEventListener("change", event => {
     taskSort = event.target.value;
     renderTaskSection(taskSection, project, onCreateTask, onUpdateTask, onDeleteTask, onSetTaskCompleted);
+  });
+
+  let draggedTaskId = null;
+  taskSection.querySelectorAll(".task-row[draggable=\"true\"]").forEach(row => {
+    row.addEventListener("dragstart", event => {
+      draggedTaskId = row.dataset.taskId;
+      row.classList.add("is-dragging");
+      event.dataTransfer?.setData("text/plain", draggedTaskId);
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+    });
+
+    row.addEventListener("dragover", event => {
+      event.preventDefault();
+      if (draggedTaskId && draggedTaskId !== row.dataset.taskId) {
+        row.classList.add("is-drop-target");
+      }
+    });
+
+    row.addEventListener("dragleave", () => {
+      row.classList.remove("is-drop-target");
+    });
+
+    row.addEventListener("drop", event => {
+      event.preventDefault();
+      const targetTaskId = row.dataset.taskId;
+      row.classList.remove("is-drop-target");
+      if (draggedTaskId && draggedTaskId !== targetTaskId) {
+        onReorderTask(draggedTaskId, targetTaskId);
+      }
+    });
+
+    row.addEventListener("dragend", () => {
+      draggedTaskId = null;
+      row.classList.remove("is-dragging");
+      taskSection.querySelectorAll(".is-drop-target").forEach(target => {
+        target.classList.remove("is-drop-target");
+      });
+    });
   });
 
   taskSection.querySelectorAll(".task-card").forEach(button => {

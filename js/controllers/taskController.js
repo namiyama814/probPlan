@@ -34,3 +34,8 @@ export function deleteTask(manager, project, taskId) {
   project.removeTask(taskId);
   StorageService.save(manager);
 }
+
+export function reorderTask(manager, project, taskId, targetTaskId) {
+  project.moveTask(taskId, targetTaskId);
+  StorageService.save(manager);
+}

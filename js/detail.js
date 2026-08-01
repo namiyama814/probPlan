@@ -10,6 +10,7 @@ import {
   deleteTask,
   setTaskCompleted,
   updateTask,
+  reorderTask,
 } from "./controllers/taskController.js";
 import {
   updateProjectDeadline,
@@ -51,7 +52,8 @@ function render() {
     onCreateTask,
     onUpdateTask,
     onDeleteTask,
-    onSetTaskCompleted
+    onSetTaskCompleted,
+    onReorderTask
   );
 }
 
@@ -122,6 +124,11 @@ function onSetTaskCompleted(task, isCompleted) {
     task,
     isCompleted
   );
+  render();
+}
+
+function onReorderTask(taskId, targetTaskId) {
+  reorderTask(manager, project, taskId, targetTaskId);
   render();
 }
 
