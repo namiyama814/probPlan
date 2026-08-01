@@ -364,6 +364,7 @@ test("タスク作成・編集・完了切替・削除のUI操作を実行でき
     renderTaskSection(root, project, () => {}, () => {}, () => {}, (target, completed) => {
       completion = { target, completed };
     });
+    assertEqual(root.querySelector(".task-row").getAttribute("draggable"), "true", "手動順でドラッグ操作を有効にできません。");
     root.querySelector(".task-menu-button").click();
     await wait(30);
     assert(root.querySelector(".task-menu").classList.contains("is-open"), "タスクメニューの開くアニメーション状態になりません。");

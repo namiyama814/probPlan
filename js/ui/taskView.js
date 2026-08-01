@@ -12,7 +12,8 @@ let activeTaskMenu = null;
 let activeTaskMenuButton = null;
 let taskMenuCloseTimer = null;
 let taskFilter = "all";
-let taskSort = "created";
+// 初期状態は保存された配列順。ドラッグ後に自動ソートされないようにする。
+let taskSort = "manual";
 
 const PRIORITY_LABELS = { high: "高", medium: "中", low: "低" };
 
@@ -99,7 +100,10 @@ export function renderTaskSection(
         return first.deadline.localeCompare(second.deadline);
       }
       if (taskSort === "name") return first.name.localeCompare(second.name, "ja");
-      return String(second.createdAt ?? "").localeCompare(String(first.createdAt ?? ""));
+      if (taskSort === "created") {
+        return String(second.createdAt ?? "").localeCompare(String(first.createdAt ?? ""));
+      }
+      return 0;
     });
 
   taskSection.innerHTML = `
@@ -142,6 +146,7 @@ export function renderTaskSection(
       <label class="flex items-center gap-2 text-sm text-[var(--color-text)]/70">
         <span>並び順</span>
         <select id="task-sort" class="rounded-md border border-[var(--color-text)]/10 bg-[var(--color-field)] px-2 py-1.5">
+          <option value="manual" ${taskSort === "manual" ? "selected" : ""}>手動順</option>
           <option value="created" ${taskSort === "created" ? "selected" : ""}>作成日の新しい順</option>
           <option value="priority" ${taskSort === "priority" ? "selected" : ""}>優先度順</option>
           <option value="deadline" ${taskSort === "deadline" ? "selected" : ""}>期限の近い順</option>
@@ -174,7 +179,7 @@ export function renderTaskSection(
         <div
           class="task-row flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
           data-task-id="${task.id}"
-          draggable="${taskFilter === "all" && taskSort === "created"}"
+          draggable="${taskFilter === "all" && taskSort === "manual"}"
         >
       
           <button
