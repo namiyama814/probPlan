@@ -319,9 +319,23 @@ test("プロジェクトの右クリックメニューから削除確認を開�
       clientX: 20,
       clientY: 20,
     }));
+    await wait(30);
+    assert(document.querySelector(".project-context-menu").classList.contains("is-open"), "右クリックメニューの開くアニメーション状態になりません。");
     const menuItems = [...document.querySelectorAll('[role="menuitem"]')];
     assertEqual(menuItems[0].id, "context-toggle-archive", "アーカイブ項目が上にありません。");
     assert(Boolean(document.querySelector("#context-toggle-archive svg")), "アーカイブ項目のSVGがありません。");
+    document.body.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true }));
+    assert(!document.querySelector(".project-context-menu").classList.contains("is-open"), "右クリックメニューの閉じるアニメーションを開始できません。");
+    await wait(180);
+    assertEqual(document.querySelector(".project-context-menu"), null, "右クリックメニューを閉じた後に削除できません。");
+
+    card.dispatchEvent(new MouseEvent("contextmenu", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 20,
+      clientY: 20,
+    }));
+    await wait(30);
     document.getElementById("context-delete-project").click();
     document.getElementById("confirm-delete-project").click();
 

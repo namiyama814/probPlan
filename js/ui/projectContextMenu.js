@@ -15,9 +15,14 @@ function handleKeydown(event) {
 }
 
 export function closeProjectContextMenu() {
-  if (contextMenu) {
-    contextMenu.remove();
-    contextMenu = null;
+  const menu = contextMenu;
+  contextMenu = null;
+
+  if (menu) {
+    menu.classList.remove("is-open");
+    window.setTimeout(() => {
+      menu.remove();
+    }, 160);
   }
 
   document.removeEventListener("pointerdown", handlePointerDown);
@@ -35,9 +40,13 @@ function openProjectContextMenu(
 ) {
   // 既存メニューを閉じてから新しい位置に1つだけ表示する。
   closeProjectContextMenu();
+  document.querySelectorAll(".project-context-menu").forEach(menu => {
+    menu.remove();
+  });
 
   contextMenu = document.createElement("div");
   contextMenu.className = `
+    project-context-menu
     fixed z-[60] w-48 rounded-md
     border border-[var(--color-text)]/10
     bg-[var(--color-surface)] p-1 shadow-lg
@@ -111,6 +120,9 @@ function openProjectContextMenu(
 
   contextMenu.style.left = `${left}px`;
   contextMenu.style.top = `${top}px`;
+  window.requestAnimationFrame(() => {
+    if (contextMenu) contextMenu.classList.add("is-open");
+  });
 
   contextMenu
     .querySelector("#context-delete-project")

@@ -157,7 +157,8 @@ input::placeholder {
 
 /* プロジェクト一覧のミートボールメニューは、表示・非表示を滑らかに切り替える。 */
 .data-menu,
-.task-menu {
+.task-menu,
+.project-context-menu {
     opacity: 0;
     transform: translateY(-0.25rem) scale(0.98);
     transform-origin: top right;
@@ -170,7 +171,8 @@ input::placeholder {
 }
 
 .data-menu.is-open,
-.task-menu.is-open {
+.task-menu.is-open,
+.project-context-menu.is-open {
     opacity: 1;
     transform: translateY(0) scale(1);
     visibility: visible;
@@ -258,6 +260,7 @@ input::placeholder {
     .undo-toast,
     .data-menu,
     .task-menu,
+    .project-context-menu,
     .deadline-settings,
     .deadline-probability-label,
     .deadline-probability-marker {
