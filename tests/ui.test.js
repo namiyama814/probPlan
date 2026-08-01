@@ -40,6 +40,7 @@ function createTask({
   id = crypto.randomUUID(),
   name = "テストタスク",
   status = "todo",
+  deadline = null,
   optimistic = 1,
   mostLikely = 2,
   pessimistic = 3,
@@ -49,6 +50,7 @@ function createTask({
     id,
     name,
     status,
+    deadline,
     optimistic,
     mostLikely,
     pessimistic,
@@ -330,12 +332,14 @@ test("プロジェクトの右クリックメニューから削除確認を開�
 test("タスク作成・編集・完了切替・削除のUI操作を実行できる", async () => {
   await withTestDocument(async root => {
     let created = null;
-    showCreateTaskModal(name => {
-      created = name;
+    showCreateTaskModal((name, deadline, priority) => {
+      created = { name, deadline, priority };
     });
     document.getElementById("task-name").value = "新規タスク";
+    document.getElementById("task-priority").value = "high";
     document.getElementById("create-task-submit").click();
-    assertEqual(created, "新規タスク", "タスク作成名を渡せません。");
+    assertEqual(created.name, "新規タスク", "タスク作成名を渡せません。");
+    assertEqual(created.priority, "high", "タスク優先度を渡せません。");
 
     const task = createTask({ name: "変更前" });
     let updated = null;
@@ -347,11 +351,13 @@ test("タスク作成・編集・完了切替・削除のUI操作を実行でき
     document.getElementById("most-likely").value = "3";
     document.getElementById("pessimistic").value = "5";
     document.getElementById("task-deadline").value = "2026-08-20";
+    document.getElementById("task-priority").value = "high";
     document.getElementById("save-task").click();
     assertEqual(updated.target, task, "編集対象を渡せません。");
     assertEqual(updated.data.name, "変更後", "タスク名を更新できません。");
     assertEqual(updated.data.pessimistic, 5, "見積もりを更新できません。");
     assertEqual(updated.data.deadline, "2026-08-20", "タスク期限を更新できません。");
+    assertEqual(updated.data.priority, "high", "タスク優先度を更新できません。");
 
     const project = createProject({ tasks: [task] });
     let completion = null;
@@ -401,6 +407,27 @@ test("ホームの最新未完了タスク表示とタスク検索・クリア�
     document.getElementById("clear-task-search").click();
     assertEqual(input.value, "", "検索文字列をクリアできません。");
     assertEqual(document.activeElement, input, "クリア後に検索欄へフォーカスできません。");
+  });
+});
+
+test("タスク一覧を状態と期限でフィルターできる", async () => {
+  await withTestDocument(async root => {
+    const project = createProject({
+      tasks: [
+        createTask({ id: "todo-task", name: "未完了", deadline: "2020-01-01" }),
+        createTask({ id: "done-task", name: "完了", status: "completed" }),
+      ],
+    });
+    renderTaskSection(root, project, () => {}, () => {}, () => {}, () => {});
+
+    root.querySelector("#task-filter").value = "completed";
+    root.querySelector("#task-filter").dispatchEvent(new Event("change"));
+    assertEqual(root.querySelectorAll(".task-card").length, 1, "完了済みフィルターが機能しません。");
+    assertEqual(root.querySelector(".task-card h3").textContent.trim(), "完了", "完了済みタスクを絞り込めません。");
+
+    root.querySelector("#task-filter").value = "overdue";
+    root.querySelector("#task-filter").dispatchEvent(new Event("change"));
+    assertEqual(root.querySelectorAll(".task-card").length, 1, "期限超過フィルターが機能しません。");
   });
 });
 

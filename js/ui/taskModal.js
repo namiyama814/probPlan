@@ -70,6 +70,14 @@ openModal(`
         class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2"
       >
     </div>
+    <div class="mt-4">
+      <label for="task-priority" class="block text-sm font-medium">優先度</label>
+      <select id="task-priority" class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2">
+        <option value="high">高</option>
+        <option value="medium" selected>中</option>
+        <option value="low">低</option>
+      </select>
+    </div>
     <button
       id="create-task-submit"
       type="button"
@@ -83,6 +91,7 @@ const closeButton = document.getElementById("close-task-modal");
 const submitButton = document.getElementById("create-task-submit");
 const input = document.getElementById("task-name");
 const deadlineInput = document.getElementById("task-deadline");
+const priorityInput = document.getElementById("task-priority");
 const error = document.getElementById("create-task-error");
 
 closeButton.addEventListener("click", () => {
@@ -98,7 +107,7 @@ submitButton.addEventListener("click", () => {
   }
 
   clearFieldError(error, [input]);
-  onCreateTask(validation.value, deadlineInput.value || null);
+  onCreateTask(validation.value, deadlineInput.value || null, priorityInput.value);
   closeModal();
   });
 
@@ -162,6 +171,15 @@ export function showEditTaskModal(task, onUpdateTask) {
     </div>
 
     <div class="mt-4">
+      <label for="task-priority" class="block text-sm font-medium">優先度</label>
+      <select id="task-priority" class="mt-2 w-full rounded-md border border-[var(--color-text)]/10 px-3 py-2">
+        <option value="high">高</option>
+        <option value="medium">中</option>
+        <option value="low">低</option>
+      </select>
+    </div>
+
+    <div class="mt-4">
       <label for="optimistic" class="block text-sm font-medium">最短日数</label>
       <input
         id="optimistic"
@@ -218,6 +236,7 @@ export function showEditTaskModal(task, onUpdateTask) {
   document.getElementById("most-likely").value = task.mostLikely ?? "";
   document.getElementById("pessimistic").value = task.pessimistic ?? "";
   document.getElementById("task-deadline").value = task.deadline ?? "";
+  document.getElementById("task-priority").value = task.priority ?? "medium";
 
   document
     .getElementById("close-task-modal")
@@ -232,6 +251,7 @@ export function showEditTaskModal(task, onUpdateTask) {
       const mostLikelyInput = document.getElementById("most-likely");
       const pessimisticInput = document.getElementById("pessimistic");
       const deadlineInput = document.getElementById("task-deadline");
+      const priorityInput = document.getElementById("task-priority");
 
       const error = document.getElementById("task-error");
 
@@ -309,6 +329,7 @@ export function showEditTaskModal(task, onUpdateTask) {
           mostLikely,
           pessimistic,
           deadline: deadlineInput.value || null,
+          priority: priorityInput.value,
       });
 
       closeModal();

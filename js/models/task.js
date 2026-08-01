@@ -1,4 +1,4 @@
-// タスク本体。3点見積もり、完了状態、作成日時を保持する。
+// タスク本体。3点見積もり、優先度、完了状態、作成日時を保持する。
 export class Task {
   constructor({
     id,
@@ -7,6 +7,7 @@ export class Task {
     mostLikely = null,
     pessimistic = null,
     deadline = null,
+    priority = "medium",
     status = "todo",
     createdAt = null,
   }) {
@@ -17,6 +18,9 @@ export class Task {
     this.mostLikely = mostLikely;
     this.pessimistic = pessimistic;
     this.deadline = deadline;
+    this.priority = ["high", "medium", "low"].includes(priority)
+      ? priority
+      : "medium";
 
     this.status = status;
     this.createdAt = createdAt;
@@ -41,6 +45,9 @@ export class Task {
     this.mostLikely = data.mostLikely;
     this.pessimistic = data.pessimistic;
     this.deadline = data.deadline ?? null;
+    this.priority = ["high", "medium", "low"].includes(data.priority)
+      ? data.priority
+      : "medium";
   }
 
   setCompleted(isCompleted) {

@@ -11,6 +11,10 @@ import {
 let activeTaskMenu = null;
 let activeTaskMenuButton = null;
 let taskMenuCloseTimer = null;
+let taskFilter = "all";
+let taskSort = "created";
+
+const PRIORITY_LABELS = { high: "高", medium: "中", low: "低" };
 
 function handleMenuKeydown(event) {
   if (event.key === "Escape") {
@@ -67,10 +71,36 @@ export function renderTaskSection(
     onCreateTask,
     onUpdateTask,
     onDeleteTask,
-    onSetTaskCompleted
+    onSetTaskCompleted,
+    onReorderTask = () => {}
 ) {
   // タスク更新後の再描画で、古いメニュー状態とイベントを残さない。
   closeActiveTaskMenu();
+
+  const visibleTasks = project.tasks
+    .filter(task => {
+      if (taskFilter === "completed") return task.status === "completed";
+      if (taskFilter === "todo") return task.status !== "completed";
+      if (taskFilter === "overdue") {
+        return task.status !== "completed" && getTaskDeadlineInfo(task.deadline)?.isOverdue;
+      }
+      return true;
+    })
+    .slice()
+    .sort((first, second) => {
+      if (taskSort === "priority") {
+        const rank = { high: 0, medium: 1, low: 2 };
+        return (rank[first.priority] ?? 1) - (rank[second.priority] ?? 1);
+      }
+      if (taskSort === "deadline") {
+        if (!first.deadline && !second.deadline) return 0;
+        if (!first.deadline) return 1;
+        if (!second.deadline) return -1;
+        return first.deadline.localeCompare(second.deadline);
+      }
+      if (taskSort === "name") return first.name.localeCompare(second.name, "ja");
+      return String(second.createdAt ?? "").localeCompare(String(first.createdAt ?? ""));
+    });
 
   taskSection.innerHTML = `
     <div class="flex items-center justify-between">
@@ -99,19 +129,40 @@ export function renderTaskSection(
       </button>
     </div>
   
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <label class="flex items-center gap-2 text-sm text-[var(--color-text)]/70">
+        <span>表示</span>
+        <select id="task-filter" class="rounded-md border border-[var(--color-text)]/10 bg-[var(--color-field)] px-2 py-1.5">
+          <option value="all" ${taskFilter === "all" ? "selected" : ""}>すべて</option>
+          <option value="todo" ${taskFilter === "todo" ? "selected" : ""}>未完了</option>
+          <option value="completed" ${taskFilter === "completed" ? "selected" : ""}>完了済み</option>
+          <option value="overdue" ${taskFilter === "overdue" ? "selected" : ""}>期限超過</option>
+        </select>
+      </label>
+      <label class="flex items-center gap-2 text-sm text-[var(--color-text)]/70">
+        <span>並び順</span>
+        <select id="task-sort" class="rounded-md border border-[var(--color-text)]/10 bg-[var(--color-field)] px-2 py-1.5">
+          <option value="created" ${taskSort === "created" ? "selected" : ""}>作成日の新しい順</option>
+          <option value="priority" ${taskSort === "priority" ? "selected" : ""}>優先度順</option>
+          <option value="deadline" ${taskSort === "deadline" ? "selected" : ""}>期限の近い順</option>
+          <option value="name" ${taskSort === "name" ? "selected" : ""}>名前順</option>
+        </select>
+      </label>
+    </div>
+
     <div
       id="task-list"
-      class="mt-6 space-y-2"
+      class="mt-4 space-y-2"
     >
-      ${project.tasks.length === 0
+      ${visibleTasks.length === 0
         ? `
           <div class="flex min-h-40 items-center justify-center rounded-xl">
             <p class="text-sm text-[var(--color-text)]/60">
-              タスクはまだありません
+              ${project.tasks.length === 0 ? "タスクはまだありません" : "条件に一致するタスクはありません"}
             </p>
           </div>
         `
-        : project.tasks.map(task => {
+        : visibleTasks.map(task => {
         const deadline = getTaskDeadlineInfo(task.deadline);
         const deadlineMarkup = deadline
           ? `<p class="mt-1 text-xs ${deadline.isOverdue ? "text-[var(--color-danger)]" : "text-[var(--color-text)]/60"}">
@@ -121,7 +172,9 @@ export function renderTaskSection(
 
         return `
         <div
-          class="flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
+          class="task-row flex items-center justify-between rounded-xl p-4 transition-colors hover:bg-[var(--color-text)]/5"
+          data-task-id="${task.id}"
+          draggable="${taskFilter === "all" && taskSort === "created"}"
         >
       
           <button
@@ -135,7 +188,14 @@ export function renderTaskSection(
             }">
                 ${escapeHtml(task.name)}
             </h3>
-      
+            <span class="mt-1 inline-flex rounded-full px-2 py-0.5 text-xs ${
+              task.priority === "high"
+                ? "bg-[var(--color-danger-soft)] text-[var(--color-danger)]"
+                : "bg-[var(--color-text)]/10 text-[var(--color-text)]/70"
+            }">
+              優先度：${PRIORITY_LABELS[task.priority] ?? PRIORITY_LABELS.medium}
+            </span>
+
             <p class="mt-1 text-sm text-[var(--color-text)]/60">
               ${task.status === "completed" ? "完了 · " : ""}${
                 task.optimistic === null
@@ -272,6 +332,54 @@ export function renderTaskSection(
       }).join("")}
     </div>
   `;
+
+  taskSection.querySelector("#task-filter").addEventListener("change", event => {
+    taskFilter = event.target.value;
+    renderTaskSection(taskSection, project, onCreateTask, onUpdateTask, onDeleteTask, onSetTaskCompleted);
+  });
+
+  taskSection.querySelector("#task-sort").addEventListener("change", event => {
+    taskSort = event.target.value;
+    renderTaskSection(taskSection, project, onCreateTask, onUpdateTask, onDeleteTask, onSetTaskCompleted);
+  });
+
+  let draggedTaskId = null;
+  taskSection.querySelectorAll(".task-row[draggable=\"true\"]").forEach(row => {
+    row.addEventListener("dragstart", event => {
+      draggedTaskId = row.dataset.taskId;
+      row.classList.add("is-dragging");
+      event.dataTransfer?.setData("text/plain", draggedTaskId);
+      if (event.dataTransfer) event.dataTransfer.effectAllowed = "move";
+    });
+
+    row.addEventListener("dragover", event => {
+      event.preventDefault();
+      if (draggedTaskId && draggedTaskId !== row.dataset.taskId) {
+        row.classList.add("is-drop-target");
+      }
+    });
+
+    row.addEventListener("dragleave", () => {
+      row.classList.remove("is-drop-target");
+    });
+
+    row.addEventListener("drop", event => {
+      event.preventDefault();
+      const targetTaskId = row.dataset.taskId;
+      row.classList.remove("is-drop-target");
+      if (draggedTaskId && draggedTaskId !== targetTaskId) {
+        onReorderTask(draggedTaskId, targetTaskId);
+      }
+    });
+
+    row.addEventListener("dragend", () => {
+      draggedTaskId = null;
+      row.classList.remove("is-dragging");
+      taskSection.querySelectorAll(".is-drop-target").forEach(target => {
+        target.classList.remove("is-drop-target");
+      });
+    });
+  });
 
   taskSection.querySelectorAll(".task-card").forEach(button => {
     button.addEventListener("click", () => {

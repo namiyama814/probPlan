@@ -180,6 +180,19 @@ input::placeholder {
         transform 140ms ease;
 }
 
+.task-row[draggable="true"] {
+    cursor: grab;
+}
+
+.task-row.is-dragging {
+    opacity: 0.45;
+}
+
+.task-row.is-drop-target {
+    outline: 2px solid color-mix(in srgb, var(--color-text) 35%, transparent);
+    outline-offset: -2px;
+}
+
 .deadline-settings {
     display: grid;
     grid-template-rows: 0fr;

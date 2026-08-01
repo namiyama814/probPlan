@@ -44,6 +44,20 @@ test("タスクを完了・未完了に切り替え、見積もりを更新で�
   assertEqual(task.pessimistic, 9, "見積もりを更新できません。");
 });
 
+test("タスクの優先度を保持・更新できる", () => {
+  const task = new Task({ id: "priority-task", name: "優先タスク", priority: "high" });
+  assertEqual(task.priority, "high", "優先度を保持できません。");
+
+  task.update({
+    name: task.name,
+    optimistic: 1,
+    mostLikely: 2,
+    pessimistic: 3,
+    priority: "low",
+  });
+  assertEqual(task.priority, "low", "優先度を更新できません。");
+});
+
 test("プロジェクト進捗を完了タスクの割合から計算できる", () => {
   const project = new Project({
     id: "project-1",
@@ -79,6 +93,16 @@ test("タスクとプロジェクトをIDで削除できる", () => {
 
   manager.removeProject("project-1");
   assertEqual(manager.projects.length, 0, "プロジェクトを削除できません。");
+});
+
+test("タスクの並び順を移動できる", () => {
+  const first = createTask({ id: "task-1", name: "1" });
+  const second = createTask({ id: "task-2", name: "2" });
+  const third = createTask({ id: "task-3", name: "3" });
+  const project = new Project({ id: "project-order", name: "並び替え", tasks: [first, second, third] });
+
+  project.moveTask("task-3", "task-1");
+  assertEqual(project.tasks.map(task => task.id).join(","), "task-3,task-1,task-2", "タスクを並び替えられません。");
 });
 
 test("全プロジェクトからタスク名を検索できる", () => {

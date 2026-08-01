@@ -55,6 +55,15 @@ export class Project {
     this.tasks = this.tasks.filter(task => task.id !== taskId);
   }
 
+  moveTask(taskId, targetTaskId) {
+    const fromIndex = this.tasks.findIndex(task => task.id === taskId);
+    const toIndex = this.tasks.findIndex(task => task.id === targetTaskId);
+    if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
+
+    const [task] = this.tasks.splice(fromIndex, 1);
+    this.tasks.splice(toIndex, 0, task);
+  }
+
   getTask(taskId) {
     return this.tasks.find(task => task.id === taskId);
   }

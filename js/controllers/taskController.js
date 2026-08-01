@@ -2,10 +2,11 @@
 import { Task } from "../models/task.js";
 import { StorageService } from "../services/storageService.js";
 
-export function createTask(manager, project, taskName, deadline = null) {
+export function createTask(manager, project, taskName, deadline = null, priority = "medium") {
   const task = Task.create({
     name: taskName,
     deadline,
+    priority,
   });
 
   project.addTask(task);
@@ -31,5 +32,10 @@ export function setTaskCompleted(manager, task, isCompleted) {
 
 export function deleteTask(manager, project, taskId) {
   project.removeTask(taskId);
+  StorageService.save(manager);
+}
+
+export function reorderTask(manager, project, taskId, targetTaskId) {
+  project.moveTask(taskId, targetTaskId);
   StorageService.save(manager);
 }
