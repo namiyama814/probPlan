@@ -282,14 +282,17 @@ test("プロジェクト作成モーダルの締切日は狭い画面でも枠�
 
     const modalRect = modal.getBoundingClientRect();
     const inputRect = deadlineInput.getBoundingClientRect();
+    const inputStyle = window.getComputedStyle(deadlineInput);
 
     assert(inputRect.left >= modalRect.left, "締切日入力がモーダル左側にはみ出しています。");
     assert(inputRect.right <= modalRect.right, "締切日入力がモーダル右側にはみ出しています。");
     assertEqual(
-      window.getComputedStyle(deadlineInput).boxSizing,
+      inputStyle.boxSizing,
       "border-box",
       "締切日入力が枠内で幅計算されていません。"
     );
+    assertEqual(inputStyle.appearance, "none", "締切日入力のネイティブ幅を抑制できていません。");
+    assertEqual(inputStyle.minInlineSize, "0px", "締切日入力の最小幅を解除できていません。");
   });
 });
 

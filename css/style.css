@@ -46,6 +46,12 @@ html {
     background-color: var(--color-bg);
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body {
     transition:
         background-color var(--transition) ease,
@@ -64,6 +70,31 @@ textarea {
 
 input::placeholder {
     color: var(--color-muted);
+}
+
+.modal-content {
+    max-inline-size: calc(100vw - 2rem);
+    overflow-x: hidden;
+}
+
+.modal-content input[type="date"] {
+    -webkit-appearance: none;
+    appearance: none;
+    display: block;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    width: 100%;
+}
+
+.modal-content input[type="date"]::-webkit-date-and-time-value {
+    min-inline-size: 0;
+    text-align: left;
+}
+
+.modal-content input[type="date"]::-webkit-calendar-picker-indicator {
+    flex-shrink: 0;
+    margin-left: 0.25rem;
 }
 
 @keyframes modal-overlay-in {
