@@ -52,9 +52,14 @@ body {
         color var(--transition) ease;
 }
 
-input {
+input,
+select,
+textarea {
     background-color: var(--color-field);
+    box-sizing: border-box;
     color: var(--color-text);
+    max-width: 100%;
+    min-width: 0;
 }
 
 input::placeholder {

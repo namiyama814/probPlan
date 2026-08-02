@@ -270,6 +270,29 @@ test("プロジェクトの作成・編集・削除モーダルは各コール�
   });
 });
 
+test("プロジェクト作成モーダルの締切日は狭い画面でも枠内に収まる", async () => {
+  await withTestDocument(async () => {
+    showCreateProjectModal(() => {});
+
+    const modal = document.querySelector(".modal-content");
+    const deadlineInput = document.getElementById("project-deadline");
+
+    modal.style.width = "240px";
+    await wait(0);
+
+    const modalRect = modal.getBoundingClientRect();
+    const inputRect = deadlineInput.getBoundingClientRect();
+
+    assert(inputRect.left >= modalRect.left, "締切日入力がモーダル左側にはみ出しています。");
+    assert(inputRect.right <= modalRect.right, "締切日入力がモーダル右側にはみ出しています。");
+    assertEqual(
+      window.getComputedStyle(deadlineInput).boxSizing,
+      "border-box",
+      "締切日入力が枠内で幅計算されていません。"
+    );
+  });
+});
+
 test("プロジェクト一覧は3件表示・追加一覧・データメニューを操作できる", async () => {
   await withTestDocument(async root => {
     const projects = Array.from({ length: 4 }, (_, index) =>
