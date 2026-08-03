@@ -3,6 +3,7 @@ import { Project } from "../js/models/project.js";
 import { ProjectManager } from "../js/models/projectManager.js";
 import { Task } from "../js/models/task.js";
 import { closeModal, openModal } from "../js/ui/modal.js";
+import { renderDataRecoveryView } from "../js/ui/dataRecoveryView.js";
 import {
   bindProjectContextMenu,
   closeProjectContextMenu,
@@ -326,6 +327,23 @@ test("プロジェクト一覧は3件表示・追加一覧・データメニュ�
 
     root.querySelector("#show-more-projects").click();
     assertEqual(document.querySelectorAll(".overflow-project-card").length, 1, "追加プロジェクトをモーダルに表示できません。");
+  });
+});
+
+test("保存データ破損時の復旧表示からリセット操作を呼び出せる", async () => {
+  await withTestDocument(async root => {
+    const taskSection = document.createElement("section");
+    let resetCalled = false;
+
+    renderDataRecoveryView(root, taskSection, () => {
+      resetCalled = true;
+    });
+
+    assert(root.textContent.includes("保存データを読み込めませんでした"), "復旧メッセージを表示できません。");
+    assert(taskSection.textContent.includes("復旧すると"), "復旧後の案内を表示できません。");
+
+    root.querySelector("#reset-corrupted-data").click();
+    assertEqual(resetCalled, true, "復旧ボタンの操作を呼び出せません。");
   });
 });
 

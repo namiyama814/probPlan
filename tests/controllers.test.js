@@ -87,6 +87,18 @@ test("壊れた保存データがあっても読み込みで画面を壊さな�
   try {
     localStorage.setItem(STORAGE_KEY, "{壊れたJSON");
     assertEqual(StorageService.load(), null, "壊れた保存データを安全に扱えません。");
+    assertEqual(
+      StorageService.loadState().status,
+      "corrupted",
+      "壊れた保存データを判定できません。"
+    );
+
+    localStorage.removeItem(STORAGE_KEY);
+    assertEqual(
+      StorageService.loadState().status,
+      "empty",
+      "保存データなしの状態を判定できません。"
+    );
   } finally {
     if (savedData === null) {
       localStorage.removeItem(STORAGE_KEY);

@@ -8,6 +8,7 @@ import {
 } from "./controllers/projectController.js";
 import { renderProjectSection } from "./ui/projectView.js";
 import { renderRecentTaskSection } from "./ui/recentTaskView.js";
+import { renderDataRecoveryView } from "./ui/dataRecoveryView.js";
 import { initializeTheme } from "./ui/theme.js";
 import { initializeTaskSearch } from "./ui/taskSearch.js";
 import { showUndoToast } from "./ui/undoToast.js";
@@ -22,7 +23,10 @@ import {
 const projectSection = document.getElementById("project-section");
 const taskSection = document.getElementById("task-section");
 
-let manager = StorageService.load();
+const savedState = StorageService.loadState();
+
+let manager = savedState.manager;
+let hasCorruptedData = savedState.status === "corrupted";
 let showArchivedProjects = false;
 
 if (!manager) {
@@ -33,6 +37,11 @@ initializeTheme();
 initializeTaskSearch(() => manager);
 
 function render() {
+  if (hasCorruptedData) {
+    renderDataRecoveryView(projectSection, taskSection, resetCorruptedData);
+    return;
+  }
+
   // データ更新後はホームの2セクションを同じマネージャーから再描画する。
   renderProjectSection(
     projectSection,
@@ -51,6 +60,14 @@ function render() {
     manager
   );
 };
+
+function resetCorruptedData() {
+  StorageService.clear();
+  manager = new ProjectManager();
+  hasCorruptedData = false;
+  showArchivedProjects = false;
+  render();
+}
 
 function onCreateProject(projectName, deadline) {
   const project = createProject(manager, projectName, deadline);
