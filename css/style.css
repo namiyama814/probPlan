@@ -73,8 +73,12 @@ input::placeholder {
 }
 
 .project-card,
-.overflow-project-card {
+.project-card *,
+.overflow-project-card,
+.overflow-project-card * {
     -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
     user-select: none;
 }
 

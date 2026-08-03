@@ -425,6 +425,29 @@ test("プロジェクトメニューは長押しで開き、直後のクリッ�
   });
 });
 
+test("プロジェクト長押し時の文字選択を抑止できる", async () => {
+  await withTestDocument(async root => {
+    const project = createProject({ tasks: [createTask()] });
+    const card = document.createElement("button");
+    const title = document.createElement("span");
+    title.textContent = "選択されないプロジェクト名";
+    card.className = "project-card";
+    card.appendChild(title);
+    root.appendChild(card);
+    bindProjectContextMenu(card, project, () => {});
+
+    const selectEvent = new Event("selectstart", {
+      bubbles: true,
+      cancelable: true,
+    });
+    const allowed = title.dispatchEvent(selectEvent);
+    const titleStyle = window.getComputedStyle(title);
+
+    assertEqual(allowed, false, "長押し時の文字選択をキャンセルできません。");
+    assertEqual(titleStyle.userSelect, "none", "プロジェクト名の選択不可スタイルが効いていません。");
+  });
+});
+
 test("プロジェクトメニューの長押しは指が動いたらキャンセルされる", async () => {
   await withTestDocument(async root => {
     const project = createProject({ tasks: [createTask()] });

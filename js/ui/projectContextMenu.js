@@ -191,6 +191,14 @@ export function bindProjectContextMenu(
     event.stopImmediatePropagation();
   }, true);
 
+  card.addEventListener("selectstart", event => {
+    event.preventDefault();
+  });
+
+  card.addEventListener("dragstart", event => {
+    event.preventDefault();
+  });
+
   card.addEventListener("contextmenu", event => {
     event.preventDefault();
 
