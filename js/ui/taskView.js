@@ -342,12 +342,28 @@ export function renderTaskSection(
 
   taskSection.querySelector("#task-filter").addEventListener("change", event => {
     taskFilter = event.target.value;
-    renderTaskSection(taskSection, project, onCreateTask, onUpdateTask, onDeleteTask, onSetTaskCompleted);
+    renderTaskSection(
+      taskSection,
+      project,
+      onCreateTask,
+      onUpdateTask,
+      onDeleteTask,
+      onSetTaskCompleted,
+      onReorderTask
+    );
   });
 
   taskSection.querySelector("#task-sort").addEventListener("change", event => {
     taskSort = event.target.value;
-    renderTaskSection(taskSection, project, onCreateTask, onUpdateTask, onDeleteTask, onSetTaskCompleted);
+    renderTaskSection(
+      taskSection,
+      project,
+      onCreateTask,
+      onUpdateTask,
+      onDeleteTask,
+      onSetTaskCompleted,
+      onReorderTask
+    );
   });
 
   let draggedTaskId = null;

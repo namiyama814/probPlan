@@ -42,6 +42,7 @@ function createTask({
   name = "テストタスク",
   status = "todo",
   deadline = null,
+  priority = "medium",
   optimistic = 1,
   mostLikely = 2,
   pessimistic = 3,
@@ -52,6 +53,7 @@ function createTask({
     name,
     status,
     deadline,
+    priority,
     optimistic,
     mostLikely,
     pessimistic,
@@ -423,6 +425,34 @@ test("プロジェクトメニューは長押しで開き、直後のクリッ�
   });
 });
 
+test("プロジェクトメニューの長押しは指が動いたらキャンセルされる", async () => {
+  await withTestDocument(async root => {
+    const project = createProject({ tasks: [createTask()] });
+    const card = document.createElement("button");
+    root.appendChild(card);
+    bindProjectContextMenu(card, project, () => {});
+
+    card.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true,
+      button: 0,
+      clientX: 24,
+      clientY: 32,
+      pointerType: "touch",
+    }));
+    card.dispatchEvent(new PointerEvent("pointermove", {
+      bubbles: true,
+      button: 0,
+      clientX: 48,
+      clientY: 32,
+      pointerType: "touch",
+    }));
+
+    await wait(600);
+
+    assertEqual(document.querySelector(".project-context-menu"), null, "移動した長押しでメニューが開いてしまいます。");
+  });
+});
+
 test("タスク作成・編集・完了切替・削除のUI操作を実行できる", async () => {
   await withTestDocument(async root => {
     let created = null;
@@ -526,6 +556,50 @@ test("タスク一覧を状態と期限でフィルターできる", async () =>
     root.querySelector("#task-filter").value = "overdue";
     root.querySelector("#task-filter").dispatchEvent(new Event("change"));
     assertEqual(root.querySelectorAll(".task-card").length, 1, "期限超過フィルターが機能しません。");
+  });
+});
+
+test("タスク一覧は優先度で並び替え、手動順ではドラッグで移動できる", async () => {
+  await withTestDocument(async root => {
+    const project = createProject({
+      tasks: [
+        createTask({ id: "low-task", name: "低い", priority: "low" }),
+        createTask({ id: "high-task", name: "高い", priority: "high" }),
+        createTask({ id: "medium-task", name: "中くらい", priority: "medium" }),
+      ],
+    });
+    let reordered = null;
+
+    renderTaskSection(
+      root,
+      project,
+      () => {},
+      () => {},
+      () => {},
+      () => {},
+      (taskId, targetTaskId) => {
+        reordered = { taskId, targetTaskId };
+      }
+    );
+
+    root.querySelector("#task-filter").value = "all";
+    root.querySelector("#task-filter").dispatchEvent(new Event("change"));
+
+    root.querySelector("#task-sort").value = "priority";
+    root.querySelector("#task-sort").dispatchEvent(new Event("change"));
+    assertEqual(root.querySelector(".task-card h3").textContent.trim(), "高い", "優先度順で並び替えられません。");
+    assertEqual(root.querySelector(".task-row").getAttribute("draggable"), "false", "自動ソート中はドラッグを無効にする必要があります。");
+
+    root.querySelector("#task-sort").value = "manual";
+    root.querySelector("#task-sort").dispatchEvent(new Event("change"));
+
+    const rows = root.querySelectorAll(".task-row");
+    rows[2].dispatchEvent(new DragEvent("dragstart", { bubbles: true }));
+    rows[0].dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true }));
+    rows[2].dispatchEvent(new DragEvent("dragend", { bubbles: true }));
+
+    assertEqual(reordered.taskId, "medium-task", "ドラッグ元タスクを通知できません。");
+    assertEqual(reordered.targetTaskId, "low-task", "ドロップ先タスクを通知できません。");
   });
 });
 

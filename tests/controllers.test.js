@@ -2,12 +2,14 @@
 import {
   createProject,
   deleteProject,
+  toggleProjectArchive,
   updateProjectDeadline,
   updateProjectName,
 } from "../js/controllers/projectController.js";
 import {
   createTask,
   deleteTask,
+  reorderTask,
   setTaskCompleted,
   updateTask,
 } from "../js/controllers/taskController.js";
@@ -40,6 +42,7 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
     setTaskCompleted(manager, task, true);
     updateProjectName(manager, project, "名前を更新したプロジェクト");
     updateProjectDeadline(manager, project, "2026-08-20");
+    toggleProjectArchive(manager, project);
 
     const savedManager = StorageService.load();
     assertEqual(savedManager.projects.length, 1, "プロジェクトが保存されていません。");
@@ -63,6 +66,11 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
       "2026-08-20",
       "締切日が保存されていません。"
     );
+    assertEqual(
+      savedManager.projects[0].archived,
+      true,
+      "アーカイブ状態が保存されていません。"
+    );
     deleteTask(manager, project, task.id);
     assertEqual(project.tasks.length, 0, "タスクを削除できません。");
 
@@ -71,6 +79,32 @@ test("プロジェクトとタスクの作成・更新・完了・削除を保�
     assert(
       StorageService.load().projects.length === 0,
       "プロジェクト削除が保存されていません。"
+    );
+  } finally {
+    if (savedData === null) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, savedData);
+    }
+  }
+});
+
+test("タスクの並び替えを保存できる", () => {
+  const savedData = localStorage.getItem(STORAGE_KEY);
+
+  try {
+    const manager = new ProjectManager();
+    const project = createProject(manager, "並び替え保存");
+    const first = createTask(manager, project, "最初");
+    const second = createTask(manager, project, "次");
+
+    reorderTask(manager, project, second.id, first.id);
+
+    const savedManager = StorageService.load();
+    assertEqual(
+      savedManager.projects[0].tasks[0].name,
+      "次",
+      "タスクの並び替えが保存されていません。"
     );
   } finally {
     if (savedData === null) {
