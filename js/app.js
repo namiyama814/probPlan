@@ -38,6 +38,7 @@ initializeTaskSearch(() => manager);
 
 function render() {
   if (hasCorruptedData) {
+    // 保存データが壊れている時は通常描画を止め、復旧操作だけを提示する。
     renderDataRecoveryView(projectSection, taskSection, resetCorruptedData);
     return;
   }
@@ -62,6 +63,7 @@ function render() {
 };
 
 function resetCorruptedData() {
+  // 壊れたlocalStorageを消して、空のプロジェクト一覧として再描画する。
   StorageService.clear();
   manager = new ProjectManager();
   hasCorruptedData = false;

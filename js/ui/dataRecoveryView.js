@@ -1,5 +1,6 @@
 // 保存データを読み込めない場合の復旧導線を表示する。
 export function renderDataRecoveryView(projectSection, taskSection, onResetData) {
+  // プロジェクト枠を復旧アクション、タスク枠を補足説明に使い、ホームの2カラム構成を保つ。
   projectSection.innerHTML = `
     <div class="flex min-h-80 flex-col items-center justify-center text-center">
       <div

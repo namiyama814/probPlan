@@ -172,6 +172,7 @@ export function bindProjectContextMenu(
     const x = event.clientX || cardRect.left + 16;
     const y = event.clientY || cardRect.top + 16;
 
+    // 長押し後に発火するclickで詳細画面へ遷移しないよう、次のclickだけ止める。
     suppressNextClick = true;
     openProjectContextMenu(
       x,
@@ -206,6 +207,7 @@ export function bindProjectContextMenu(
     if (!["touch", "pen"].includes(event.pointerType)) return;
     if (event.button !== 0) return;
 
+    // スマホでは右クリックできないため、一定時間押し続けた時だけ同じメニューを開く。
     clearLongPress();
     longPressStart = {
       x: event.clientX,
@@ -226,6 +228,7 @@ export function bindProjectContextMenu(
       Math.abs(event.clientY - longPressStart.y) >
         LONG_PRESS_MOVE_TOLERANCE;
 
+    // スクロールやスワイプを長押しと誤判定しないよう、指が動いたらキャンセルする。
     if (moved) clearLongPress();
   });
 

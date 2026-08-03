@@ -93,6 +93,7 @@ test("タスクの並び替えを保存できる", () => {
   const savedData = localStorage.getItem(STORAGE_KEY);
 
   try {
+    // UIのドラッグ操作から呼ばれる保存経路まで含めて、順序の永続化を確認する。
     const manager = new ProjectManager();
     const project = createProject(manager, "並び替え保存");
     const first = createTask(manager, project, "最初");

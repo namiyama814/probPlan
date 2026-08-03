@@ -39,6 +39,7 @@ export const StorageService = {
     }
 
     try {
+      // ホーム画面では「データなし」と「破損」を区別し、破損時だけ復旧UIを出す。
       return {
         status: "ok",
         manager: parseManager(json),

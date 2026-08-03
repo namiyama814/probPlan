@@ -342,6 +342,7 @@ export function renderTaskSection(
 
   taskSection.querySelector("#task-filter").addEventListener("change", event => {
     taskFilter = event.target.value;
+    // 再描画後もドラッグ並び替えが効くよう、全コールバックを引き継ぐ。
     renderTaskSection(
       taskSection,
       project,
@@ -355,6 +356,7 @@ export function renderTaskSection(
 
   taskSection.querySelector("#task-sort").addEventListener("change", event => {
     taskSort = event.target.value;
+    // 並び順変更時も同じ描画関数を通し、フィルターと手動順の状態を揃える。
     renderTaskSection(
       taskSection,
       project,

@@ -432,6 +432,7 @@ test("プロジェクトメニューの長押しは指が動いたらキャン�
     root.appendChild(card);
     bindProjectContextMenu(card, project, () => {});
 
+    // スクロール操作を長押しメニューとして扱わないため、移動量でキャンセルする。
     card.dispatchEvent(new PointerEvent("pointerdown", {
       bubbles: true,
       button: 0,
@@ -593,6 +594,7 @@ test("タスク一覧は優先度で並び替え、手動順ではドラッグ�
     root.querySelector("#task-sort").value = "manual";
     root.querySelector("#task-sort").dispatchEvent(new Event("change"));
 
+    // フィルター/ソート変更後も、手動順に戻せばドラッグ通知が残ることを確認する。
     const rows = root.querySelectorAll(".task-row");
     rows[2].dispatchEvent(new DragEvent("dragstart", { bubbles: true }));
     rows[0].dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true }));
