@@ -72,6 +72,12 @@ input::placeholder {
     color: var(--color-muted);
 }
 
+.project-card,
+.overflow-project-card {
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+
 .modal-content {
     max-inline-size: calc(100vw - 2rem);
     overflow-x: hidden;

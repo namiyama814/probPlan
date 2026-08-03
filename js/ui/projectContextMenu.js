@@ -1,6 +1,9 @@
 // プロジェクトカードの右クリック／キーボードメニューを管理する。
 import { showDeleteProjectModal } from "./projectDeleteModal.js";
 
+const LONG_PRESS_DURATION = 550;
+const LONG_PRESS_MOVE_TOLERANCE = 10;
+
 let contextMenu = null;
 
 function handlePointerDown(event) {
@@ -152,6 +155,41 @@ export function bindProjectContextMenu(
   onDeleteProject,
   onToggleArchive = () => {}
 ) {
+  let longPressTimer = null;
+  let longPressStart = null;
+  let suppressNextClick = false;
+
+  const clearLongPress = () => {
+    if (longPressTimer) {
+      window.clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+    longPressStart = null;
+  };
+
+  const openFromLongPress = event => {
+    const cardRect = card.getBoundingClientRect();
+    const x = event.clientX || cardRect.left + 16;
+    const y = event.clientY || cardRect.top + 16;
+
+    suppressNextClick = true;
+    openProjectContextMenu(
+      x,
+      y,
+      project,
+      onDeleteProject,
+      onToggleArchive
+    );
+  };
+
+  card.addEventListener("click", event => {
+    if (!suppressNextClick) return;
+
+    suppressNextClick = false;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }, true);
+
   card.addEventListener("contextmenu", event => {
     event.preventDefault();
 
@@ -163,6 +201,37 @@ export function bindProjectContextMenu(
       onToggleArchive
     );
   });
+
+  card.addEventListener("pointerdown", event => {
+    if (!["touch", "pen"].includes(event.pointerType)) return;
+    if (event.button !== 0) return;
+
+    clearLongPress();
+    longPressStart = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+    longPressTimer = window.setTimeout(() => {
+      longPressTimer = null;
+      openFromLongPress(event);
+    }, LONG_PRESS_DURATION);
+  });
+
+  card.addEventListener("pointermove", event => {
+    if (!longPressStart) return;
+
+    const moved =
+      Math.abs(event.clientX - longPressStart.x) >
+        LONG_PRESS_MOVE_TOLERANCE ||
+      Math.abs(event.clientY - longPressStart.y) >
+        LONG_PRESS_MOVE_TOLERANCE;
+
+    if (moved) clearLongPress();
+  });
+
+  card.addEventListener("pointerup", clearLongPress);
+  card.addEventListener("pointercancel", clearLongPress);
+  card.addEventListener("pointerleave", clearLongPress);
 
   card.addEventListener("keydown", event => {
     const isKeyboardMenu =

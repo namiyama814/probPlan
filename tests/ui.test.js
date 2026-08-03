@@ -369,6 +369,42 @@ test("プロジェクトの右クリックメニューから削除確認を開�
   });
 });
 
+test("プロジェクトメニューは長押しで開き、直後のクリック遷移を抑止できる", async () => {
+  await withTestDocument(async root => {
+    const project = createProject({ tasks: [createTask()] });
+    let clicked = false;
+    const card = document.createElement("button");
+    root.appendChild(card);
+    card.addEventListener("click", () => {
+      clicked = true;
+    });
+    bindProjectContextMenu(card, project, () => {});
+
+    card.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true,
+      button: 0,
+      clientX: 24,
+      clientY: 32,
+      pointerType: "touch",
+    }));
+
+    await wait(600);
+
+    assert(document.querySelector(".project-context-menu").classList.contains("is-open"), "長押しでメニューを開けません。");
+
+    card.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true,
+      button: 0,
+      clientX: 24,
+      clientY: 32,
+      pointerType: "touch",
+    }));
+    card.click();
+
+    assertEqual(clicked, false, "長押し直後のクリック遷移を抑止できません。");
+  });
+});
+
 test("タスク作成・編集・完了切替・削除のUI操作を実行できる", async () => {
   await withTestDocument(async root => {
     let created = null;
