@@ -34,7 +34,31 @@ test("初回チュートリアルは3ステップで表示され、完了後は�
       "タスクを3点で見積もる",
       "次のステップへ進めません。"
     );
+    assertEqual(
+      document.querySelector(".tutorial-step").dataset.direction,
+      "forward",
+      "次へ時のアニメーション方向が正しくありません。"
+    );
 
+    await wait(0);
+    assert(
+      document.querySelector(".tutorial-step").classList.contains("is-visible"),
+      "次へ時の表示アニメーションが始まりません。"
+    );
+
+    document.getElementById("previous-tutorial-step").click();
+    assertEqual(
+      document.querySelector("#tutorial-content h2").textContent,
+      "ProbPlanへようこそ",
+      "前のステップへ戻れません。"
+    );
+    assertEqual(
+      document.querySelector(".tutorial-step").dataset.direction,
+      "backward",
+      "戻る時のアニメーション方向が正しくありません。"
+    );
+
+    document.getElementById("next-tutorial-step").click();
     document.getElementById("next-tutorial-step").click();
     assertEqual(
       document.getElementById("next-tutorial-step").textContent.trim(),
@@ -76,6 +100,45 @@ test("チュートリアルは背景クリックで閉じず、スキップで�
     document.getElementById("skip-tutorial").click();
     await wait(300);
     assertEqual(localStorage.getItem(STORAGE_KEY), "true", "スキップを保存できません。");
+  } finally {
+    closeModal(true);
+
+    if (savedValue === null) {
+      localStorage.removeItem(STORAGE_KEY);
+    } else {
+      localStorage.setItem(STORAGE_KEY, savedValue);
+    }
+  }
+});
+
+test("最終ステップからサンプルデータ投入を実行できる", async () => {
+  const savedValue = localStorage.getItem(STORAGE_KEY);
+  let loaded = false;
+
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+    showTutorial({
+      onLoadSampleData: () => {
+        loaded = true;
+      },
+    });
+
+    document.getElementById("next-tutorial-step").click();
+    document.getElementById("next-tutorial-step").click();
+
+    const sampleButton = document.getElementById("load-sample-data");
+    assert(Boolean(sampleButton), "最終ステップにサンプルデータ投入ボタンがありません。");
+    assertEqual(
+      sampleButton.textContent.trim(),
+      "サンプルデータを入稿する",
+      "サンプルデータ投入ボタンの文言が正しくありません。"
+    );
+
+    sampleButton.click();
+    await wait(300);
+
+    assert(loaded, "サンプルデータ投入処理を呼び出せません。");
+    assertEqual(localStorage.getItem(STORAGE_KEY), "true", "投入後にチュートリアル完了を保存できません。");
   } finally {
     closeModal(true);
 

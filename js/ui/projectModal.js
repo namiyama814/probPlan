@@ -10,6 +10,7 @@ import {
 export function showCreateProjectModal(onCreateProject) {
   let saveProject = () => false;
 
+  // 背景クリック時は「入力済みなら保存、空ならキャンセル」にしたいので silent で検証する。
   openModal(`
     <div class="relative">
       <h2 class="text-xl font-bold">
@@ -84,7 +85,7 @@ export function showCreateProjectModal(onCreateProject) {
     >
       作成
     </button>
-  `, { onBackdrop: () => saveProject() });
+  `, { onBackdrop: () => saveProject({ silent: true }) });
 
   const closeButton = document.getElementById("close-project-modal");
   const submitButton = document.getElementById("create-project-submit");
@@ -96,11 +97,13 @@ export function showCreateProjectModal(onCreateProject) {
     closeModal();
   });
 
-  saveProject = () => {
+  saveProject = ({ silent = false } = {}) => {
     // エラー時は保存せず、具体的なメッセージとフォーカスで修正箇所を示す。
     const validation = validateName(input.value, "プロジェクト名");
 
     if (validation.error) {
+      // 背景クリックで閉じる時は、空の作成フォームをキャンセル扱いにしてエラーを出さない。
+      if (silent) return true;
       showFieldError(error, input, validation.error);
       return false;
     }

@@ -8,7 +8,7 @@ import {
   showCreateTaskModal,
   showEditTaskModal,
 } from "../js/ui/taskModal.js";
-import { assertEqual, createTestSuite } from "./testUtils.js";
+import { assert, assertEqual, createTestSuite } from "./testUtils.js";
 
 const suite = createTestSuite();
 const { test } = suite;
@@ -99,6 +99,26 @@ test("作成モーダルはEnterキーで送信できる", () => {
     taskInput.value = "Enterタスク";
     taskInput.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
     assertEqual(taskName, "Enterタスク", "Enterキーでタスクを作成できません。");
+  } finally {
+    closeModal(true);
+  }
+});
+
+test("プロジェクト作成モーダルは空のまま背景クリックしてもエラーを表示せず閉じる", async () => {
+  let created = null;
+
+  try {
+    showCreateProjectModal(name => {
+      created = name;
+    });
+
+    document
+      .querySelector(".modal-overlay")
+      .dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true }));
+
+    assert(document.querySelector(".modal-overlay").classList.contains("is-closing"), "背景クリックで閉じる処理が始まりません。");
+    assertEqual(errorText("create-project-error"), "", "空の背景クリックでエラーを表示しています。");
+    assertEqual(created, null, "空のプロジェクトを作成してしまいました。");
   } finally {
     closeModal(true);
   }

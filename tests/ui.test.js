@@ -29,6 +29,7 @@ import {
 } from "../js/ui/taskModal.js";
 import { renderTaskSection } from "../js/ui/taskView.js";
 import { initializeTheme } from "../js/ui/theme.js";
+import { initializeHomePanels } from "../js/ui/homePanels.js";
 import { hideUndoToast, showUndoToast } from "../js/ui/undoToast.js";
 import { showImportPreviewModal } from "../js/ui/importPreviewModal.js";
 import { escapeHtml } from "../js/ui/escapeHtml.js";
@@ -157,6 +158,97 @@ test("テーマ切替は表示と保存内容を更新する", async () => {
   }
 });
 
+test("ホーム画面のスマホ用タブは横スクロールと選択状態を同期する", async () => {
+  await withTestDocument(async root => {
+    root.innerHTML = `
+      <nav class="home-panel-tabs">
+        <button class="home-panel-tab" data-target-panel="project-section" aria-selected="true">プロジェクト</button>
+        <button class="home-panel-tab" data-target-panel="task-section" aria-selected="false">タスク一覧</button>
+      </nav>
+      <div id="home-panel-scroll">
+        <section id="project-section"></section>
+        <section id="task-section"></section>
+      </div>
+    `;
+
+    const tabContainer = root.querySelector(".home-panel-tabs");
+    const scroller = root.querySelector("#home-panel-scroll");
+    const projectPanel = root.querySelector("#project-section");
+    const taskPanel = root.querySelector("#task-section");
+    const tabs = [...root.querySelectorAll(".home-panel-tab")];
+    const offsets = new Map([
+      [projectPanel, 0],
+      [taskPanel, 220],
+    ]);
+    let requestedScrollLeft = null;
+
+    scroller.scrollLeft = 0;
+    Object.defineProperty(scroller, "scrollTo", {
+      configurable: true,
+      value: ({ left }) => {
+        requestedScrollLeft = left;
+      },
+    });
+    scroller.getBoundingClientRect = () => ({ left: 0 });
+    [projectPanel, taskPanel].forEach(panel => {
+      panel.getBoundingClientRect = () => ({
+        left: offsets.get(panel) - scroller.scrollLeft,
+      });
+    });
+
+    const cleanup = initializeHomePanels({
+      scroller,
+      panels: [projectPanel, taskPanel],
+      tabs,
+    });
+
+    tabs[1].click();
+    assertEqual(requestedScrollLeft, 220, "タスク一覧まで横スクロールできません。");
+    assertEqual(tabs[1].getAttribute("aria-selected"), "true", "タブ押下時の選択状態が更新されません。");
+    assertEqual(tabContainer.style.getPropertyValue("--home-panel-tab-index"), "1", "タブ背景の位置が同期されません。");
+
+    scroller.scrollLeft = 0;
+    scroller.dispatchEvent(new Event("scroll"));
+    await wait(100);
+    assertEqual(tabs[0].getAttribute("aria-selected"), "true", "スワイプ後の選択状態が同期されません。");
+    assertEqual(tabContainer.style.getPropertyValue("--home-panel-tab-index"), "0", "スワイプ後のタブ背景位置が同期されません。");
+
+    requestedScrollLeft = null;
+    tabContainer.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true,
+      clientX: 180,
+      clientY: 20,
+      pointerType: "touch",
+    }));
+    tabContainer.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 80,
+      clientY: 24,
+      pointerType: "touch",
+    }));
+    assertEqual(requestedScrollLeft, 220, "タブ余白の左スワイプでタスク一覧へ切り替えられません。");
+    assertEqual(tabs[1].getAttribute("aria-selected"), "true", "タブ余白スワイプ後の選択状態が更新されません。");
+
+    tabContainer.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true,
+      clientX: 80,
+      clientY: 20,
+      pointerType: "touch",
+    }));
+    tabContainer.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 190,
+      clientY: 22,
+      pointerType: "touch",
+    }));
+    assertEqual(tabs[0].getAttribute("aria-selected"), "true", "タブ余白の右スワイプでプロジェクトへ戻れません。");
+
+    cleanup();
+  });
+});
+
 test("ユーザー入力をHTMLとして解釈せず表示する", async () => {
   await withTestDocument(async root => {
     const unsafeName = "<img src=x onerror=alert(1)>";
@@ -189,6 +281,61 @@ test("削除取り消し通知から元の処理を実行できる", async () =>
     await wait(220);
     assert(!document.querySelector('[role="status"]'), "取り消し後に通知が残っています。");
     hideUndoToast();
+  });
+});
+
+test("削除取り消し通知は下スワイプで元に戻さず閉じられる", async () => {
+  await withTestDocument(async () => {
+    let undone = false;
+    showUndoToast("プロジェクトを削除しました", () => {
+      undone = true;
+    });
+
+    const toast = document.querySelector('[role="status"]');
+    toast.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true,
+      clientX: 120,
+      clientY: 20,
+      pointerType: "touch",
+    }));
+    toast.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 122,
+      clientY: 74,
+      pointerType: "touch",
+    }));
+
+    assert(!undone, "スワイプで元に戻す処理を実行してしまいました。");
+    assert(toast.classList.contains("is-closing"), "下スワイプで閉じるアニメーションが始まりません。");
+    await wait(220);
+    assert(!document.querySelector('[role="status"]'), "下スワイプ後に通知が残っています。");
+    hideUndoToast();
+  });
+});
+
+test("削除取り消し通知は横スワイプでは閉じない", async () => {
+  await withTestDocument(async () => {
+    showUndoToast("プロジェクトを削除しました", () => {});
+
+    const toast = document.querySelector('[role="status"]');
+    toast.dispatchEvent(new PointerEvent("pointerdown", {
+      bubbles: true,
+      clientX: 40,
+      clientY: 20,
+      pointerType: "touch",
+    }));
+    toast.dispatchEvent(new PointerEvent("pointerup", {
+      bubbles: true,
+      cancelable: true,
+      clientX: 120,
+      clientY: 28,
+      pointerType: "touch",
+    }));
+
+    assert(!toast.classList.contains("is-closing"), "横スワイプで閉じてしまいました。");
+    assert(Boolean(document.querySelector('[role="status"]')), "横スワイプ後に通知が消えています。");
+    hideUndoToast(true);
   });
 });
 
@@ -296,6 +443,21 @@ test("プロジェクト作成モーダルの締切日は狭い画面でも枠�
     );
     assertEqual(inputStyle.appearance, "none", "締切日入力のネイティブ幅を抑制できていません。");
     assertEqual(inputStyle.minInlineSize, "0px", "締切日入力の最小幅を解除できていません。");
+  });
+});
+
+test("PC幅でも通常モーダルは画面いっぱいに広がらない", async () => {
+  await withTestDocument(async () => {
+    openModal("<p>幅確認</p>");
+
+    const defaultModalStyle = window.getComputedStyle(document.querySelector(".modal-content"));
+    assertEqual(defaultModalStyle.maxInlineSize, "448px", "通常モーダルの最大幅が広がりすぎています。");
+
+    closeModal(true);
+    openModal("<p>幅確認</p>", { maxWidth: "max-w-xl" });
+
+    const wideModalStyle = window.getComputedStyle(document.querySelector(".modal-content"));
+    assertEqual(wideModalStyle.maxInlineSize, "576px", "広めのモーダル幅指定を維持できていません。");
   });
 });
 

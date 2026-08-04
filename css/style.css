@@ -58,6 +58,74 @@ body {
         color var(--transition) ease;
 }
 
+.home-panel-scroll {
+    /* スマホでは横スワイプUIとして使うが、下部スクロールバーは見せない。 */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.home-panel-scroll::-webkit-scrollbar {
+    display: none;
+}
+
+.home-panel-tabs {
+    /* タブの選択背景を独立レイヤー化し、横スクロール時の残像を抑える。 */
+    contain: paint;
+    isolation: isolate;
+    overflow: hidden;
+    position: relative;
+    transform: translateZ(0);
+}
+
+.home-panel-tabs::before {
+    /* 選択中タブの背景は1枚だけをスライドさせ、ボタン背景の塗り替えを減らす。 */
+    background-color: var(--color-text);
+    border-radius: 9999px;
+    content: "";
+    inset-block: 0.25rem;
+    inset-inline-start: 0.25rem;
+    position: absolute;
+    transform: translate3d(calc(var(--home-panel-tab-index, 0) * 100%), 0, 0);
+    transition: transform 160ms ease;
+    width: calc((100% - 0.5rem) / 2);
+    will-change: transform;
+    z-index: 0;
+}
+
+.home-panel-tab {
+    color: color-mix(in srgb, var(--color-text) 58%, transparent);
+    position: relative;
+    transform: translateZ(0);
+    z-index: 1;
+}
+
+.home-panel-tab.is-active {
+    color: var(--color-bg);
+}
+
+.home-panel-tab:not(.is-active):hover {
+    color: var(--color-text);
+}
+
+.tutorial-step {
+    /* チュートリアルのステップ切り替え時に、方向つきで軽くスライド表示する。 */
+    opacity: 0;
+    transform: translate3d(1rem, 0, 0);
+    transition:
+        opacity 180ms ease,
+        transform 220ms cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+.tutorial-step[data-direction="backward"] {
+    transform: translate3d(-1rem, 0, 0);
+}
+
+.tutorial-step.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+}
+
 input,
 select,
 textarea {
@@ -83,8 +151,22 @@ input::placeholder {
 }
 
 .modal-content {
-    max-inline-size: calc(100vw - 2rem);
+    /* PCでは最大幅を固定し、スマホでは画面幅内に収める。 */
+    inline-size: min(100%, calc(100vw - 2rem));
+    max-inline-size: 28rem;
     overflow-x: hidden;
+}
+
+.modal-content.max-w-lg {
+    max-inline-size: 32rem;
+}
+
+.modal-content.max-w-xl {
+    max-inline-size: 36rem;
+}
+
+.modal-content.max-w-4xl {
+    max-inline-size: 56rem;
 }
 
 .modal-content input[type="date"] {
@@ -307,6 +389,7 @@ input::placeholder {
     .data-menu,
     .task-menu,
     .project-context-menu,
+    .tutorial-step,
     .deadline-settings,
     .deadline-probability-label,
     .deadline-probability-marker {

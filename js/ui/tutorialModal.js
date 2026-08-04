@@ -61,7 +61,8 @@ function completeTutorial() {
   closeModal();
 }
 
-export function showTutorial() {
+export function showTutorial({ onLoadSampleData = null } = {}) {
+  // onLoadSampleData はアプリ本体から注入し、UI層は「押された」ことだけを伝える。
   let stepIndex = 0;
 
   openModal(
@@ -74,65 +75,90 @@ export function showTutorial() {
 
   const content = document.getElementById("tutorial-content");
 
-  function renderStep() {
+  function renderStep(direction = "forward") {
     // ステップを描き直すたびにボタンの役割と表示を更新する。
     const step = steps[stepIndex];
     const isLastStep = stepIndex === steps.length - 1;
 
     content.innerHTML = `
-      <div class="flex items-center justify-between gap-4">
-        <span class="text-xs text-[var(--color-text)]/60">
-          ${stepIndex + 1} / ${steps.length}
-        </span>
-        <button
-          id="skip-tutorial"
-          type="button"
-          class="text-sm text-[var(--color-text)]/60 transition-colors hover:text-[var(--color-text)]"
-        >
-          スキップ
-        </button>
-      </div>
+      <div class="tutorial-step" data-direction="${direction}">
+        <div class="flex items-center justify-between gap-4">
+          <span class="text-xs text-[var(--color-text)]/60">
+            ${stepIndex + 1} / ${steps.length}
+          </span>
+          <button
+            id="skip-tutorial"
+            type="button"
+            class="text-sm text-[var(--color-text)]/60 transition-colors hover:text-[var(--color-text)]"
+          >
+            スキップ
+          </button>
+        </div>
 
-      <div class="mt-8 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-text)]/10">
-        ${step.icon}
-      </div>
+        <div class="mt-8 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--color-text)]/10">
+          ${step.icon}
+        </div>
 
-      <h2 class="mt-6 text-2xl font-bold">${step.title}</h2>
-      <p class="mt-3 text-sm leading-6 text-[var(--color-text)]/70">
-        ${step.description}
-      </p>
+        <h2 class="mt-6 text-2xl font-bold">${step.title}</h2>
+        <p class="mt-3 text-sm leading-6 text-[var(--color-text)]/70">
+          ${step.description}
+        </p>
 
-      <div class="mt-8 flex items-center justify-between gap-3">
-        <button
-          id="previous-tutorial-step"
-          type="button"
-          class="rounded-md px-3 py-2 text-sm text-[var(--color-text)]/60 transition-colors hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)] ${
-            stepIndex === 0 ? "invisible" : ""
-          }"
-        >
-          戻る
-        </button>
+        ${isLastStep && onLoadSampleData
+          ? `
+            <button
+              id="load-sample-data"
+              type="button"
+              class="mt-6 w-full rounded-md border border-[var(--color-text)]/15 px-4 py-3 text-sm font-medium transition-colors hover:bg-[var(--color-text)]/5"
+            >
+              サンプルデータを入稿する
+            </button>
+          `
+          : ""}
 
-        <button
-          id="next-tutorial-step"
-          type="button"
-          class="rounded-md bg-[var(--color-text)] px-4 py-2 text-sm font-medium text-[var(--color-bg)] transition-opacity hover:opacity-85"
-        >
-          ${isLastStep ? "はじめる" : "次へ"}
-        </button>
+        <div class="mt-8 flex items-center justify-between gap-3">
+          <button
+            id="previous-tutorial-step"
+            type="button"
+            class="rounded-md px-3 py-2 text-sm text-[var(--color-text)]/60 transition-colors hover:bg-[var(--color-text)]/5 hover:text-[var(--color-text)] ${
+              stepIndex === 0 ? "invisible" : ""
+            }"
+          >
+            戻る
+          </button>
+
+          <button
+            id="next-tutorial-step"
+            type="button"
+            class="rounded-md bg-[var(--color-text)] px-4 py-2 text-sm font-medium text-[var(--color-bg)] transition-opacity hover:opacity-85"
+          >
+            ${isLastStep ? "はじめる" : "次へ"}
+          </button>
+        </div>
       </div>
     `;
+
+    window.requestAnimationFrame(() => {
+      content.querySelector(".tutorial-step")?.classList.add("is-visible");
+    });
 
     content
       .querySelector("#skip-tutorial")
       .addEventListener("click", completeTutorial);
+    content
+      .querySelector("#load-sample-data")
+      ?.addEventListener("click", () => {
+        // サンプル投入後は初回案内を完了扱いにして、すぐホーム画面を触れる状態にする。
+        onLoadSampleData?.();
+        completeTutorial();
+      });
     content
       .querySelector("#previous-tutorial-step")
       .addEventListener("click", () => {
         if (stepIndex === 0) return;
 
         stepIndex--;
-        renderStep();
+        renderStep("backward");
       });
     content
       .querySelector("#next-tutorial-step")
@@ -143,7 +169,7 @@ export function showTutorial() {
         }
 
         stepIndex++;
-        renderStep();
+        renderStep("forward");
       });
   }
 

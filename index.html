@@ -27,7 +27,36 @@
 
   <main class="max-w-3xl w-full px-6">
 
-    <div class="overflow-x-auto snap-x snap-mandatory">
+    <nav
+      class="home-panel-tabs mb-4 rounded-full border border-[var(--color-text)]/10 bg-[var(--color-surface)] p-1 md:hidden"
+      aria-label="ホーム画面の表示切り替え"
+    >
+      <div class="relative grid grid-cols-2 gap-1">
+        <button
+          id="home-project-tab"
+          type="button"
+          class="home-panel-tab rounded-full px-3 py-2 text-sm font-medium transition-colors"
+          data-target-panel="project-section"
+          aria-controls="project-section"
+          aria-selected="true"
+        >
+          プロジェクト
+        </button>
+
+        <button
+          id="home-task-tab"
+          type="button"
+          class="home-panel-tab rounded-full px-3 py-2 text-sm font-medium transition-colors"
+          data-target-panel="task-section"
+          aria-controls="task-section"
+          aria-selected="false"
+        >
+          タスク一覧
+        </button>
+      </div>
+    </nav>
+
+    <div id="home-panel-scroll" class="home-panel-scroll overflow-x-auto snap-x snap-mandatory">
       <div class="flex gap-6 md:grid md:grid-cols-2 md:min-w-0">
 
         <section id="project-section"

@@ -10,6 +10,7 @@ import { renderProjectSection } from "./ui/projectView.js";
 import { renderRecentTaskSection } from "./ui/recentTaskView.js";
 import { renderDataRecoveryView } from "./ui/dataRecoveryView.js";
 import { initializeTheme } from "./ui/theme.js";
+import { initializeHomePanels } from "./ui/homePanels.js";
 import { initializeTaskSearch } from "./ui/taskSearch.js";
 import { showUndoToast } from "./ui/undoToast.js";
 import { showImportPreviewModal } from "./ui/importPreviewModal.js";
@@ -19,9 +20,12 @@ import {
   getExportFileName,
   parseImportData,
 } from "./services/dataTransferService.js";
+import { addSampleProject } from "./services/sampleDataService.js";
 
 const projectSection = document.getElementById("project-section");
 const taskSection = document.getElementById("task-section");
+const homePanelScroller = document.getElementById("home-panel-scroll");
+const homePanelTabs = [...document.querySelectorAll(".home-panel-tab")];
 
 const savedState = StorageService.loadState();
 
@@ -35,6 +39,11 @@ if (!manager) {
 
 initializeTheme();
 initializeTaskSearch(() => manager);
+initializeHomePanels({
+  scroller: homePanelScroller,
+  panels: [projectSection, taskSection],
+  tabs: homePanelTabs,
+});
 
 function render() {
   if (hasCorruptedData) {
@@ -94,6 +103,13 @@ function onToggleProjectArchive(project) {
 
 function onToggleArchivedProjects(isVisible) {
   showArchivedProjects = isVisible;
+  render();
+}
+
+function loadSampleData() {
+  // チュートリアルからの投入は、既存データを上書きせずサンプルだけ追加する。
+  addSampleProject(manager);
+  StorageService.save(manager);
   render();
 }
 
@@ -178,5 +194,7 @@ async function importData(event) {
 render();
 
 if (shouldShowTutorial()) {
-  window.requestAnimationFrame(showTutorial);
+  window.requestAnimationFrame(() => {
+    showTutorial({ onLoadSampleData: loadSampleData });
+  });
 }

@@ -2,6 +2,8 @@
 let activeToast = null;
 let hideTimer = null;
 let removeTimer = null;
+const SWIPE_DISMISS_DISTANCE = 36;
+const VERTICAL_SWIPE_RATIO = 1.2;
 
 export function hideUndoToast(immediate = false) {
   if (hideTimer !== null) {
@@ -41,6 +43,7 @@ export function showUndoToast(message, onUndo, duration = 5000) {
   replaceUndoToast();
 
   const toast = document.createElement("div");
+  let swipeStart = null;
   // 横位置はアニメーションの transform で一元管理し、Tailwind の
   // translate ユーティリティと重なって二重にずれないようにする。
   toast.className = "undo-toast fixed bottom-5 left-1/2 z-[70] flex items-center gap-4 rounded-lg bg-[var(--color-text)] px-4 py-3 text-sm text-[var(--color-bg)] shadow-lg";
@@ -60,6 +63,38 @@ export function showUndoToast(message, onUndo, duration = 5000) {
   toast.querySelector("button").addEventListener("click", () => {
     onUndo();
     hideUndoToast();
+  });
+
+  toast.addEventListener("pointerdown", event => {
+    if (event.pointerType === "mouse" && event.button !== 0) return;
+
+    swipeStart = {
+      x: event.clientX,
+      y: event.clientY,
+    };
+  });
+
+  toast.addEventListener("pointerup", event => {
+    if (!swipeStart) return;
+
+    const deltaX = event.clientX - swipeStart.x;
+    const deltaY = event.clientY - swipeStart.y;
+    swipeStart = null;
+
+    // 下方向の明確なスワイプだけを閉じる操作として扱い、Undoボタンのタップは邪魔しない。
+    if (
+      deltaY < SWIPE_DISMISS_DISTANCE ||
+      Math.abs(deltaY) < Math.abs(deltaX) * VERTICAL_SWIPE_RATIO
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    hideUndoToast();
+  });
+
+  toast.addEventListener("pointercancel", () => {
+    swipeStart = null;
   });
 
   document.body.appendChild(toast);

@@ -2,6 +2,10 @@
 import { ProjectManager } from "../js/models/projectManager.js";
 import { Project } from "../js/models/project.js";
 import { Task } from "../js/models/task.js";
+import {
+  addSampleProject,
+  createSampleProject,
+} from "../js/services/sampleDataService.js";
 import { assert, assertEqual, createTestSuite } from "./testUtils.js";
 
 const suite = createTestSuite();
@@ -182,6 +186,31 @@ test("期限優先で3件の未完了タスクだけを取得できる", () => {
     recentTasks.every(({ task }) => task.status === "todo"),
     "完了タスクが一覧に含まれています。"
   );
+});
+
+test("チュートリアル用のサンプルプロジェクトを作成できる", () => {
+  const project = createSampleProject(new Date("2026-08-04T00:00:00"));
+
+  assertEqual(project.name, "サンプル：コンテスト応募準備", "サンプルプロジェクト名が正しくありません。");
+  assertEqual(project.deadline, "2026-08-24", "サンプルプロジェクトの締切が正しくありません。");
+  assertEqual(project.tasks.length, 4, "サンプルタスク数が正しくありません。");
+  assertEqual(project.tasks[0].status, "completed", "完了済みサンプルタスクを含められていません。");
+  assertEqual(project.tasks[1].priority, "high", "優先度つきサンプルタスクを作成できていません。");
+  assertEqual(project.tasks[2].mostLikely, 5, "3点見積もりつきサンプルタスクを作成できていません。");
+});
+
+test("サンプルプロジェクト投入は既存プロジェクトを残して追加できる", () => {
+  const existingProject = new Project({ id: "existing", name: "既存プロジェクト" });
+  const manager = new ProjectManager([existingProject]);
+
+  const sampleProject = addSampleProject(
+    manager,
+    new Date("2026-08-04T00:00:00")
+  );
+
+  assertEqual(manager.projects.length, 2, "既存データを残してサンプルを追加できていません。");
+  assertEqual(manager.projects[0], existingProject, "既存プロジェクトの順序や参照を壊しています。");
+  assertEqual(manager.projects[1], sampleProject, "サンプルプロジェクトを末尾に追加できていません。");
 });
 
 export function runModelTests() {
