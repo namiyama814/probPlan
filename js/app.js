@@ -28,6 +28,7 @@ const homePanelScroller = document.getElementById("home-panel-scroll");
 const homePanelTabs = [...document.querySelectorAll(".home-panel-tab")];
 
 const savedState = StorageService.loadState();
+const APP_STORAGE_KEY = "probplan";
 
 let manager = savedState.manager;
 let hasCorruptedData = savedState.status === "corrupted";
@@ -70,6 +71,16 @@ function render() {
     manager
   );
 };
+
+function reloadFromStorage() {
+  // terminal.html など別画面からlocalStorageが更新された時に、ホームの表示を同期する。
+  const currentState = StorageService.loadState();
+
+  manager = currentState.manager ?? new ProjectManager();
+  hasCorruptedData = currentState.status === "corrupted";
+  showArchivedProjects = false;
+  render();
+}
 
 function resetCorruptedData() {
   // 壊れたlocalStorageを消して、空のプロジェクト一覧として再描画する。
@@ -192,6 +203,11 @@ async function importData(event) {
 }
 
 render();
+
+window.addEventListener("storage", event => {
+  if (event.key !== APP_STORAGE_KEY) return;
+  reloadFromStorage();
+});
 
 if (shouldShowTutorial()) {
   window.requestAnimationFrame(() => {

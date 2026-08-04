@@ -22,9 +22,10 @@ import { showUndoToast } from "./ui/undoToast.js";
 
 const params = new URLSearchParams(window.location.search);
 const projectId = params.get("id");
+const APP_STORAGE_KEY = "probplan";
 
-const manager = StorageService.load();
-const project = projectId
+let manager = StorageService.load();
+let project = projectId
   ? manager?.getProject(projectId)
   : null;
 
@@ -57,30 +58,45 @@ function render() {
   );
 }
 
-if (!projectId) {
-  document.title = "プロジェクトが指定されていません | ProbPlan";
-  renderProjectError(
-    projectHeader,
-    taskSection,
-    {
-      title: "プロジェクトが指定されていません",
-      description:
-        "ホーム画面から表示するプロジェクトを選択してください。",
-    }
-  );
-} else if (!project) {
-  document.title = "プロジェクトが見つかりません | ProbPlan";
-  renderProjectError(
-    projectHeader,
-    taskSection,
-    {
-      title: "プロジェクトが見つかりません",
-      description:
-        "削除されたか、URLが正しくない可能性があります。",
-    }
-  );
-} else {
+function renderCurrentState() {
+  if (!projectId) {
+    document.title = "プロジェクトが指定されていません | ProbPlan";
+    renderProjectError(
+      projectHeader,
+      taskSection,
+      {
+        title: "プロジェクトが指定されていません",
+        description:
+          "ホーム画面から表示するプロジェクトを選択してください。",
+      }
+    );
+    return;
+  }
+
+  if (!project) {
+    document.title = "プロジェクトが見つかりません | ProbPlan";
+    renderProjectError(
+      projectHeader,
+      taskSection,
+      {
+        title: "プロジェクトが見つかりません",
+        description:
+          "削除されたか、URLが正しくない可能性があります。",
+      }
+    );
+    return;
+  }
+
   render();
+}
+
+function reloadFromStorage() {
+  // CLI画面など別タブからの更新を、詳細画面のタスク一覧へ即座に反映する。
+  manager = StorageService.load();
+  project = projectId && manager
+    ? manager.getProject(projectId)
+    : null;
+  renderCurrentState();
 }
 
 function onCreateTask(taskName, deadline, priority) {
@@ -145,3 +161,10 @@ function onUpdateProjectName(projectName) {
 function onToggleDeadlineSettings(isOpen) {
   isDeadlineSettingsOpen = isOpen;
 }
+
+renderCurrentState();
+
+window.addEventListener("storage", event => {
+  if (event.key !== APP_STORAGE_KEY) return;
+  reloadFromStorage();
+});

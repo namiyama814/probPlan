@@ -3,6 +3,7 @@ import { runControllerTests } from "./controllers.test.js";
 import { runDataTransferServiceTests } from "./dataTransferService.test.js";
 import { runModelTests } from "./models.test.js";
 import { runSimulationTests } from "./simulation.test.js";
+import { runTerminalCommandServiceTests } from "./terminalCommandService.test.js";
 import { runUiTests } from "./ui.test.js";
 import { runTutorialTests } from "./tutorial.test.js";
 import { runValidationTests } from "./validation.test.js";
@@ -13,6 +14,7 @@ export async function runAllTests() {
     ...(await runDataTransferServiceTests()),
     ...(await runModelTests()),
     ...(await runSimulationTests()),
+    ...(await runTerminalCommandServiceTests()),
     ...(await runControllerTests()),
     ...(await runUiTests()),
     ...(await runValidationTests()),

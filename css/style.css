@@ -140,6 +140,27 @@ input::placeholder {
     color: var(--color-muted);
 }
 
+.terminal-shell {
+    color-scheme: dark;
+}
+
+.terminal-output {
+    scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+}
+
+.terminal-line {
+    white-space: pre-wrap;
+}
+
+.terminal-input {
+    background: transparent;
+    color: #d7f9df;
+}
+
+.terminal-input::placeholder {
+    color: rgb(255 255 255 / 0.3);
+}
+
 .project-card,
 .project-card *,
 .overflow-project-card,
