@@ -153,8 +153,12 @@ input::placeholder {
 .modal-content {
     /* PCでは最大幅を固定し、スマホでは画面幅内に収める。 */
     inline-size: min(100%, calc(100vw - 2rem));
+    max-block-size: calc(100dvh - 2rem);
     max-inline-size: 28rem;
     overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal-content.max-w-lg {

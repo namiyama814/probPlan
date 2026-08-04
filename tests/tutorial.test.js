@@ -40,7 +40,7 @@ test("初回チュートリアルは3ステップで表示され、完了後は�
       "次へ時のアニメーション方向が正しくありません。"
     );
 
-    await wait(0);
+    await wait(50);
     assert(
       document.querySelector(".tutorial-step").classList.contains("is-visible"),
       "次へ時の表示アニメーションが始まりません。"

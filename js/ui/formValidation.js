@@ -25,3 +25,8 @@ export function showFieldError(errorElement, input, message) {
   input.setAttribute("aria-invalid", "true");
   input.focus();
 }
+
+export function shouldSubmitByEnter(event) {
+  // 日本語IMEの変換確定Enterは key が Enter でも作成操作ではないため無視する。
+  return event.key === "Enter" && !event.isComposing && event.keyCode !== 229;
+}

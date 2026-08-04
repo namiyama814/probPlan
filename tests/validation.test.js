@@ -104,6 +104,40 @@ test("作成モーダルはEnterキーで送信できる", () => {
   }
 });
 
+test("IME変換確定中のEnterでは作成モーダルを送信しない", () => {
+  let projectName = null;
+  let taskName = null;
+
+  try {
+    showCreateProjectModal(name => {
+      projectName = name;
+    });
+    const projectInput = document.getElementById("project-name");
+    projectInput.value = "変換中プロジェクト";
+    projectInput.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      isComposing: true,
+    }));
+    assertEqual(projectName, null, "変換確定Enterでプロジェクトを作成してしまいました。");
+    closeModal(true);
+
+    showCreateTaskModal(name => {
+      taskName = name;
+    });
+    const taskInput = document.getElementById("task-name");
+    taskInput.value = "変換中タスク";
+    taskInput.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      keyCode: 229,
+    }));
+    assertEqual(taskName, null, "変換確定Enterでタスクを作成してしまいました。");
+  } finally {
+    closeModal(true);
+  }
+});
+
 test("プロジェクト作成モーダルは空のまま背景クリックしてもエラーを表示せず閉じる", async () => {
   let created = null;
 

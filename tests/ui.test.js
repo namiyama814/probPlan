@@ -461,6 +461,21 @@ test("PC幅でも通常モーダルは画面いっぱいに広がらない", asy
   });
 });
 
+test("タスク編集モーダルは低いスマホ画面でも内部スクロールできる", async () => {
+  await withTestDocument(async () => {
+    showEditTaskModal(createTask(), () => {});
+
+    const modalStyle = window.getComputedStyle(document.querySelector(".modal-content"));
+
+    assertEqual(modalStyle.overflowY, "auto", "縦に長いモーダルを内部スクロールできません。");
+    assert(
+      parseFloat(modalStyle.maxBlockSize) <= window.innerHeight - 32,
+      "小さいスマホ画面向けの最大高さが設定されていません。"
+    );
+    assertEqual(modalStyle.overscrollBehavior, "contain", "モーダル外へのスクロール連鎖を抑止できていません。");
+  });
+});
+
 test("プロジェクト一覧は3件表示・追加一覧・データメニューを操作できる", async () => {
   await withTestDocument(async root => {
     const projects = Array.from({ length: 4 }, (_, index) =>

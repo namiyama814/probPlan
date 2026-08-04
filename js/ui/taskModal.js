@@ -4,6 +4,7 @@ import {
   MAX_NAME_LENGTH,
   clearFieldError,
   showFieldError,
+  shouldSubmitByEnter,
   validateName,
 } from "./formValidation.js";
 
@@ -117,7 +118,7 @@ saveTask = ({ silent = false } = {}) => {
 submitButton.addEventListener("click", saveTask);
 
 input.addEventListener("keydown", event => {
-  if (event.key !== "Enter") return;
+  if (!shouldSubmitByEnter(event)) return;
   event.preventDefault();
   submitButton.click();
 });
