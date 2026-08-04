@@ -29,6 +29,7 @@ import {
 } from "../js/ui/taskModal.js";
 import { renderTaskSection } from "../js/ui/taskView.js";
 import { initializeTheme } from "../js/ui/theme.js";
+import { initializeCustomControls } from "../js/ui/customControls.js";
 import { initializeHomePanels } from "../js/ui/homePanels.js";
 import { hideUndoToast, showUndoToast } from "../js/ui/undoToast.js";
 import { showImportPreviewModal } from "../js/ui/importPreviewModal.js";
@@ -156,6 +157,45 @@ test("テーマ切替は表示と保存内容を更新する", async () => {
       localStorage.setItem("probplan-theme", previousTheme);
     }
   }
+});
+
+test("selectと日付入力はアプリ独自UIで操作できる", async () => {
+  await withTestDocument(async root => {
+    root.innerHTML = `
+      <select id="custom-select-source" class="w-full">
+        <option value="low">低</option>
+        <option value="high">高</option>
+      </select>
+      <input id="custom-date-source" type="date" value="2026-08-04">
+    `;
+
+    const select = root.querySelector("#custom-select-source");
+    const dateInput = root.querySelector("#custom-date-source");
+    let selectedValue = null;
+    let selectedDate = null;
+
+    select.addEventListener("change", event => {
+      selectedValue = event.target.value;
+    });
+    dateInput.addEventListener("change", event => {
+      selectedDate = event.target.value;
+    });
+
+    initializeCustomControls(root);
+
+    assert(Boolean(root.querySelector(".custom-select-button")), "独自selectボタンを生成できません。");
+    assertEqual(dateInput.type, "text", "日付入力を独自UI用のテキスト入力へ置き換えられていません。");
+
+    root.querySelector(".custom-select-button").click();
+    document.querySelector('[data-value="high"]').click();
+    assertEqual(select.value, "high", "独自selectの選択値を元selectへ反映できません。");
+    assertEqual(selectedValue, "high", "独自selectでchangeイベントを発火できません。");
+
+    dateInput.dispatchEvent(new Event("focus"));
+    document.querySelector('[data-date="2026-08-04"]').click();
+    assertEqual(dateInput.value, "2026-08-04", "独自日付UIの値を入力へ反映できません。");
+    assertEqual(selectedDate, "2026-08-04", "独自日付UIでchangeイベントを発火できません。");
+  });
 });
 
 test("ホーム画面のスマホ用タブは横スクロールと選択状態を同期する", async () => {

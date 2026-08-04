@@ -366,6 +366,7 @@ export function renderProjectSection(
             style="width: ${progress}%"
           ></div>
         </div>
+
       </button>
     `;
   }).join("") + (

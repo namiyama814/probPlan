@@ -245,6 +245,9 @@ export function showEditTaskModal(task, onUpdateTask) {
   document.getElementById("pessimistic").value = task.pessimistic ?? "";
   document.getElementById("task-deadline").value = task.deadline ?? "";
   document.getElementById("task-priority").value = task.priority ?? "medium";
+  document
+    .getElementById("task-priority")
+    .dispatchEvent(new Event("change", { bubbles: true }));
 
   document
     .getElementById("close-task-modal")

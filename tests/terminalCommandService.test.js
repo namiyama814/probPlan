@@ -28,11 +28,13 @@ test("CLIでプロジェクトとタスクを作成して保存できる", () =>
       "project add \"CLIプロジェクト\" --deadline 2026-09-01"
     );
     assert(projectResult.ok, "CLIでプロジェクトを作成できません。");
+    assert(projectResult.output.startsWith("Created:"), "CLIの標準表示が英語になっていません。");
 
     const taskResult = executeTerminalCommand(
       "task add #1 \"CLIタスク\" --deadline 2026-09-02 --priority high --estimate 1,2,4"
     );
     assert(taskResult.ok, "CLIでタスクを作成できません。");
+    assert(taskResult.output.includes("priority:high"), "CLIのタスク表示が英語になっていません。");
 
     const manager = StorageService.load();
     const project = manager.projects[0];
@@ -56,6 +58,7 @@ test("CLIでタスクの完了・未完了と一覧表示を操作できる", ()
 
     const doneResult = executeTerminalCommand("task done #1 #1");
     assert(doneResult.ok, "CLIでタスクを完了できません。");
+    assert(doneResult.output.startsWith("Marked as done:"), "CLIの完了表示が英語になっていません。");
     assertEqual(
       StorageService.load().projects[0].tasks[0].status,
       "completed",
@@ -73,6 +76,43 @@ test("CLIでタスクの完了・未完了と一覧表示を操作できる", ()
       "未完了状態が保存されていません。"
     );
   });
+});
+
+test("CLIは--jaを指定した時だけ日本語で結果を表示する", () => {
+  withCleanStorage(() => {
+    const emptyResult = executeTerminalCommand("projects");
+    assertEqual(
+      emptyResult.output,
+      "No projects yet. Create one with project add \"Name\".",
+      "プロジェクト一覧の標準表示が英語になっていません。"
+    );
+
+    const japaneseEmptyResult = executeTerminalCommand("projects --ja");
+    assertEqual(
+      japaneseEmptyResult.output,
+      "プロジェクトはありません。project add \"名前\" で作成できます。",
+      "--ja指定時に日本語表示になっていません。"
+    );
+
+    executeTerminalCommand("project add \"表示確認\"");
+
+    const japaneseTaskResult = executeTerminalCommand("tasks #1 --ja");
+    assertEqual(
+      japaneseTaskResult.output,
+      "表示確認 にタスクはありません。",
+      "tasksコマンドの--ja指定が効いていません。"
+    );
+
+    const helpResult = executeTerminalCommand("HELP");
+    assert(helpResult.output.includes("このヘルプを表示"), "HELPコマンドの日本語表示が維持されていません。");
+  });
+});
+
+test("CLIはexitコマンドでGUIへ戻る意図を返す", () => {
+  const result = executeTerminalCommand("EXIT");
+
+  assert(result.ok, "exitコマンドを実行できません。");
+  assertEqual(result.exit, true, "GUIへ戻るフラグを返せません。");
 });
 
 test("CLIは不正な日付・見積もり・優先度を保存しない", () => {

@@ -5,6 +5,7 @@ import {
 } from "../simulation/projectSimulation.js";
 import { showEditProjectModal } from "./projectModal.js";
 import { escapeHtml } from "./escapeHtml.js";
+import { initializeCustomControls } from "./customControls.js";
 
 function formatForecastDate(duration, now = new Date()) {
   const date = new Date(
@@ -334,6 +335,8 @@ export function renderProjectHeader(
     .addEventListener("change", event => {
       onUpdateProjectDeadline(event.target.value || null);
     });
+
+  initializeCustomControls(projectHeader);
 }
 
 export function renderProjectError(

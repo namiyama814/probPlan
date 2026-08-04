@@ -1,4 +1,6 @@
 // 全モーダルで共有するオーバーレイ管理。閉じる時はCSSアニメーションも開始する。
+import { initializeCustomControls } from "./customControls.js";
+
 let overlay = null;
 let previousFocusedElement = null;
 
@@ -91,6 +93,7 @@ export function openModal(content, options = {}) {
   });
 
   document.body.appendChild(overlay);
+  initializeCustomControls(modalContent);
 
   window.requestAnimationFrame(() => {
     const firstFocusable = modalContent.querySelector(FOCUSABLE_SELECTOR);

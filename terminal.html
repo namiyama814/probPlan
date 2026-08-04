@@ -36,35 +36,27 @@
   <button
     id="theme-toggle"
     type="button"
-    class="fixed right-5 top-5 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-text)]/10 bg-[var(--color-surface)] shadow-sm transition-colors hover:bg-[var(--color-text)]/5"
+    class="fixed right-5 top-5 z-40 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-text)]/10 bg-[var(--color-surface)] transition-colors hover:bg-[var(--color-text)]/5"
   ></button>
 
   <main class="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-8 sm:px-6 sm:py-12">
-    <header class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <header class="mb-6">
       <div>
         <p class="text-sm text-[var(--color-muted)]">ProbPlan command line</p>
         <h1 class="mt-1 text-3xl font-semibold tracking-tight">CLI</h1>
         <p class="mt-2 text-sm text-[var(--color-muted)]">
-          ここで作成・更新したプロジェクトやタスクは、ホーム画面と詳細画面にも反映されます。
+          Type <code class="rounded bg-[var(--color-text)]/5 px-1.5 py-0.5">exit</code> to return to the GUI.
+          Add <code class="rounded bg-[var(--color-text)]/5 px-1.5 py-0.5">--ja</code> for Japanese output.
         </p>
       </div>
-
-      <a
-        href="./index.html"
-        class="inline-flex items-center justify-center rounded-full border border-[var(--color-text)]/10 bg-[var(--color-surface)] px-4 py-2 text-sm font-medium transition hover:bg-[var(--color-text)]/5"
-      >
-        GUIに戻る
-      </a>
     </header>
 
     <section
-      class="terminal-shell flex min-h-[70vh] flex-1 flex-col rounded-2xl border border-[var(--color-text)]/10 bg-[#101214] shadow-2xl shadow-black/10"
+      class="terminal-shell flex flex-col rounded-2xl border border-[var(--color-text)]/10 bg-[#101214] shadow-2xl shadow-black/10"
       aria-label="ProbPlan CLI"
     >
-      <div class="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-        <span class="h-3 w-3 rounded-full bg-[#ff5f57]"></span>
-        <span class="h-3 w-3 rounded-full bg-[#ffbd2e]"></span>
-        <span class="h-3 w-3 rounded-full bg-[#28c840]"></span>
+      <div id="terminal-titlebar" class="terminal-titlebar flex items-center gap-2 border-b border-white/10 px-4 py-3">
+        <div id="terminal-window-controls" class="terminal-window-controls" aria-hidden="true"></div>
         <span class="ml-2 text-xs text-white/45">/terminal.html</span>
       </div>
 
@@ -83,7 +75,7 @@
             class="terminal-input min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-[#d7f9df] outline-none placeholder:text-white/30"
             autocomplete="off"
             spellcheck="false"
-            placeholder='help と入力すると使い方を表示します'
+            placeholder='Type help to see available commands'
           >
         </label>
       </form>

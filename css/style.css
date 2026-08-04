@@ -141,10 +141,13 @@ input::placeholder {
 }
 
 .terminal-shell {
+    block-size: clamp(28rem, 72dvh, calc(100dvh - 12rem));
     color-scheme: dark;
+    min-block-size: 0;
 }
 
 .terminal-output {
+    min-block-size: 0;
     scrollbar-color: rgb(255 255 255 / 0.18) transparent;
 }
 
@@ -159,6 +162,96 @@ input::placeholder {
 
 .terminal-input::placeholder {
     color: rgb(255 255 255 / 0.3);
+}
+
+.terminal-titlebar[data-platform="windows"] {
+    justify-content: space-between;
+}
+
+.terminal-titlebar[data-platform="windows"] .terminal-window-controls {
+    margin-left: auto;
+    order: 2;
+}
+
+.terminal-window-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.terminal-traffic-light {
+    block-size: 0.75rem;
+    border-radius: 9999px;
+    inline-size: 0.75rem;
+}
+
+.terminal-window-button {
+    align-items: center;
+    border-radius: 0.25rem;
+    color: rgb(255 255 255 / 0.55);
+    display: inline-flex;
+    block-size: 1rem;
+    inline-size: 1rem;
+    justify-content: center;
+}
+
+.terminal-window-button svg {
+    block-size: 0.75rem;
+    fill: none;
+    inline-size: 0.75rem;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.5;
+}
+
+.terminal-window-close {
+    color: rgb(255 155 146 / 0.9);
+}
+
+.custom-native-control {
+    block-size: 1px;
+    inline-size: 1px;
+    opacity: 0;
+    pointer-events: none;
+    position: absolute;
+}
+
+.custom-select {
+    inline-size: max-content;
+}
+
+.custom-select.w-full,
+.custom-date.w-full {
+    inline-size: 100%;
+}
+
+.custom-select-button,
+.custom-date-input {
+    -webkit-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    inline-size: 100%;
+    max-inline-size: 100%;
+    min-inline-size: 0;
+    transition:
+        border-color var(--transition) ease,
+        background-color var(--transition) ease;
+}
+
+.custom-select-button:focus-visible,
+.custom-date-input:focus {
+    border-color: var(--color-text);
+    outline: none;
+}
+
+.custom-select-menu,
+.custom-date-menu {
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.14);
+}
+
+.custom-date-day.is-selected {
+    background-color: var(--color-text);
+    color: var(--color-bg);
 }
 
 .project-card,

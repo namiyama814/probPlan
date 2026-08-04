@@ -7,6 +7,7 @@ import {
   showDeleteTaskModal,
   showEditTaskModal,
 } from "./taskModal.js";
+import { initializeCustomControls } from "./customControls.js";
 
 let activeTaskMenu = null;
 let activeTaskMenuButton = null;
@@ -477,4 +478,6 @@ export function renderTaskSection(
   addButton.addEventListener("click", () => {
     showCreateTaskModal(onCreateTask);
   });
+
+  initializeCustomControls(taskSection);
 }
