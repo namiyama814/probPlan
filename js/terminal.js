@@ -68,7 +68,7 @@ function appendBlock(html) {
 function appendWelcome() {
   appendBlock(
     [
-      "<span class=\"text-[#8be28b]\">Welcome to ProbPlan CLI.</span>",
+      "<span class=\"terminal-accent\">Welcome to ProbPlan CLI.</span>",
       "Run help to see commands, or projects to list your projects.",
       "Add --ja to commands when you want Japanese output.",
       "",
@@ -79,13 +79,13 @@ function appendWelcome() {
 }
 
 function appendCommand(command) {
-  appendBlock(`<span class="text-[#8be28b]">$</span> ${escapeHtml(command)}`);
+  appendBlock(`<span class="terminal-accent">$</span> ${escapeHtml(command)}`);
 }
 
 function appendResult(result) {
   if (!result.output) return;
 
-  const statusClass = result.ok ? "text-[#d7f9df]" : "text-[#ff9b92]";
+  const statusClass = result.ok ? "terminal-success" : "terminal-error";
   appendBlock(`<span class="${statusClass}">${escapeHtml(result.output)}</span>`);
 }
 

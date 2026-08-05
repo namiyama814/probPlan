@@ -36,6 +36,13 @@ let isDeadlineSettingsOpen = false;
 initializeTheme();
 initializeTaskSearch(() => manager);
 
+function setProjectPageTitle(targetProject) {
+  const projectName = targetProject?.name?.trim();
+  if (projectName) {
+    document.title = `${projectName} - ProbPlan`;
+  }
+}
+
 function render() {
   // 対象がない場合も空画面にせず、原因が分かるエラー表示へ切り替える。
   renderProjectHeader(
@@ -88,6 +95,7 @@ function renderCurrentState() {
   }
 
   render();
+  setProjectPageTitle(project);
 }
 
 function reloadFromStorage() {

@@ -9,6 +9,16 @@
     --color-danger: #C2413A;
     --color-danger-contrast: #FFFFFF;
     --color-danger-soft: rgb(194 65 58 / 0.1);
+    --terminal-bg: #f5f6f8;
+    --terminal-text: #111827;
+    --terminal-text-subtle: rgb(0 0 0 / 0.45);
+    --terminal-prompt: #16a34a;
+    --terminal-success: #111827;
+    --terminal-error: #dc2626;
+    --terminal-border: rgb(0 0 0 / 0.12);
+    --terminal-scroll-thumb: rgb(0 0 0 / 0.18);
+    --terminal-controls: rgb(0 0 0 / 0.55);
+    --terminal-color-scheme: light;
 
     --radius: 0.75rem;
     --transition: 150ms;
@@ -25,10 +35,20 @@
     --color-danger: #F08075;
     --color-danger-contrast: #201716;
     --color-danger-soft: rgb(240 128 117 / 0.12);
+    --terminal-bg: #101214;
+    --terminal-text: #d7f9df;
+    --terminal-text-subtle: rgb(255 255 255 / 0.45);
+    --terminal-prompt: #8be28b;
+    --terminal-success: #d7f9df;
+    --terminal-error: #ff9b92;
+    --terminal-border: rgb(255 255 255 / 0.1);
+    --terminal-scroll-thumb: rgb(255 255 255 / 0.18);
+    --terminal-controls: rgb(255 255 255 / 0.55);
+    --terminal-color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
+:root:not([data-theme="light"]) {
         color-scheme: dark;
 
         --color-text: #F2F2F0;
@@ -39,6 +59,16 @@
         --color-danger: #F08075;
         --color-danger-contrast: #201716;
         --color-danger-soft: rgb(240 128 117 / 0.12);
+        --terminal-bg: #101214;
+        --terminal-text: #d7f9df;
+        --terminal-text-subtle: rgb(255 255 255 / 0.45);
+        --terminal-prompt: #8be28b;
+        --terminal-success: #d7f9df;
+        --terminal-error: #ff9b92;
+        --terminal-border: rgb(255 255 255 / 0.1);
+        --terminal-scroll-thumb: rgb(255 255 255 / 0.18);
+        --terminal-controls: rgb(255 255 255 / 0.55);
+        --terminal-color-scheme: dark;
     }
 }
 
@@ -142,13 +172,21 @@ input::placeholder {
 
 .terminal-shell {
     block-size: clamp(28rem, 72dvh, calc(100dvh - 12rem));
-    color-scheme: dark;
+    background-color: var(--terminal-bg);
+    color: var(--terminal-text);
+    color-scheme: var(--terminal-color-scheme);
     min-block-size: 0;
+    transition: background-color var(--transition) ease, color var(--transition) ease;
 }
 
 .terminal-output {
     min-block-size: 0;
-    scrollbar-color: rgb(255 255 255 / 0.18) transparent;
+    color: var(--terminal-text);
+    scrollbar-color: var(--terminal-scroll-thumb) transparent;
+}
+
+.terminal-titlebar {
+    border-bottom-color: var(--terminal-border);
 }
 
 .terminal-line {
@@ -157,11 +195,27 @@ input::placeholder {
 
 .terminal-input {
     background: transparent;
-    color: #d7f9df;
+    color: var(--terminal-text);
 }
 
 .terminal-input::placeholder {
-    color: rgb(255 255 255 / 0.3);
+    color: color-mix(in srgb, var(--terminal-text) 35%, transparent);
+}
+
+.terminal-shell-label {
+    color: var(--terminal-text-subtle);
+}
+
+.terminal-accent {
+    color: var(--terminal-prompt);
+}
+
+.terminal-success {
+    color: var(--terminal-success);
+}
+
+.terminal-error {
+    color: var(--terminal-error);
 }
 
 .terminal-titlebar[data-platform="windows"] {
@@ -187,7 +241,7 @@ input::placeholder {
 .terminal-window-button {
     align-items: center;
     border-radius: 0.25rem;
-    color: rgb(255 255 255 / 0.55);
+    color: var(--terminal-controls);
     display: inline-flex;
     block-size: 1rem;
     inline-size: 1rem;
@@ -205,7 +259,7 @@ input::placeholder {
 }
 
 .terminal-window-close {
-    color: rgb(255 155 146 / 0.9);
+    color: var(--terminal-error);
 }
 
 .custom-native-control {

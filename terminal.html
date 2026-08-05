@@ -29,7 +29,7 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   <link rel="stylesheet" href="./css/style.css">
-  <title>ProbPlan CLI</title>
+  <title>CLI - ProbPlan</title>
 </head>
 
 <body class="bg-[var(--color-bg)] text-[var(--color-text)] antialiased min-h-screen">
@@ -53,27 +53,27 @@
     </header>
 
     <section
-      class="terminal-shell flex flex-col rounded-2xl border border-[var(--color-text)]/10 bg-[#101214] shadow-2xl shadow-black/10"
+      class="terminal-shell flex flex-col rounded-2xl border border-[var(--terminal-border)] shadow-2xl shadow-black/10"
       aria-label="ProbPlan CLI"
     >
-      <div id="terminal-titlebar" class="terminal-titlebar flex items-center gap-2 border-b border-white/10 px-4 py-3">
+      <div id="terminal-titlebar" class="terminal-titlebar flex items-center gap-2 px-4 py-3">
         <div id="terminal-window-controls" class="terminal-window-controls" aria-hidden="true"></div>
-        <span class="ml-2 text-xs text-white/45">/terminal.html</span>
+        <span class="terminal-shell-label ml-2 text-xs">/terminal.html</span>
       </div>
 
       <div
         id="terminal-output"
-        class="terminal-output flex-1 overflow-y-auto p-4 font-mono text-sm leading-6 text-[#d7f9df]"
+        class="terminal-output flex-1 overflow-y-auto p-4 font-mono text-sm leading-6"
         aria-live="polite"
       ></div>
 
-      <form id="terminal-form" class="border-t border-white/10 p-4">
-        <label class="flex items-center gap-3 font-mono text-sm text-[#d7f9df]">
-          <span class="text-[#8be28b]">$</span>
+      <form id="terminal-form" class="border-t border-[var(--terminal-border)] p-4">
+        <label class="flex items-center gap-3 font-mono text-sm">
+          <span class="terminal-accent">$</span>
           <input
             id="terminal-input"
             type="text"
-            class="terminal-input min-w-0 flex-1 border-0 bg-transparent p-0 font-mono text-[#d7f9df] outline-none placeholder:text-white/30"
+            class="terminal-input min-w-0 flex-1 border-0 bg-transparent p-0 font-mono outline-none"
             autocomplete="off"
             spellcheck="false"
             placeholder='Type help to see available commands'
