@@ -122,6 +122,10 @@ export function showCreateProjectModal(onCreateProject) {
     event.preventDefault();
     submitButton.click();
   });
+
+  window.requestAnimationFrame(() => {
+    input.focus();
+  });
 };
 
 export function showEditProjectModal(project, onUpdateProjectName) {

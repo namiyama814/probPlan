@@ -94,6 +94,9 @@ function resetCorruptedData() {
 function onCreateProject(projectName, deadline) {
   const project = createProject(manager, projectName, deadline);
   render();
+  if (project?.id) {
+    window.location.href = `detail.html?id=${encodeURIComponent(project.id)}`;
+  }
 };
 
 function onDeleteProject(project) {
