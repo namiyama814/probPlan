@@ -1,5 +1,7 @@
 // 保存テーマ、OSのカラースキーム、切替ボタンを同期する。
 const THEME_STORAGE_KEY = "probplan-theme";
+const LIGHT_FAVICON_PATH = "./image/favicon_light.ico";
+const DARK_FAVICON_PATH = "./image/favicon_dark.ico";
 
 function getSavedTheme() {
   try {
@@ -19,6 +21,20 @@ function getSystemTheme() {
 function setTheme(theme) {
   // CSS変数はhtml要素のdata属性を基準に切り替える。
   document.documentElement.dataset.theme = theme;
+
+  const resolvedTheme = theme === "dark" ? "dark" : "light";
+  let favicon = document.querySelector('link[data-app-favicon="true"]');
+
+  if (!favicon) {
+    favicon = document.createElement("link");
+    favicon.rel = "icon";
+    favicon.type = "image/x-icon";
+    favicon.dataset.appFavicon = "true";
+    document.head.appendChild(favicon);
+  }
+
+  favicon.href =
+    resolvedTheme === "dark" ? DARK_FAVICON_PATH : LIGHT_FAVICON_PATH;
 }
 
 function renderThemeToggle(button, theme) {
