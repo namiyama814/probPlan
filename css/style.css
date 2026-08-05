@@ -12,6 +12,7 @@
     --terminal-bg: #f5f6f8;
     --terminal-text: #111827;
     --terminal-text-subtle: rgb(0 0 0 / 0.45);
+    --terminal-placeholder: rgb(0 0 0 / 0.45);
     --terminal-prompt: #16a34a;
     --terminal-success: #111827;
     --terminal-error: #dc2626;
@@ -38,6 +39,7 @@
     --terminal-bg: #101214;
     --terminal-text: #d7f9df;
     --terminal-text-subtle: rgb(255 255 255 / 0.45);
+    --terminal-placeholder: rgb(255 255 255 / 0.35);
     --terminal-prompt: #8be28b;
     --terminal-success: #d7f9df;
     --terminal-error: #ff9b92;
@@ -62,6 +64,7 @@
         --terminal-bg: #101214;
         --terminal-text: #d7f9df;
         --terminal-text-subtle: rgb(255 255 255 / 0.45);
+        --terminal-placeholder: rgb(255 255 255 / 0.35);
         --terminal-prompt: #8be28b;
         --terminal-success: #d7f9df;
         --terminal-error: #ff9b92;
@@ -177,6 +180,7 @@ input::placeholder {
     color-scheme: var(--terminal-color-scheme);
     min-block-size: 0;
     transition: background-color var(--transition) ease, color var(--transition) ease;
+    border: 0;
 }
 
 .terminal-output {
@@ -199,7 +203,7 @@ input::placeholder {
 }
 
 .terminal-input::placeholder {
-    color: color-mix(in srgb, var(--terminal-text) 35%, transparent);
+    color: var(--terminal-placeholder);
 }
 
 .terminal-shell-label {
