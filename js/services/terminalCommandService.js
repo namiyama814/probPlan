@@ -12,6 +12,7 @@ import {
   setTaskCompleted,
   updateTask,
 } from "../controllers/taskController.js";
+import { MAX_NAME_LENGTH, isValidName, isCalendarDateString } from "../validation.js";
 
 const PRIORITIES = ["high", "medium", "low"];
 const LANGUAGE_FLAG = "--ja";
@@ -23,7 +24,8 @@ const messages = {
     deleted: "Deleted",
     projectNameRequired: "Please provide a project name.",
     taskNameRequired: "Please provide a task name.",
-    deadlineFormat: "deadline must use YYYY-MM-DD.",
+    nameTooLong: `name must be ${MAX_NAME_LENGTH} characters or fewer.`,
+    deadlineFormat: "deadline must use YYYY-MM-DD and be a real calendar date.",
     projectNotFound: "Project not found.",
     taskNotFound: "Task not found.",
     deadlineUpdated: "Deadline updated",
@@ -42,7 +44,8 @@ const messages = {
     deleted: "削除しました",
     projectNameRequired: "プロジェクト名を指定してください。",
     taskNameRequired: "タスク名を指定してください。",
-    deadlineFormat: "deadlineは YYYY-MM-DD で指定してください。",
+    nameTooLong: `名前は${MAX_NAME_LENGTH}文字以内で入力してください。`,
+    deadlineFormat: "deadlineは実在する日付をYYYY-MM-DDで指定してください。",
     projectNotFound: "プロジェクトが見つかりません。",
     taskNotFound: "タスクが見つかりません。",
     deadlineUpdated: "締切を更新しました",
@@ -111,10 +114,6 @@ function parseFlags(tokens) {
   }
 
   return { values, flags };
-}
-
-function isDateLike(value) {
-  return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value);
 }
 
 function extractLanguage(tokens) {
@@ -272,7 +271,8 @@ export function executeTerminalCommand(input) {
       const { values, flags } = parseFlags(rest);
       const name = values.join(" ").trim();
       if (!name) throw new Error(text.projectNameRequired);
-      if (flags.deadline && !isDateLike(flags.deadline)) {
+      if (!isValidName(name)) throw new Error(text.nameTooLong);
+      if (flags.deadline && !isCalendarDateString(flags.deadline)) {
         throw new Error(text.deadlineFormat);
       }
 
@@ -291,7 +291,7 @@ export function executeTerminalCommand(input) {
       const [projectReference, deadline] = rest;
       const project = getProject(manager, projectReference);
       if (!project) throw new Error(text.projectNotFound);
-      if (!isDateLike(deadline)) throw new Error(text.deadlineFormat);
+      if (!isCalendarDateString(deadline)) throw new Error(text.deadlineFormat);
       updateProjectDeadline(manager, project, deadline);
       return { ok: true, output: `${text.deadlineUpdated}: ${project.name} -> ${deadline}` };
     }
@@ -313,7 +313,8 @@ export function executeTerminalCommand(input) {
       if (!project) throw new Error(text.projectNotFound);
       const name = nameParts.join(" ").trim();
       if (!name) throw new Error(text.taskNameRequired);
-      if (flags.deadline && !isDateLike(flags.deadline)) {
+      if (!isValidName(name)) throw new Error(text.nameTooLong);
+      if (flags.deadline && !isCalendarDateString(flags.deadline)) {
         throw new Error(text.deadlineFormat);
       }
       if (flags.priority && !PRIORITIES.includes(flags.priority)) {

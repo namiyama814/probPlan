@@ -1,6 +1,7 @@
 // terminal.html のエントリポイント。入力されたコマンドを実行し、結果を履歴として表示する。
 import { executeTerminalCommand } from "./services/terminalCommandService.js";
 import { initializeTheme } from "./ui/theme.js";
+import { escapeHtml } from "./ui/escapeHtml.js";
 
 const form = document.getElementById("terminal-form");
 const input = document.getElementById("terminal-input");
@@ -45,15 +46,6 @@ function renderWindowControls() {
       <span class="terminal-traffic-light bg-[#ffbd2e]"></span>
       <span class="terminal-traffic-light bg-[#28c840]"></span>
     `;
-}
-
-function escapeHtml(value) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll("\"", "&quot;")
-    .replaceAll("'", "&#039;");
 }
 
 function appendBlock(html) {
