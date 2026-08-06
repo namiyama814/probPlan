@@ -19,11 +19,16 @@ export function drawHistogram(canvas, samples) {
   const binWidth = (max - min) / bins;
   const counts = new Array(bins).fill(0);
 
-  for (const value of samples) {
-    let index = Math.floor((value - min) / binWidth);
-    if (index >= bins) { index = bins - 1; };
+  if (binWidth === 0) {
+    // 全サンプルが同値の場合、bin幅が0になり通常の割り当て計算はNaNになるため単一の棒にまとめる。
+    counts[0] = samples.length;
+  } else {
+    for (const value of samples) {
+      let index = Math.floor((value - min) / binWidth);
+      if (index >= bins) { index = bins - 1; };
 
-    counts[index]++;
+      counts[index]++;
+    }
   }
 
   const margin = 40;

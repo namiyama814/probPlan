@@ -1,18 +1,11 @@
 // 独自拡張子.pplpのJSONを、安全に書き出し・読み込みするサービス。
 import { ProjectManager } from "../models/projectManager.js";
+import { isValidName, isCalendarDateString } from "../validation.js";
 
-const MAX_NAME_LENGTH = 100;
 const ID_PATTERN = /^[A-Za-z0-9_-]+$/;
 
 function isObject(value) {
   return typeof value === "object" && value !== null;
-}
-
-function isValidName(value) {
-  if (typeof value !== "string") return false;
-
-  const name = value.trim();
-  return name.length > 0 && name.length <= MAX_NAME_LENGTH;
 }
 
 function isValidId(value) {
@@ -39,17 +32,7 @@ function areValidEstimates(task) {
 
 function isOptionalDeadline(value) {
   if (value === null || value === undefined) return true;
-  if (typeof value !== "string") return false;
-
-  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!match) return false;
-
-  const [, year, month, day] = match.map(Number);
-  const date = new Date(year, month - 1, day);
-
-  return date.getFullYear() === year &&
-    date.getMonth() === month - 1 &&
-    date.getDate() === day;
+  return isCalendarDateString(value);
 }
 
 function isValidTask(task) {
